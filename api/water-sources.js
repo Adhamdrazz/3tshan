@@ -48,7 +48,7 @@ export default async function handler(req, res) {
         latitude,
         longitude,
         photo_url
-      } = req.body;
+     } = req.body || {};
 
       if (
         !name ||
