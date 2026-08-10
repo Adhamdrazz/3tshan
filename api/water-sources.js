@@ -2,20 +2,27 @@ import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL);
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export default async function handler(request) {
+  // CORS
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  };
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  // Handle OPTIONS
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders
+    });
   }
 
   try {
-    // GET
-    if (req.method === 'GET') {
-      const sources = await sql.query(
-        `SELECT
+    // GET - Get all water sources
+    if (request.method === 'GET') {
+      const sources = await sql`
+        SELECT
           id,
           name,
           type,
@@ -27,28 +34,38 @@ export default async function handler(req, res) {
           status,
           created_at
         FROM water_sources
-        ORDER BY created_at DESC`
-      );
+        ORDER BY created_at DESC
+      `;
 
-      return res.status(200).json({
-        success: true,
-        data: sources
-      });
+      return Response.json(
+        {
+          success: true,
+          data: sources
+        },
+        {
+          status: 200,
+          headers: corsHeaders
+        }
+      );
     }
 
-    // POST
-    if (req.method === 'POST') {
-      let body = req.body || {};
+    // POST - Add new water source
+    if (request.method === 'POST') {
+      let body;
 
-      if (typeof body === 'string') {
-        try {
-          body = JSON.parse(body);
-        } catch (error) {
-          return res.status(400).json({
+      try {
+        body = await request.json();
+      } catch (error) {
+        return Response.json(
+          {
             success: false,
             message: 'Invalid JSON body'
-          });
-        }
+          },
+          {
+            status: 400,
+            headers: corsHeaders
+          }
+        );
       }
 
       const {
@@ -59,56 +76,88 @@ export default async function handler(req, res) {
         latitude,
         longitude,
         photo_url
-      } = body;
+      } = body || {};
 
+      // Validate required fields
       if (
         !name ||
         !type ||
         latitude === undefined ||
         longitude === undefined
       ) {
-        return res.status(400).json({
-          success: false,
-          message: 'Missing required fields'
-        });
+        return Response.json(
+          {
+            success: false,
+            message: 'Missing required fields'
+          },
+          {
+            status: 400,
+            headers: corsHeaders
+          }
+        );
       }
 
-      const result = await sql.query(
-        `INSERT INTO water_sources
-          (name, type, temp_status, price_type, latitude, longitude, photo_url, status)
-         VALUES
-          ($1, $2, $3, $4, $5, $6, $7, $8)
-         RETURNING *`,
-        [
+      // Insert into database
+      const [source] = await sql`
+        INSERT INTO water_sources (
           name,
           type,
-          temp_status || null,
-          price_type || null,
+          temp_status,
+          price_type,
           latitude,
           longitude,
-          photo_url || null,
+          photo_url,
+          status
+        )
+        VALUES (
+          ${name},
+          ${type},
+          ${temp_status || null},
+          ${price_type || null},
+          ${latitude},
+          ${longitude},
+          ${photo_url || null},
           'pending'
-        ]
-      );
+        )
+        RETURNING *
+      `;
 
-      return res.status(201).json({
-        success: true,
-        data: result[0]
-      });
+      return Response.json(
+        {
+          success: true,
+          data: source
+        },
+        {
+          status: 201,
+          headers: corsHeaders
+        }
+      );
     }
 
-    return res.status(405).json({
-      success: false,
-      message: 'Method not allowed'
-    });
+    return Response.json(
+      {
+        success: false,
+        message: 'Method not allowed'
+      },
+      {
+        status: 405,
+        headers: corsHeaders
+      }
+    );
 
   } catch (error) {
     console.error('API Error:', error);
 
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: error.message
-    });
+    return Response.json(
+      {
+        success: false,
+        message: 'Internal server error',
+        error: error.message
+      },
+      {
+        status: 500,
+        headers: corsHeaders
+      }
+    );
   }
 }
