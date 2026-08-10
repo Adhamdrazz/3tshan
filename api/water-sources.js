@@ -1,4 +1,3 @@
-```js
 import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL);
@@ -41,29 +40,6 @@ export default async function handler(req, res) {
 
     // POST - Add new water source
     if (req.method === 'POST') {
-      let body = req.body;
-
-      // If Vercel did not parse the request body, read it manually
-      if (!body) {
-        body = await new Promise((resolve, reject) => {
-          let data = '';
-
-          req.on('data', chunk => {
-            data += chunk;
-          });
-
-          req.on('end', () => {
-            try {
-              resolve(data ? JSON.parse(data) : {});
-            } catch (error) {
-              resolve({});
-            }
-          });
-
-          req.on('error', reject);
-        });
-      }
-
       const {
         name,
         type,
@@ -72,7 +48,7 @@ export default async function handler(req, res) {
         latitude,
         longitude,
         photo_url
-      } = body || {};
+      } = req.body || {};
 
       if (
         !name ||
@@ -130,4 +106,3 @@ export default async function handler(req, res) {
     });
   }
 }
-```
