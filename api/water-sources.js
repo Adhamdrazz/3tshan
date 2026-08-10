@@ -1,3 +1,4 @@
+```js
 import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL);
@@ -40,16 +41,31 @@ export default async function handler(req, res) {
 
     // POST - Add new water source
     if (req.method === 'POST') {
-      const {
-        name,
-        type,
-        temp_status,
-        price_type,
-        latitude,
-        longitude,
-        photo_url
-      } = req.body || {};
+      let body = req.body;
 
+      // Make sure body is an object
+      if (typeof body === 'string') {
+        try {
+          body = JSON.parse(body);
+        } catch (error) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid JSON body'
+          });
+        }
+      }
+
+      body = body || {};
+
+      const name = body.name;
+      const type = body.type;
+      const temp_status = body.temp_status;
+      const price_type = body.price_type;
+      const latitude = body.latitude;
+      const longitude = body.longitude;
+      const photo_url = body.photo_url;
+
+      // Validate required fields
       if (
         !name ||
         !type ||
@@ -62,6 +78,7 @@ export default async function handler(req, res) {
         });
       }
 
+      // Insert water source
       const [source] = await sql`
         INSERT INTO water_sources (
           name,
@@ -92,6 +109,7 @@ export default async function handler(req, res) {
       });
     }
 
+    // Method not allowed
     return res.status(405).json({
       success: false,
       message: 'Method not allowed'
@@ -106,3 +124,4 @@ export default async function handler(req, res) {
     });
   }
 }
+```
