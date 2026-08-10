@@ -1,24 +1,21 @@
-```js
 import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL);
 
 export default async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Handle browser preflight request
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
   try {
-    // GET - Get all water sources
+    // GET
     if (req.method === 'GET') {
-      const sources = await sql`
-        SELECT
+      const sources = await sql.query(
+        `SELECT
           id,
           name,
           type,
@@ -30,8 +27,8 @@ export default async function handler(req, res) {
           status,
           created_at
         FROM water_sources
-        ORDER BY created_at DESC
-      `;
+        ORDER BY created_at DESC`
+      );
 
       return res.status(200).json({
         success: true,
@@ -39,11 +36,10 @@ export default async function handler(req, res) {
       });
     }
 
-    // POST - Add new water source
+    // POST
     if (req.method === 'POST') {
-      let body = req.body;
+      let body = req.body || {};
 
-      // Make sure body is an object
       if (typeof body === 'string') {
         try {
           body = JSON.parse(body);
@@ -55,17 +51,16 @@ export default async function handler(req, res) {
         }
       }
 
-      body = body || {};
+      const {
+        name,
+        type,
+        temp_status,
+        price_type,
+        latitude,
+        longitude,
+        photo_url
+      } = body;
 
-      const name = body.name;
-      const type = body.type;
-      const temp_status = body.temp_status;
-      const price_type = body.price_type;
-      const latitude = body.latitude;
-      const longitude = body.longitude;
-      const photo_url = body.photo_url;
-
-      // Validate required fields
       if (
         !name ||
         !type ||
@@ -78,38 +73,30 @@ export default async function handler(req, res) {
         });
       }
 
-      // Insert water source
-      const [source] = await sql`
-        INSERT INTO water_sources (
+      const result = await sql.query(
+        `INSERT INTO water_sources
+          (name, type, temp_status, price_type, latitude, longitude, photo_url, status)
+         VALUES
+          ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING *`,
+        [
           name,
           type,
-          temp_status,
-          price_type,
+          temp_status || null,
+          price_type || null,
           latitude,
           longitude,
-          photo_url,
-          status
-        )
-        VALUES (
-          ${name},
-          ${type},
-          ${temp_status || null},
-          ${price_type || null},
-          ${latitude},
-          ${longitude},
-          ${photo_url || null},
+          photo_url || null,
           'pending'
-        )
-        RETURNING *
-      `;
+        ]
+      );
 
       return res.status(201).json({
         success: true,
-        data: source
+        data: result[0]
       });
     }
 
-    // Method not allowed
     return res.status(405).json({
       success: false,
       message: 'Method not allowed'
@@ -120,8 +107,8 @@ export default async function handler(req, res) {
 
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
+      error: error.message
     });
   }
 }
-```
