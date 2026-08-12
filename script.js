@@ -520,7 +520,82 @@ window.userLongitude = longitude;
 
 
         nearestWaterSource = nearest;
+// =========================
+// Update Home Nearest Source Card
+// =========================
 
+function updateNearestSourceCard() {
+
+    const distanceElement =
+        document.getElementById('nearest-distance');
+
+    const typeElement =
+        document.getElementById('nearest-source-type');
+
+    if (!distanceElement || !typeElement) {
+        return;
+    }
+
+    // No nearest source
+    if (!nearestWaterSource) {
+
+        distanceElement.innerHTML = `
+            <svg width="16" height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+
+            </svg>
+
+            لا يوجد مصدر مياه قريب
+        `;
+
+        typeElement.textContent =
+            'لم يتم العثور على مصدر مياه قريب';
+
+        return;
+    }
+
+    // Distance
+    distanceElement.innerHTML = `
+        <svg width="16" height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+
+        </svg>
+
+        ${formatDistance(nearestWaterSource.distance)}
+    `;
+
+    // Source type
+    let typeText = 'مصدر مياه';
+
+    if (nearestWaterSource.type === 'cooler') {
+        typeText = 'كولدير مياه';
+    }
+
+    if (nearestWaterSource.type === 'tap') {
+        typeText = 'حنفية مياه';
+    }
+
+    typeElement.textContent =
+        nearestWaterSource.name
+            ? `${nearestWaterSource.name} • ${typeText}`
+            : typeText;
+}
 
         if (nearestWaterSource) {
 
