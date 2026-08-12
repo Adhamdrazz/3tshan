@@ -782,6 +782,16 @@ function updateNearestSourceCard() {
                 }
 
 
+                if (
+                    source.temp_status === 'not_cold'
+                ) {
+
+                    tempText =
+                        'غير باردة';
+
+                }
+
+
                 // =========================
                 // Price
                 // =========================
@@ -1200,6 +1210,22 @@ function updateNearestSourceCard() {
 
                         }
 
+                        if (
+                            view.id === 'view-add'
+                        ) {
+
+                            setTimeout(
+                                () => {
+
+                                    initAddLocationMap();
+                                    addMap.invalidateSize();
+
+                                },
+                                100
+                            );
+
+                        }
+
                     } else {
 
                         view.style.display =
@@ -1334,5 +1360,186 @@ function updateNearestSourceCard() {
     setupRadioChips('temp');
 
     setupRadioChips('price');
+
+
+    // =========================
+    // Add Source: Location Picker Map
+    // =========================
+
+    let addMap = null;
+    let addMarker = null;
+
+    function initAddLocationMap() {
+
+        if (addMap) {
+            return;
+        }
+
+        const startLat =
+            userLatitude !== null ? userLatitude : 30.0444;
+
+        const startLng =
+            userLongitude !== null ? userLongitude : 31.2357;
+
+        addMap = L.map('add-location-map', {
+            zoomControl: true
+        }).setView([startLat, startLng], 15);
+
+        L.tileLayer(
+            'http://{s}.google.com/vt/lyrs=m&hl=ar&x={x}&y={y}&z={z}&apistyle=s.t%3A3%7Cp.v%3Aoff',
+            {
+                maxZoom: 20,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+                attribution: '&copy; Google Maps'
+            }
+        ).addTo(addMap);
+
+        function setPickedLocation(lat, lng) {
+
+            document.getElementById('input-latitude').value = lat;
+            document.getElementById('input-longitude').value = lng;
+
+            const hint = document.getElementById('add-location-hint');
+
+            if (hint) {
+                hint.textContent =
+                    `الموقع المختار: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            }
+
+            if (addMarker) {
+                addMarker.setLatLng([lat, lng]);
+            } else {
+                addMarker = L.marker([lat, lng], {
+                    icon: waterPlusIcon
+                }).addTo(addMap);
+            }
+
+        }
+
+        addMap.on('click', (e) => {
+            setPickedLocation(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Default the picked location to the map center so the form
+        // always has coordinates even if the user doesn't click.
+        setPickedLocation(startLat, startLng);
+
+    }
+
+
+    // =========================
+    // Add Source: Form Submit
+    // =========================
+
+    const addSourceForm =
+        document.getElementById('add-source-form');
+
+    if (addSourceForm) {
+
+        addSourceForm.addEventListener('submit', async (e) => {
+
+            e.preventDefault();
+
+            const statusEl =
+                document.getElementById('add-source-status');
+
+            const submitBtn =
+                document.getElementById('submit-add-source');
+
+            const showStatus = (message, isError) => {
+
+                if (!statusEl) {
+                    return;
+                }
+
+                statusEl.style.display = 'block';
+                statusEl.textContent = message;
+                statusEl.style.background = isError ? '#FEECEC' : '#EAF6FF';
+                statusEl.style.color = isError ? '#D92D20' : '#0077D9';
+
+            };
+
+            const nameInput = document.getElementById('input-name');
+            const typeInput = addSourceForm.querySelector('input[name="type"]:checked');
+            const tempInput = addSourceForm.querySelector('input[name="temp"]:checked');
+            const priceInput = addSourceForm.querySelector('input[name="price"]:checked');
+            const otherTypeInput = document.getElementById('input-type-other');
+            const latInput = document.getElementById('input-latitude');
+            const lngInput = document.getElementById('input-longitude');
+
+            const latitude = latInput.value ? parseFloat(latInput.value) : null;
+            const longitude = lngInput.value ? parseFloat(lngInput.value) : null;
+
+            if (latitude === null || longitude === null) {
+                showStatus('من فضلك اختر الموقع على الخريطة أولاً.', true);
+                return;
+            }
+
+            let type = typeInput ? typeInput.value : 'other';
+
+            if (type === 'other' && otherTypeInput && otherTypeInput.value.trim()) {
+                type = otherTypeInput.value.trim();
+            }
+
+            const name =
+                nameInput && nameInput.value.trim()
+                    ? nameInput.value.trim()
+                    : (type === 'cooler' ? 'كولدير' : type === 'tap' ? 'حنفية' : 'مصدر مياه');
+
+            const payload = {
+                name: name,
+                type: type,
+                temp_status: tempInput ? tempInput.value : null,
+                price_type: priceInput ? priceInput.value : null,
+                latitude: latitude,
+                longitude: longitude,
+                photo_url: null
+            };
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'جاري الإضافة...';
+            }
+
+            try {
+
+                const response = await fetch('/api/water-sources', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || 'حدث خطأ أثناء إضافة المصدر');
+                }
+
+                showStatus('تمت إضافة المصدر بنجاح، بانتظار المراجعة ✅', false);
+
+                addSourceForm.reset();
+
+                // Refresh the sources on the main map so it stays in sync
+                await loadWaterSources();
+
+            } catch (error) {
+
+                console.error('Error adding water source:', error);
+                showStatus(error.message || 'حدث خطأ، حاول مرة أخرى.', true);
+
+            } finally {
+
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'إضافة المصدر';
+                }
+
+            }
+
+        });
+
+    }
 
 });
