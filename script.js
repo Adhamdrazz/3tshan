@@ -125,8 +125,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let userMarker = null;
 
     let userLatitude = null;
-    let userLongitude = null;
+let userLongitude = null;
 
+window.userLatitude = null;
+window.userLongitude = null;
 
     // =========================
     // Water Sources Data
@@ -145,6 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         userLatitude = latitude;
         userLongitude = longitude;
+        window.userLatitude = latitude;
+window.userLongitude = longitude;
 
 
         if (userMarker) {
