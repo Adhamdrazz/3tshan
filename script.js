@@ -741,56 +741,147 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Popup
                 // =========================
 
-                marker.bindPopup(`
+              marker.bindPopup(`
+    <div
+        dir="rtl"
+        style="
+            width:280px;
+            font-family:Arial,sans-serif;
+            color:#172033;
+            text-align:right;
+        "
+    >
 
-                    <div
-                        dir="rtl"
-                        style="
-                            text-align:right;
-                            min-width:200px;
-                            font-family:
-                                Arial,
-                                sans-serif;
-                            line-height:1.8;
-                        "
-                    >
+        <div
+            style="
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:10px;
+                margin-bottom:10px;
+            "
+        >
 
-                        <strong
-                            style="
-                                font-size:16px;
-                                color:#0077D9;
-                            "
-                        >
-                            ${
-                                source.name ||
-                                'مصدر مياه'
-                            }
-                        </strong>
+            <strong
+                style="
+                    font-size:18px;
+                    font-weight:700;
+                "
+            >
+                ${source.name || 'مصدر مياه'}
+            </strong>
 
-                        <br>
+            <span
+                style="
+                    background:#E8F7EE;
+                    color:#16834B;
+                    padding:4px 8px;
+                    border-radius:20px;
+                    font-size:11px;
+                    font-weight:700;
+                    white-space:nowrap;
+                "
+            >
+                ${statusText}
+            </span>
 
-                        النوع:
-                        ${typeText}
+        </div>
 
-                        <br>
+        <div
+            style="
+                color:#667085;
+                font-size:13px;
+                margin-bottom:14px;
+            "
+        >
+            📍 ${typeText}
+        </div>
 
-                        المياه:
-                        ${tempText}
+        <div
+            style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:8px;
+                margin-bottom:14px;
+            "
+        >
 
-                        <br>
+            <div
+                style="
+                    background:#F6F8FA;
+                    border-radius:10px;
+                    padding:10px;
+                "
+            >
+                <div
+                    style="
+                        color:#8A94A6;
+                        font-size:11px;
+                        margin-bottom:4px;
+                    "
+                >
+                    المياه
+                </div>
 
-                        السعر:
-                        ${priceText}
+                <div
+                    style="
+                        font-size:13px;
+                        font-weight:700;
+                    "
+                >
+                    💧 ${tempText}
+                </div>
+            </div>
 
-                        <br>
+            <div
+                style="
+                    background:#F6F8FA;
+                    border-radius:10px;
+                    padding:10px;
+                "
+            >
+                <div
+                    style="
+                        color:#8A94A6;
+                        font-size:11px;
+                        margin-bottom:4px;
+                    "
+                >
+                    السعر
+                </div>
 
-                        الحالة:
-                        ${statusText}
+                <div
+                    style="
+                        font-size:13px;
+                        font-weight:700;
+                    "
+                >
+                    ${
+                        source.price_type === 'free'
+                            ? '✓ مجانية'
+                            : source.price_type === 'paid'
+                                ? '💰 مدفوعة'
+                                : 'غير محدد'
+                    }
+                </div>
+            </div>
 
-                    </div>
+        </div>
 
-                `);
+        <div
+            style="
+                font-size:11px;
+                color:#98A2B3;
+                border-top:1px solid #EAECF0;
+                padding-top:9px;
+            "
+        >
+            📍 ${latitude.toFixed(5)},
+            ${longitude.toFixed(5)}
+        </div>
 
+    </div>
+`);
             });
 
 
