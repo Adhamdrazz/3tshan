@@ -741,7 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Popup
                 // =========================
 
-              marker.bindPopup(`
+             marker.bindPopup(`
     <div
         dir="rtl"
         style="
@@ -749,16 +749,56 @@ document.addEventListener('DOMContentLoaded', () => {
             font-family:Arial,sans-serif;
             color:#172033;
             text-align:right;
+            overflow:hidden;
         "
     >
 
+        <!-- صورة المصدر -->
+        ${
+            source.photo_url
+                ? `
+                    <img
+                        src="${source.photo_url}"
+                        alt="${source.name || 'مصدر مياه'}"
+                        style="
+                            width:100%;
+                            height:150px;
+                            object-fit:cover;
+                            border-radius:14px;
+                            display:block;
+                            margin-bottom:12px;
+                        "
+                        onerror="this.style.display='none'"
+                    >
+                `
+                : `
+                    <div
+                        style="
+                            width:100%;
+                            height:150px;
+                            border-radius:14px;
+                            background:linear-gradient(
+                                135deg,
+                                #eaf7ff,
+                                #d8f5f5
+                            );
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            margin-bottom:12px;
+                            font-size:48px;
+                        "
+                    >
+                        💧
+                    </div>
+                `
+        }
+
+
+        <!-- اسم المصدر -->
         <div
             style="
-                display:flex;
-                align-items:center;
-                justify-content:space-between;
-                gap:10px;
-                margin-bottom:10px;
+                margin-bottom:8px;
             "
         >
 
@@ -766,27 +806,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 style="
                     font-size:18px;
                     font-weight:700;
+                    color:#172033;
                 "
             >
                 ${source.name || 'مصدر مياه'}
             </strong>
 
-            <span
-                style="
-                    background:#E8F7EE;
-                    color:#16834B;
-                    padding:4px 8px;
-                    border-radius:20px;
-                    font-size:11px;
-                    font-weight:700;
-                    white-space:nowrap;
-                "
-            >
-                ${statusText}
-            </span>
-
         </div>
 
+
+        <!-- نوع المصدر والمسافة -->
         <div
             style="
                 color:#667085;
@@ -794,9 +823,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 margin-bottom:14px;
             "
         >
-            📍 ${typeText}
+
+            💧 ${typeText}
+
+            ${
+                userLatitude !== null &&
+                userLongitude !== null
+                    ? `
+                        <span>
+                            • ${formatDistance(
+                                calculateDistance(
+                                    userLatitude,
+                                    userLongitude,
+                                    latitude,
+                                    longitude
+                                )
+                            )}
+                        </span>
+                    `
+                    : ''
+            }
+
         </div>
 
+
+        <!-- معلومات المصدر -->
         <div
             style="
                 display:grid;
@@ -806,6 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "
         >
 
+            <!-- المياه -->
             <div
                 style="
                     background:#F6F8FA;
@@ -813,6 +865,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     padding:10px;
                 "
             >
+
                 <div
                     style="
                         color:#8A94A6;
@@ -831,8 +884,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 >
                     💧 ${tempText}
                 </div>
+
             </div>
 
+
+            <!-- السعر -->
             <div
                 style="
                     background:#F6F8FA;
@@ -840,6 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     padding:10px;
                 "
             >
+
                 <div
                     style="
                         color:#8A94A6;
@@ -864,19 +921,49 @@ document.addEventListener('DOMContentLoaded', () => {
                                 : 'غير محدد'
                     }
                 </div>
+
             </div>
 
         </div>
 
-        <div
+
+        <!-- زر ابدأ الطريق -->
+        <button
+            type="button"
+            onclick="
+                window.open(
+                    'https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}',
+                    '_blank'
+                );
+            "
             style="
-                font-size:11px;
-                color:#98A2B3;
-                border-top:1px solid #EAECF0;
-                padding-top:9px;
+                width:100%;
+                border:none;
+                background:#0077D9;
+                color:white;
+                padding:12px;
+                border-radius:10px;
+                font-size:14px;
+                font-weight:700;
+                cursor:pointer;
+                margin-bottom:10px;
             "
         >
-            📍 ${latitude.toFixed(5)},
+            🚗 ابدأ الطريق
+        </button>
+
+
+        <!-- الإحداثيات -->
+        <div
+            style="
+                font-size:10px;
+                color:#98A2B3;
+                text-align:center;
+                padding-top:8px;
+                border-top:1px solid #EAECF0;
+            "
+        >
+            ${latitude.toFixed(5)},
             ${longitude.toFixed(5)}
         </div>
 
