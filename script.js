@@ -927,30 +927,35 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
 
-        <!-- زر ابدأ الطريق -->
-        <button
-            type="button"
-            onclick="
-                window.open(
-                    'https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}',
-                    '_blank'
-                );
-            "
-            style="
-                width:100%;
-                border:none;
-                background:#0077D9;
-                color:white;
-                padding:12px;
-                border-radius:10px;
-                font-size:14px;
-                font-weight:700;
-                cursor:pointer;
-                margin-bottom:10px;
-            "
-        >
-            🚗 ابدأ الطريق
-        </button>
+       <div
+    style="
+        width:100%;
+        box-sizing:border-box;
+        background:#EAF6FF;
+        color:#0077D9;
+        padding:11px;
+        border-radius:10px;
+        font-size:14px;
+        font-weight:700;
+        text-align:center;
+        margin-bottom:10px;
+    "
+>
+    📍 يبعد عنك
+    ${
+        userLatitude !== null &&
+        userLongitude !== null
+            ? formatDistance(
+                calculateDistance(
+                    userLatitude,
+                    userLongitude,
+                    latitude,
+                    longitude
+                )
+            )
+            : 'غير متاح'
+    }
+</div>
 
 
         <!-- الإحداثيات -->
