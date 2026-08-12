@@ -519,7 +519,42 @@ window.userLongitude = longitude;
         });
 
 
-        nearestWaterSource = nearest;
+       nearestWaterSource = nearest;
+
+if (nearestWaterSource) {
+
+    console.log(
+        '=============================='
+    );
+
+    console.log(
+        'Nearest Water Source:'
+    );
+
+    console.log(
+        nearestWaterSource
+    );
+
+    console.log(
+        'Distance:',
+        formatDistance(
+            nearestWaterSource.distance
+        )
+    );
+
+    console.log(
+        '=============================='
+    );
+
+}
+
+updateNearestSourceCard();
+
+return nearestWaterSource;
+
+}
+
+
 // =========================
 // Update Home Nearest Source Card
 // =========================
@@ -595,44 +630,13 @@ function updateNearestSourceCard() {
         nearestWaterSource.name
             ? `${nearestWaterSource.name} • ${typeText}`
             : typeText;
+
 }
 
-        if (nearestWaterSource) {
 
-            console.log(
-                '=============================='
-            );
-
-            console.log(
-                'Nearest Water Source:'
-            );
-
-            console.log(
-                nearestWaterSource
-            );
-
-            console.log(
-                'Distance:',
-                formatDistance(
-                    nearestWaterSource.distance
-                )
-            );
-
-            console.log(
-                '=============================='
-            );
-
-        }
-
-
-        return nearestWaterSource;
-
-    }
-
-
-    // =========================
-    // Load Water Sources From API
-    // =========================
+// =========================
+// Load Water Sources From API
+// =========================
 
     async function loadWaterSources() {
 
