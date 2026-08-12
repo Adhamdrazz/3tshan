@@ -54,7 +54,6 @@ export default async function handler(req, res) {
 
       body = body || {};
 
-      const name = body.name;
       const type = body.type;
       const temp_status = body.temp_status;
       const price_type = body.price_type;
@@ -62,8 +61,14 @@ export default async function handler(req, res) {
       const longitude = body.longitude;
       const photo_url = body.photo_url;
 
+      // "name" is optional in the UI, so default it based on type
+      // instead of rejecting the request.
+      const name =
+        body.name && String(body.name).trim()
+          ? String(body.name).trim()
+          : 'مصدر مياه';
+
       if (
-        !name ||
         !type ||
         latitude === undefined ||
         longitude === undefined
@@ -93,7 +98,7 @@ export default async function handler(req, res) {
           ${price_type || null},
           ${latitude},
           ${longitude},
-          ${photo_url || null},
+          ${photo_url || null}
           'pending'
         )
         RETURNING *
