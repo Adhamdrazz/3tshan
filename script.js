@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     );
 
-    // Add default layer
     googleStreets.addTo(map);
 
 
@@ -113,14 +112,117 @@ document.addEventListener('DOMContentLoaded', () => {
         iconAnchor: [24, 24]
     });
 
-    // Temporary user location
-    // We will replace this with real GPS later
-    L.marker(
-        [30.0444, 31.2357],
-        {
-            icon: userIcon
+
+    // =========================
+    // Real User Location
+    // =========================
+
+    let userMarker = null;
+
+    let userLatitude = null;
+    let userLongitude = null;
+
+
+    function showUserLocation(latitude, longitude) {
+
+        userLatitude = latitude;
+        userLongitude = longitude;
+
+
+        // Remove previous marker
+        if (userMarker) {
+            map.removeLayer(userMarker);
         }
-    ).addTo(map);
+
+
+        // Create user marker
+        userMarker = L.marker(
+            [latitude, longitude],
+            {
+                icon: userIcon
+            }
+        ).addTo(map);
+
+
+        // Move map to user location
+        map.setView(
+            [latitude, longitude],
+            16
+        );
+
+
+        console.log(
+            'User location:',
+            latitude,
+            longitude
+        );
+    }
+
+
+    function getUserLocation() {
+
+        if (!navigator.geolocation) {
+
+            console.error(
+                'Geolocation is not supported by this browser.'
+            );
+
+            // Fallback
+            showUserLocation(
+                30.0444,
+                31.2357
+            );
+
+            return;
+        }
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            (position) => {
+
+                const latitude =
+                    position.coords.latitude;
+
+                const longitude =
+                    position.coords.longitude;
+
+
+                showUserLocation(
+                    latitude,
+                    longitude
+                );
+            },
+
+
+            (error) => {
+
+                console.error(
+                    'Unable to get user location:',
+                    error
+                );
+
+
+                // Fallback to Cairo
+                showUserLocation(
+                    30.0444,
+                    31.2357
+                );
+            },
+
+
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+
+        );
+    }
+
+
+    // Get real user location
+    getUserLocation();
 
 
     // =========================
@@ -151,6 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         </div>
     `;
+
 
     const waterIcon = L.divIcon({
         className: 'custom-leaflet-marker',
@@ -205,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     `;
 
+
     const waterPlusIcon = L.divIcon({
         className: 'custom-leaflet-marker',
         html: waterPlusIconHtml,
@@ -223,19 +327,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log('Loading water sources...');
 
-            const response = await fetch('/api/water-sources');
+
+            const response =
+                await fetch('/api/water-sources');
+
 
             if (!response.ok) {
-                throw new Error(`HTTP error: ${response.status}`);
+
+                throw new Error(
+                    `HTTP error: ${response.status}`
+                );
+
             }
 
-            const result = await response.json();
 
-            console.log('Water sources from API:', result);
+            const result =
+                await response.json();
 
 
-            // Check API response
-            if (!result.success || !Array.isArray(result.data)) {
+            console.log(
+                'Water sources from API:',
+                result
+            );
+
+
+            // Validate response
+            if (
+                !result.success ||
+                !Array.isArray(result.data)
+            ) {
 
                 console.error(
                     'Invalid API response:',
@@ -246,16 +366,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
 
-            // Add each water source to the map
+            // Add sources to map
             result.data.forEach(source => {
 
-                // Check coordinates
                 if (
                     source.latitude === null ||
                     source.latitude === undefined ||
                     source.longitude === null ||
                     source.longitude === undefined
                 ) {
+
                     console.warn(
                         'Source has no coordinates:',
                         source
@@ -265,11 +385,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
-                const latitude = Number(source.latitude);
-                const longitude = Number(source.longitude);
+                const latitude =
+                    Number(source.latitude);
+
+                const longitude =
+                    Number(source.longitude);
 
 
-                // Make marker
+                // Create marker
                 const marker = L.marker(
                     [latitude, longitude],
                     {
@@ -278,12 +401,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 ).addTo(map);
 
 
-                // Source type
+                // Type
                 let typeText = 'مصدر مياه';
 
                 if (source.type === 'cooler') {
                     typeText = 'كولدير';
-                } else if (source.type === 'tap') {
+                }
+
+                if (source.type === 'tap') {
                     typeText = 'حنفية';
                 }
 
@@ -293,7 +418,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (source.temp_status === 'cold') {
                     tempText = 'باردة';
-                } else if (source.temp_status === 'normal') {
+                }
+
+                if (source.temp_status === 'normal') {
                     tempText = 'عادية';
                 }
 
@@ -303,9 +430,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (source.price_type === 'free') {
                     priceText = 'مجانية';
-                } else if (source.price_type === 'paid') {
+                }
+
+                if (source.price_type === 'paid') {
                     priceText = 'مدفوعة';
                 }
+
+
+                // Status
+                const statusText =
+                    source.status === 'pending'
+                        ? 'قيد المراجعة'
+                        : 'معتمد';
 
 
                 // Popup
@@ -347,10 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <br>
 
                         الحالة:
-                        ${source.status === 'pending'
-                            ? 'قيد المراجعة'
-                            : 'معتمد'
-                        }
+                        ${statusText}
 
                     </div>
                 `);
@@ -381,7 +514,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Chips Interaction
     // =========================
 
-    const chips = document.querySelectorAll('.chip');
+    const chips =
+        document.querySelectorAll('.chip');
+
 
     chips.forEach(chip => {
 
@@ -402,8 +537,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navigation Logic
     // =========================
 
-    const navLinks = document.querySelectorAll('.nav-link');
-    const views = document.querySelectorAll('.app-view');
+    const navLinks =
+        document.querySelectorAll('.nav-link');
+
+    const views =
+        document.querySelectorAll('.app-view');
 
 
     navLinks.forEach(link => {
@@ -411,6 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', (e) => {
 
             e.preventDefault();
+
 
             const targetId =
                 link.getAttribute('data-target');
@@ -442,7 +581,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     view.style.display = 'flex';
 
 
-                    // Fix Leaflet size
                     if (view.id === 'view-map') {
 
                         setTimeout(() => {
@@ -480,85 +618,92 @@ document.addEventListener('DOMContentLoaded', () => {
 
         radios.forEach(radio => {
 
-            radio.addEventListener('change', (e) => {
+            radio.addEventListener(
+                'change',
+                (e) => {
 
 
-                // Reset labels
-                radios.forEach(r => {
+                    // Reset labels
+                    radios.forEach(r => {
 
-                    const label = r.closest('label');
+                        const label =
+                            r.closest('label');
 
-                    if (label) {
 
-                        label.style.background =
-                            'transparent';
+                        if (label) {
 
-                        label.style.borderColor =
-                            'var(--border-color)';
+                            label.style.background =
+                                'transparent';
 
-                        label.style.color =
-                            'var(--dark-navy)';
+                            label.style.borderColor =
+                                'var(--border-color)';
 
-                        label.style.fontWeight =
-                            '500';
+                            label.style.color =
+                                'var(--dark-navy)';
+
+                            label.style.fontWeight =
+                                '500';
+
+                        }
+
+                    });
+
+
+                    // Selected label
+                    const selectedLabel =
+                        e.target.closest('label');
+
+
+                    if (selectedLabel) {
+
+                        selectedLabel.style.background =
+                            'rgba(0, 119, 217, 0.05)';
+
+                        selectedLabel.style.borderColor =
+                            'var(--primary-blue)';
+
+                        selectedLabel.style.color =
+                            'var(--primary-blue)';
+
+                        selectedLabel.style.fontWeight =
+                            '700';
 
                     }
 
-                });
+
+                    // Other type
+                    if (groupName === 'type') {
+
+                        const otherInput =
+                            document.getElementById(
+                                'input-type-other'
+                            );
 
 
-                // Selected label
-                const selectedLabel =
-                    e.target.closest('label');
+                        if (otherInput) {
 
+                            if (
+                                e.target.value === 'other'
+                            ) {
 
-                if (selectedLabel) {
+                                otherInput.style.display =
+                                    'block';
 
-                    selectedLabel.style.background =
-                        'rgba(0, 119, 217, 0.05)';
+                                otherInput.focus();
 
-                    selectedLabel.style.borderColor =
-                        'var(--primary-blue)';
+                            } else {
 
-                    selectedLabel.style.color =
-                        'var(--primary-blue)';
+                                otherInput.style.display =
+                                    'none';
 
-                    selectedLabel.style.fontWeight =
-                        '700';
-
-                }
-
-
-                // Other type
-                if (groupName === 'type') {
-
-                    const otherInput =
-                        document.getElementById(
-                            'input-type-other'
-                        );
-
-
-                    if (otherInput) {
-
-                        if (e.target.value === 'other') {
-
-                            otherInput.style.display =
-                                'block';
-
-                            otherInput.focus();
-
-                        } else {
-
-                            otherInput.style.display =
-                                'none';
+                            }
 
                         }
 
                     }
 
                 }
-
-            });
+            );
 
         });
 
