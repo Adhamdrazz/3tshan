@@ -63,23 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         stroke-linecap="round"
                         stroke-linejoin="round">
 
-                        <polygon
-                            points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6">
-                        </polygon>
-
-                        <line
-                            x1="8"
-                            y1="2"
-                            x2="8"
-                            y2="18">
-                        </line>
-
-                        <line
-                            x1="16"
-                            y1="6"
-                            x2="16"
-                            y2="22">
-                        </line>
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                        <line x1="8" y1="2" x2="8" y2="18"></line>
+                        <line x1="16" y1="6" x2="16" y2="22"></line>
 
                     </svg>
                 `;
@@ -100,8 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         stroke-linecap="round"
                         stroke-linejoin="round">
 
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4">
-                        </path>
+                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
 
                     </svg>
                 `;
@@ -210,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 31.2357
             );
 
-
             return;
 
         }
@@ -274,17 +258,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const waterIconHtml = `
 
-        <div style="
-            cursor:pointer;
-            transition:transform 0.2s;
-        ">
+        <div
+            style="
+                cursor:pointer;
+                transition:transform 0.2s;
+            "
+        >
 
             <svg
                 width="40"
                 height="48"
                 viewBox="0 0 40 48"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg">
+                xmlns="http://www.w3.org/2000/svg"
+            >
 
                 <path
                     d="M20 48C20 48 40 31.3333 40 20C40 8.9543 31.0457 0 20 0C8.9543 0 0 8.9543 0 20C0 31.3333 20 48 20 48Z"
@@ -292,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 />
 
                 <path
-                    d="M20 36C26.6274 36 32 30.6276 32 24C32 17.3724 20 8 20 8C20 8 8 17.3724 8 24C8 30.6276 13.3726 36 20 36Z"
+                    d="M20 36C26.6274 36 32 30.6274 32 24C32 17.3726 20 8 20 8C20 8 8 17.3726 8 24C8 30.6274 13.3726 36 20 36Z"
                     fill="#00C2C7"
                 />
 
@@ -322,17 +309,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const waterPlusIconHtml = `
 
-        <div style="
-            cursor:pointer;
-            transition:transform 0.2s;
-        ">
+        <div
+            style="
+                cursor:pointer;
+                transition:transform 0.2s;
+            "
+        >
 
             <svg
                 width="40"
                 height="48"
                 viewBox="0 0 40 48"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg">
+                xmlns="http://www.w3.org/2000/svg"
+            >
 
                 <path
                     d="M20 48C20 48 40 31.3333 40 20C40 8.9543 31.0457 0 20 0C8.9543 0 0 8.9543 0 20C0 31.3333 20 48 20 48Z"
@@ -340,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 />
 
                 <path
-                    d="M20 36C26.6274 36 32 30.6274 32 24C32 17.3726 20 8 20 8C20 8 8 17.3724 8 24C8 30.6276 13.3726 36 20 36Z"
+                    d="M20 36C26.6274 36 32 30.6274 32 24C32 17.3726 20 8 20 8C20 8 8 17.3726 8 24C8 30.6274 13.3726 36 20 36Z"
                     fill="#00C2C7"
                 />
 
@@ -513,8 +503,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 shortestDistance = distance;
 
                 nearest = {
+
                     ...source,
+
                     distance: distance
+
                 };
 
             }
@@ -643,17 +636,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const marker =
                     L.marker(
-                        [
-                            latitude,
-                            longitude
-                        ],
+                        [latitude, longitude],
                         {
                             icon: waterIcon
                         }
                     ).addTo(map);
 
 
+                // =========================
                 // Type
+                // =========================
 
                 let typeText =
                     'مصدر مياه';
@@ -679,7 +671,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
+                // =========================
                 // Temperature
+                // =========================
 
                 let tempText =
                     'غير محددة';
@@ -705,7 +699,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
+                // =========================
                 // Price
+                // =========================
 
                 let priceText =
                     'غير محدد';
@@ -731,7 +727,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
+                // =========================
                 // Status
+                // =========================
 
                 const statusText =
                     source.status === 'pending'
@@ -739,338 +737,61 @@ document.addEventListener('DOMContentLoaded', () => {
                         : 'معتمد';
 
 
-               // Popup - Google Maps Style
+                // =========================
+                // Popup
+                // =========================
 
-const distanceFromUser =
-    userLatitude !== null &&
-    userLongitude !== null
-        ? formatDistance(
-            calculateDistance(
-                userLatitude,
-                userLongitude,
-                latitude,
-                longitude
-            )
-        )
-        : null;
-
-
-// Image
-
-const popupImage = source.photo_url
-    ? `
-        <img
-            src="${source.photo_url}"
-            alt="${source.name || 'مصدر مياه'}"
-            style="
-                width:100%;
-                height:170px;
-                object-fit:cover;
-                display:block;
-                background:#eef8ff;
-            "
-            onerror="
-                this.style.display='none';
-            "
-        >
-    `
-    : `
-        <div
-            style="
-                width:100%;
-                height:140px;
-                background:
-                    linear-gradient(
-                        135deg,
-                        #eaf7ff,
-                        #d9f7f5
-                    );
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-size:52px;
-            "
-        >
-            💧
-        </div>
-    `;
-
-
-// Status
-
-const statusColor =
-    source.status === 'pending'
-        ? '#B54708'
-        : '#16834B';
-
-const statusBackground =
-    source.status === 'pending'
-        ? '#FFF4E5'
-        : '#E8F7EE';
-
-
-// Popup
-
-marker.bindPopup(`
-
-    <div
-        dir="rtl"
-        style="
-            width:320px;
-            max-width:calc(100vw - 50px);
-            padding:0;
-            margin:0;
-            font-family:
-                Arial,
-                sans-serif;
-            color:#172033;
-            overflow:hidden;
-            line-height:1.5;
-        "
-    >
-
-        <!-- Image -->
-
-        <div
-            style="
-                margin:-1px -1px 0 -1px;
-                overflow:hidden;
-                border-radius:14px 14px 0 0;
-            "
-        >
-
-            ${popupImage}
-
-        </div>
-
-
-        <!-- Content -->
-
-        <div
-            style="
-                padding:14px 15px 15px;
-            "
-        >
-
-            <!-- Title -->
-
-            <div
-                style="
-                    display:flex;
-                    align-items:flex-start;
-                    justify-content:space-between;
-                    gap:10px;
-                    margin-bottom:5px;
-                "
-            >
-
-                <div
-                    style="
-                        font-size:18px;
-                        font-weight:700;
-                        color:#172033;
-                        line-height:1.4;
-                    "
-                >
-                    ${
-                        source.name ||
-                        'مصدر مياه'
-                    }
-                </div>
-
-
-                <span
-                    style="
-                        flex-shrink:0;
-                        background:${statusBackground};
-                        color:${statusColor};
-                        padding:4px 8px;
-                        border-radius:20px;
-                        font-size:11px;
-                        font-weight:700;
-                        white-space:nowrap;
-                    "
-                >
-                    ${statusText}
-                </span>
-
-            </div>
-
-
-            <!-- Subtitle -->
-
-            <div
-                style="
-                    color:#667085;
-                    font-size:13px;
-                    margin-bottom:14px;
-                "
-            >
-
-                ${typeText}
-
-                ${
-                    distanceFromUser
-                        ? ` • ${distanceFromUser} منك`
-                        : ''
-                }
-
-            </div>
-
-
-            <!-- Information -->
-
-            <div
-                style="
-                    display:grid;
-                    grid-template-columns:1fr 1fr;
-                    gap:8px;
-                    margin-bottom:14px;
-                "
-            >
-
-                <!-- Temperature -->
-
-                <div
-                    style="
-                        background:#F6F8FA;
-                        border-radius:10px;
-                        padding:10px;
-                    "
-                >
+                marker.bindPopup(`
 
                     <div
+                        dir="rtl"
                         style="
-                            color:#8A94A6;
-                            font-size:11px;
-                            margin-bottom:4px;
-                        "
-                    >
-                        المياه
-                    </div>
-
-                    <div
-                        style="
-                            font-size:13px;
-                            font-weight:700;
-                            color:#172033;
-                        "
-                    >
-                        💧 ${tempText}
-                    </div>
-
-                </div>
-
-
-                <!-- Price -->
-
-                <div
-                    style="
-                        background:#F6F8FA;
-                        border-radius:10px;
-                        padding:10px;
-                    "
-                >
-
-                    <div
-                        style="
-                            color:#8A94A6;
-                            font-size:11px;
-                            margin-bottom:4px;
-                        "
-                    >
-                        السعر
-                    </div>
-
-                    <div
-                        style="
-                            font-size:13px;
-                            font-weight:700;
-                            color:#172033;
+                            text-align:right;
+                            min-width:200px;
+                            font-family:
+                                Arial,
+                                sans-serif;
+                            line-height:1.8;
                         "
                     >
 
-                        ${
-                            source.price_type === 'free'
-                                ? '✓ مجانية'
-                                : source.price_type === 'paid'
-                                    ? '💰 مدفوعة'
-                                    : 'غير محدد'
-                        }
+                        <strong
+                            style="
+                                font-size:16px;
+                                color:#0077D9;
+                            "
+                        >
+                            ${
+                                source.name ||
+                                'مصدر مياه'
+                            }
+                        </strong>
+
+                        <br>
+
+                        النوع:
+                        ${typeText}
+
+                        <br>
+
+                        المياه:
+                        ${tempText}
+
+                        <br>
+
+                        السعر:
+                        ${priceText}
+
+                        <br>
+
+                        الحالة:
+                        ${statusText}
 
                     </div>
 
-                </div>
+                `);
 
-            </div>
-
-
-            <!-- Actions -->
-
-            <div
-                style="
-                    display:grid;
-                    grid-template-columns:1fr 1fr;
-                    gap:8px;
-                "
-            >
-
-                <!-- Directions -->
-
-                <button
-                    type="button"
-                    onclick="
-                        window.open(
-                            'https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}',
-                            '_blank'
-                        );
-                    "
-                    style="
-                        border:none;
-                        background:#0077D9;
-                        color:white;
-                        padding:11px 8px;
-                        border-radius:10px;
-                        font-size:13px;
-                        font-weight:700;
-                        cursor:pointer;
-                    "
-                >
-                    🧭 الاتجاهات
-                </button>
-
-
-                <!-- Google Maps -->
-
-                <button
-                    type="button"
-                    onclick="
-                        window.open(
-                            'https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}',
-                            '_blank'
-                        );
-                    "
-                    style="
-                        border:1px solid #D0D5DD;
-                        background:white;
-                        color:#172033;
-                        padding:11px 8px;
-                        border-radius:10px;
-                        font-size:13px;
-                        font-weight:700;
-                        cursor:pointer;
-                    "
-                >
-                    📍 عرض على الخريطة
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-`);
+            });
 
 
             console.log(
@@ -1247,10 +968,14 @@ marker.bindPopup(`
                     'change',
                     (e) => {
 
+
+                        // Reset labels
                         radios.forEach(r => {
 
                             const label =
-                                r.closest('label');
+                                r.closest(
+                                    'label'
+                                );
 
 
                             if (label) {
@@ -1272,8 +997,11 @@ marker.bindPopup(`
                         });
 
 
+                        // Selected label
                         const selectedLabel =
-                            e.target.closest('label');
+                            e.target.closest(
+                                'label'
+                            );
 
 
                         if (selectedLabel) {
@@ -1293,6 +1021,7 @@ marker.bindPopup(`
                         }
 
 
+                        // Other type
                         if (
                             groupName === 'type'
                         ) {
