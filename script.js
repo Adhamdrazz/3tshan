@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================
-    // Real User Location
+    // User Location
     // =========================
 
     let userMarker = null;
@@ -123,13 +123,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let userLongitude = null;
 
 
+    // =========================
+    // Water Sources Data
+    // =========================
+
+    let waterSources = [];
+
+    let nearestWaterSource = null;
+
+
+    // =========================
+    // Show User Location
+    // =========================
+
     function showUserLocation(latitude, longitude) {
 
         userLatitude = latitude;
         userLongitude = longitude;
 
 
-        // Remove previous marker
+        // Remove previous user marker
         if (userMarker) {
             map.removeLayer(userMarker);
         }
@@ -144,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ).addTo(map);
 
 
-        // Move map to user location
+        // Move map to user
         map.setView(
             [latitude, longitude],
             16
@@ -159,6 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    // =========================
+    // Get User Location
+    // =========================
+
     function getUserLocation() {
 
         if (!navigator.geolocation) {
@@ -167,11 +184,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Geolocation is not supported by this browser.'
             );
 
+
             // Fallback
             showUserLocation(
                 30.0444,
                 31.2357
             );
+
 
             return;
         }
@@ -192,6 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     latitude,
                     longitude
                 );
+
+
+                // Try to find nearest source
+                findNearestWaterSource();
             },
 
 
@@ -208,6 +231,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     30.0444,
                     31.2357
                 );
+
+
+                // Try to find nearest source
+                findNearestWaterSource();
             },
 
 
@@ -219,10 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         );
     }
-
-
-    // Get real user location
-    getUserLocation();
 
 
     // =========================
@@ -318,6 +341,179 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================
+    // Calculate Distance
+    // =========================
+
+    function calculateDistance(
+        lat1,
+        lon1,
+        lat2,
+        lon2
+    ) {
+
+        const R = 6371;
+
+
+        const dLat =
+            (lat2 - lat1) * Math.PI / 180;
+
+        const dLon =
+            (lon2 - lon1) * Math.PI / 180;
+
+
+        const a =
+            Math.sin(dLat / 2) *
+            Math.sin(dLat / 2) +
+
+            Math.cos(lat1 * Math.PI / 180) *
+            Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+
+
+        const c =
+            2 *
+            Math.atan2(
+                Math.sqrt(a),
+                Math.sqrt(1 - a)
+            );
+
+
+        return R * c;
+    }
+
+
+    // =========================
+    // Format Distance
+    // =========================
+
+    function formatDistance(distanceKm) {
+
+        if (distanceKm < 1) {
+
+            return `${Math.round(distanceKm * 1000)} متر`;
+        }
+
+
+        return `${distanceKm.toFixed(1)} كم`;
+    }
+
+
+    // =========================
+    // Find Nearest Water Source
+    // =========================
+
+    function findNearestWaterSource() {
+
+        // User location not ready
+        if (
+            userLatitude === null ||
+            userLongitude === null
+        ) {
+
+            console.warn(
+                'User location is not available yet.'
+            );
+
+            return null;
+        }
+
+
+        // No sources
+        if (!waterSources.length) {
+
+            console.warn(
+                'No water sources available yet.'
+            );
+
+            return null;
+        }
+
+
+        let nearest = null;
+
+        let shortestDistance = Infinity;
+
+
+        // Check every source
+        waterSources.forEach(source => {
+
+            if (
+                source.latitude === null ||
+                source.latitude === undefined ||
+                source.longitude === null ||
+                source.longitude === undefined
+            ) {
+
+                return;
+            }
+
+
+            const sourceLatitude =
+                Number(source.latitude);
+
+            const sourceLongitude =
+                Number(source.longitude);
+
+
+            const distance =
+                calculateDistance(
+                    userLatitude,
+                    userLongitude,
+                    sourceLatitude,
+                    sourceLongitude
+                );
+
+
+            if (distance < shortestDistance) {
+
+                shortestDistance = distance;
+
+                nearest = {
+                    ...source,
+                    distance: distance
+                };
+
+            }
+
+        });
+
+
+        nearestWaterSource = nearest;
+
+
+        if (nearestWaterSource) {
+
+            console.log(
+                '=============================='
+            );
+
+            console.log(
+                'Nearest Water Source:'
+            );
+
+            console.log(
+                nearestWaterSource
+            );
+
+            console.log(
+                'Distance:',
+                formatDistance(
+                    nearestWaterSource.distance
+                )
+            );
+
+            console.log(
+                '=============================='
+            );
+        }
+
+
+        return nearestWaterSource;
+    }
+
+
+    // =========================
     // Load Water Sources From API
     // =========================
 
@@ -325,7 +521,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
 
-            console.log('Loading water sources...');
+            console.log(
+                'Loading water sources...'
+            );
 
 
             const response =
@@ -366,6 +564,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
 
+            // Save sources globally
+            waterSources = result.data;
+
+
             // Add sources to map
             result.data.forEach(source => {
 
@@ -402,38 +604,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 // Type
-                let typeText = 'مصدر مياه';
+                let typeText =
+                    'مصدر مياه';
+
 
                 if (source.type === 'cooler') {
-                    typeText = 'كولدير';
+
+                    typeText =
+                        'كولدير';
                 }
 
+
                 if (source.type === 'tap') {
-                    typeText = 'حنفية';
+
+                    typeText =
+                        'حنفية';
                 }
 
 
                 // Temperature
-                let tempText = 'غير محددة';
+                let tempText =
+                    'غير محددة';
+
 
                 if (source.temp_status === 'cold') {
-                    tempText = 'باردة';
+
+                    tempText =
+                        'باردة';
                 }
 
+
                 if (source.temp_status === 'normal') {
-                    tempText = 'عادية';
+
+                    tempText =
+                        'عادية';
                 }
 
 
                 // Price
-                let priceText = 'غير محدد';
+                let priceText =
+                    'غير محدد';
+
 
                 if (source.price_type === 'free') {
-                    priceText = 'مجانية';
+
+                    priceText =
+                        'مجانية';
                 }
 
+
                 if (source.price_type === 'paid') {
-                    priceText = 'مدفوعة';
+
+                    priceText =
+                        'مدفوعة';
                 }
 
 
@@ -495,6 +718,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 `Loaded ${result.data.length} water source(s).`
             );
 
+
+            // Find nearest after sources are loaded
+            findNearestWaterSource();
+
+
         } catch (error) {
 
             console.error(
@@ -506,7 +734,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // Start loading sources
+    // =========================
+    // Start
+    // =========================
+
+    getUserLocation();
+
     loadWaterSources();
 
 
@@ -523,8 +756,11 @@ document.addEventListener('DOMContentLoaded', () => {
         chip.addEventListener('click', () => {
 
             chips.forEach(c => {
+
                 c.classList.remove('active');
+
             });
+
 
             chip.classList.add('active');
 
