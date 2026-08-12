@@ -739,59 +739,338 @@ document.addEventListener('DOMContentLoaded', () => {
                         : 'معتمد';
 
 
-                // Popup
+               // Popup - Google Maps Style
 
-                marker.bindPopup(`
+const distanceFromUser =
+    userLatitude !== null &&
+    userLongitude !== null
+        ? formatDistance(
+            calculateDistance(
+                userLatitude,
+                userLongitude,
+                latitude,
+                longitude
+            )
+        )
+        : null;
+
+
+// Image
+
+const popupImage = source.photo_url
+    ? `
+        <img
+            src="${source.photo_url}"
+            alt="${source.name || 'مصدر مياه'}"
+            style="
+                width:100%;
+                height:170px;
+                object-fit:cover;
+                display:block;
+                background:#eef8ff;
+            "
+            onerror="
+                this.style.display='none';
+            "
+        >
+    `
+    : `
+        <div
+            style="
+                width:100%;
+                height:140px;
+                background:
+                    linear-gradient(
+                        135deg,
+                        #eaf7ff,
+                        #d9f7f5
+                    );
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:52px;
+            "
+        >
+            💧
+        </div>
+    `;
+
+
+// Status
+
+const statusColor =
+    source.status === 'pending'
+        ? '#B54708'
+        : '#16834B';
+
+const statusBackground =
+    source.status === 'pending'
+        ? '#FFF4E5'
+        : '#E8F7EE';
+
+
+// Popup
+
+marker.bindPopup(`
+
+    <div
+        dir="rtl"
+        style="
+            width:320px;
+            max-width:calc(100vw - 50px);
+            padding:0;
+            margin:0;
+            font-family:
+                Arial,
+                sans-serif;
+            color:#172033;
+            overflow:hidden;
+            line-height:1.5;
+        "
+    >
+
+        <!-- Image -->
+
+        <div
+            style="
+                margin:-1px -1px 0 -1px;
+                overflow:hidden;
+                border-radius:14px 14px 0 0;
+            "
+        >
+
+            ${popupImage}
+
+        </div>
+
+
+        <!-- Content -->
+
+        <div
+            style="
+                padding:14px 15px 15px;
+            "
+        >
+
+            <!-- Title -->
+
+            <div
+                style="
+                    display:flex;
+                    align-items:flex-start;
+                    justify-content:space-between;
+                    gap:10px;
+                    margin-bottom:5px;
+                "
+            >
+
+                <div
+                    style="
+                        font-size:18px;
+                        font-weight:700;
+                        color:#172033;
+                        line-height:1.4;
+                    "
+                >
+                    ${
+                        source.name ||
+                        'مصدر مياه'
+                    }
+                </div>
+
+
+                <span
+                    style="
+                        flex-shrink:0;
+                        background:${statusBackground};
+                        color:${statusColor};
+                        padding:4px 8px;
+                        border-radius:20px;
+                        font-size:11px;
+                        font-weight:700;
+                        white-space:nowrap;
+                    "
+                >
+                    ${statusText}
+                </span>
+
+            </div>
+
+
+            <!-- Subtitle -->
+
+            <div
+                style="
+                    color:#667085;
+                    font-size:13px;
+                    margin-bottom:14px;
+                "
+            >
+
+                ${typeText}
+
+                ${
+                    distanceFromUser
+                        ? ` • ${distanceFromUser} منك`
+                        : ''
+                }
+
+            </div>
+
+
+            <!-- Information -->
+
+            <div
+                style="
+                    display:grid;
+                    grid-template-columns:1fr 1fr;
+                    gap:8px;
+                    margin-bottom:14px;
+                "
+            >
+
+                <!-- Temperature -->
+
+                <div
+                    style="
+                        background:#F6F8FA;
+                        border-radius:10px;
+                        padding:10px;
+                    "
+                >
 
                     <div
-                        dir="rtl"
                         style="
-                            text-align:right;
-                            min-width:200px;
-                            font-family:
-                                Arial,
-                                sans-serif;
-                            line-height:1.8;
+                            color:#8A94A6;
+                            font-size:11px;
+                            margin-bottom:4px;
+                        "
+                    >
+                        المياه
+                    </div>
+
+                    <div
+                        style="
+                            font-size:13px;
+                            font-weight:700;
+                            color:#172033;
+                        "
+                    >
+                        💧 ${tempText}
+                    </div>
+
+                </div>
+
+
+                <!-- Price -->
+
+                <div
+                    style="
+                        background:#F6F8FA;
+                        border-radius:10px;
+                        padding:10px;
+                    "
+                >
+
+                    <div
+                        style="
+                            color:#8A94A6;
+                            font-size:11px;
+                            margin-bottom:4px;
+                        "
+                    >
+                        السعر
+                    </div>
+
+                    <div
+                        style="
+                            font-size:13px;
+                            font-weight:700;
+                            color:#172033;
                         "
                     >
 
-                        <strong
-                            style="
-                                font-size:16px;
-                                color:#0077D9;
-                            "
-                        >
-                            ${
-                                source.name ||
-                                'مصدر مياه'
-                            }
-                        </strong>
-
-                        <br>
-
-                        النوع:
-                        ${typeText}
-
-                        <br>
-
-                        المياه:
-                        ${tempText}
-
-                        <br>
-
-                        السعر:
-                        ${priceText}
-
-                        <br>
-
-                        الحالة:
-                        ${statusText}
+                        ${
+                            source.price_type === 'free'
+                                ? '✓ مجانية'
+                                : source.price_type === 'paid'
+                                    ? '💰 مدفوعة'
+                                    : 'غير محدد'
+                        }
 
                     </div>
 
-                `);
+                </div>
 
-            });
+            </div>
+
+
+            <!-- Actions -->
+
+            <div
+                style="
+                    display:grid;
+                    grid-template-columns:1fr 1fr;
+                    gap:8px;
+                "
+            >
+
+                <!-- Directions -->
+
+                <button
+                    type="button"
+                    onclick="
+                        window.open(
+                            'https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}',
+                            '_blank'
+                        );
+                    "
+                    style="
+                        border:none;
+                        background:#0077D9;
+                        color:white;
+                        padding:11px 8px;
+                        border-radius:10px;
+                        font-size:13px;
+                        font-weight:700;
+                        cursor:pointer;
+                    "
+                >
+                    🧭 الاتجاهات
+                </button>
+
+
+                <!-- Google Maps -->
+
+                <button
+                    type="button"
+                    onclick="
+                        window.open(
+                            'https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}',
+                            '_blank'
+                        );
+                    "
+                    style="
+                        border:1px solid #D0D5DD;
+                        background:white;
+                        color:#172033;
+                        padding:11px 8px;
+                        border-radius:10px;
+                        font-size:13px;
+                        font-weight:700;
+                        cursor:pointer;
+                    "
+                >
+                    📍 عرض على الخريطة
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+`);
 
 
             console.log(
