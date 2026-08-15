@@ -804,19 +804,30 @@ h1, h2, h3, h4 {
     display: block;
 }
 
+.nearest-source {
+    position: relative;
+}
 
 .close-nearest-source {
-    width: 32px;
-    height: 32px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+
+    width: 30px;
+    height: 30px;
+
     border: none;
     background: transparent;
     color: #8a94a6;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     border-radius: 50%;
     cursor: pointer;
     padding: 0;
+
     transition: all 0.2s ease;
 }
 
@@ -826,6 +837,6 @@ h1, h2, h3, h4 {
 }
 
 .close-nearest-source svg {
-    width: 17px;
-    height: 17px;
+    width: 16px;
+    height: 16px;
 }
