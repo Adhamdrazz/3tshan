@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // =========================================================
-    // عطشان - Main Application
+    // عطشان - FINAL SCRIPT
     // =========================================================
 
-    console.log('💧 عطشان App Starting...');
+    console.log('💧 عطشان App Started');
 
 
     // =========================================================
-    // Initialize Map
+    // MAIN MAP
     // =========================================================
 
     const map = L.map('map', {
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Tile Layers
+    // GOOGLE MAP LAYERS
     // =========================================================
 
     const googleStreets = L.tileLayer(
@@ -44,83 +44,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Map Layer Toggle
+    // MAIN MAP MARKERS LAYER
+    // =========================================================
+
+    const waterMarkersLayer =
+        L.layerGroup().addTo(map);
+
+
+    // =========================================================
+    // VARIABLES
     // =========================================================
 
     let currentLayer = 'streets';
 
-    const toggleBtn =
-        document.getElementById('toggle-layer-btn');
+    let userMarker = null;
+
+    let userLatitude = null;
+
+    let userLongitude = null;
+
+    let waterSources = [];
+
+    let nearestWaterSource = null;
+
+    let activeFilter = 'drinkable';
+
+    let searchQuery = '';
+
+    let addMap = null;
+
+    let addMarker = null;
 
 
-    if (toggleBtn) {
-
-        toggleBtn.addEventListener('click', () => {
-
-            if (currentLayer === 'streets') {
-
-                map.removeLayer(googleStreets);
-
-                googleSatellite.addTo(map);
-
-                currentLayer = 'satellite';
-
-
-                toggleBtn.innerHTML = `
-                    <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    >
-                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
-                        <line x1="8" y1="2" x2="8" y2="18"></line>
-                        <line x1="16" y1="6" x2="16" y2="22"></line>
-                    </svg>
-                `;
-
-            } else {
-
-                map.removeLayer(googleSatellite);
-
-                googleStreets.addTo(map);
-
-                currentLayer = 'streets';
-
-
-                toggleBtn.innerHTML = `
-                    <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                    >
-                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                    </svg>
-                `;
-
-            }
-
-        });
-
-    }
+    window.userLatitude = null;
+    window.userLongitude = null;
 
 
     // =========================================================
-    // User Location Marker
+    // USER ICON
     // =========================================================
 
     const userIcon = L.divIcon({
 
-        className: 'custom-leaflet-marker',
+        className: 'custom-user-marker',
 
         html: `
             <div class="user-marker">
@@ -137,84 +103,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Variables
+    // WATER ICON
     // =========================================================
 
-    let userMarker = null;
+    const waterIcon = L.divIcon({
 
-    let userLatitude = null;
+        className: 'custom-water-marker',
 
-    let userLongitude = null;
+        html: `
+            <div
+                style="
+                    width:40px;
+                    height:48px;
+                    position:relative;
+                "
+            >
 
-    let waterSources = [];
+                <svg
+                    width="40"
+                    height="48"
+                    viewBox="0 0 40 48"
+                    fill="none"
+                >
 
-    let waterMarkers = [];
+                    <path
+                        d="M20 48C20 48 40 31.3333 40 20C40 8.9543 31.0457 0 20 0C8.9543 0 0 8.9543 0 20C0 31.3333 20 48 20 48Z"
+                        fill="#0077D9"
+                    />
 
-    let nearestWaterSource = null;
+                    <path
+                        d="M20 36C26.6274 36 32 30.6274 32 24C32 17.3726 20 8 20 8C20 8 8 17.3726 8 24C8 30.6274 13.3726 36 20 36Z"
+                        fill="#00C2C7"
+                    />
 
-    let selectedSourceMarker = null;
+                </svg>
 
-    let selectedSourceLocation = null;
+            </div>
+        `,
 
-    let activeFilter = 'drinkable';
+        iconSize: [40, 48],
 
-    let searchQuery = '';
-
-
-    window.userLatitude = null;
-
-    window.userLongitude = null;
-
-
-    // =========================================================
-    // Water Source Icon
-    // =========================================================
-
-    const waterIcon = L.icon({
-
-        iconUrl: 'images/Marker.png',
-
-        iconSize: [48, 48],
-
-        iconAnchor: [24, 48],
-
-        popupAnchor: [0, -48]
+        iconAnchor: [20, 48]
 
     });
 
 
     // =========================================================
-    // Selected Location Icon
+    // ADD LOCATION ICON
     // =========================================================
 
-    const selectedLocationIcon = L.divIcon({
+    const addLocationIcon = L.divIcon({
 
-        className: 'selected-location-marker',
+        className: 'custom-add-location-marker',
 
         html: `
             <div
                 style="
                     width:42px;
                     height:42px;
-                    border-radius:50% 50% 50% 0;
                     background:#0077D9;
-                    border:4px solid #fff;
-                    box-shadow:0 4px 14px rgba(0,0,0,.25);
+                    border:4px solid white;
+                    border-radius:50% 50% 50% 0;
                     transform:rotate(-45deg);
+                    box-shadow:0 5px 18px rgba(0,0,0,.25);
                     position:relative;
                 "
             >
+
                 <div
                     style="
                         width:12px;
                         height:12px;
-                        background:#fff;
+                        background:white;
                         border-radius:50%;
                         position:absolute;
-                        top:11px;
                         left:11px;
+                        top:11px;
                     "
                 ></div>
+
             </div>
         `,
 
@@ -226,10 +193,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Show User Location
+    // LAYER TOGGLE
     // =========================================================
 
-    function showUserLocation(latitude, longitude) {
+    const toggleLayerButton =
+        document.getElementById('toggle-layer-btn');
+
+
+    if (toggleLayerButton) {
+
+        toggleLayerButton.addEventListener(
+            'click',
+            () => {
+
+                if (currentLayer === 'streets') {
+
+                    map.removeLayer(googleStreets);
+
+                    googleSatellite.addTo(map);
+
+                    currentLayer = 'satellite';
+
+                } else {
+
+                    map.removeLayer(googleSatellite);
+
+                    googleStreets.addTo(map);
+
+                    currentLayer = 'streets';
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // =========================================================
+    // USER LOCATION
+    // =========================================================
+
+    function showUserLocation(
+        latitude,
+        longitude,
+        moveMap = true
+    ) {
 
         userLatitude = latitude;
 
@@ -247,17 +256,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        userMarker = L.marker(
-            [latitude, longitude],
-            {
-                icon: userIcon,
-                zIndexOffset: 1000
-            }
-        ).addTo(map);
+        userMarker =
+            L.marker(
+                [latitude, longitude],
+                {
+                    icon: userIcon,
+                    zIndexOffset: 1000
+                }
+            ).addTo(map);
+
+
+        if (moveMap) {
+
+            map.setView(
+                [latitude, longitude],
+                16
+            );
+
+        }
 
 
         console.log(
-            '📍 User location:',
+            'User location:',
             latitude,
             longitude
         );
@@ -265,24 +285,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // =========================================================
-    // Get User Location
-    // =========================================================
-
     function getUserLocation() {
 
         if (!navigator.geolocation) {
 
-            console.warn(
-                'Geolocation is not supported.'
-            );
-
             showUserLocation(
                 30.0444,
-                31.2357
+                31.2357,
+                false
             );
-
-            findNearestWaterSource();
 
             return;
 
@@ -291,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         navigator.geolocation.getCurrentPosition(
 
-            (position) => {
+            position => {
 
                 const latitude =
                     position.coords.latitude;
@@ -302,37 +313,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 showUserLocation(
                     latitude,
-                    longitude
-                );
-
-
-                map.setView(
-                    [latitude, longitude],
-                    16
+                    longitude,
+                    true
                 );
 
 
                 findNearestWaterSource();
 
+
+                if (addMap) {
+
+                    addMap.setView(
+                        [latitude, longitude],
+                        16
+                    );
+
+                    setAddLocation(
+                        latitude,
+                        longitude
+                    );
+
+                }
+
             },
 
-            (error) => {
+
+            error => {
 
                 console.warn(
-                    'Unable to get user location:',
+                    'Location permission/error:',
                     error
                 );
 
 
                 showUserLocation(
                     30.0444,
-                    31.2357
+                    31.2357,
+                    false
                 );
 
-
-                findNearestWaterSource();
-
             },
+
 
             {
                 enableHighAccuracy: true,
@@ -346,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Calculate Distance
+    // DISTANCE
     // =========================================================
 
     function calculateDistance(
@@ -358,21 +379,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const R = 6371;
 
+
         const dLat =
-            (lat2 - lat1) * Math.PI / 180;
+            (lat2 - lat1) *
+            Math.PI /
+            180;
+
 
         const dLon =
-            (lon2 - lon1) * Math.PI / 180;
+            (lon2 - lon1) *
+            Math.PI /
+            180;
+
 
         const a =
             Math.sin(dLat / 2) *
             Math.sin(dLat / 2) +
 
-            Math.cos(lat1 * Math.PI / 180) *
-            Math.cos(lat2 * Math.PI / 180) *
+            Math.cos(
+                lat1 * Math.PI / 180
+            ) *
+
+            Math.cos(
+                lat2 * Math.PI / 180
+            ) *
 
             Math.sin(dLon / 2) *
             Math.sin(dLon / 2);
+
 
         const c =
             2 *
@@ -381,16 +415,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 Math.sqrt(1 - a)
             );
 
+
         return R * c;
 
     }
 
 
-    // =========================================================
-    // Format Distance
-    // =========================================================
-
-    function formatDistance(distanceKm) {
+    function formatDistance(
+        distanceKm
+    ) {
 
         if (
             distanceKm === null ||
@@ -405,7 +438,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (distanceKm < 1) {
 
-            return `${Math.round(distanceKm * 1000)} متر`;
+            return `${Math.round(
+                distanceKm * 1000
+            )} متر`;
 
         }
 
@@ -416,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Source Type Text
+    // TEXT HELPERS
     // =========================================================
 
     function getTypeText(type) {
@@ -429,18 +464,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return 'حنفية مياه';
         }
 
-        if (type === 'other') {
-            return 'مصدر مياه آخر';
-        }
-
         return 'مصدر مياه';
 
     }
 
-
-    // =========================================================
-    // Temperature Text
-    // =========================================================
 
     function getTemperatureText(status) {
 
@@ -452,22 +479,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return 'أحيانًا باردة';
         }
 
-        if (status === 'not_cold') {
-            return 'غير باردة';
-        }
-
         if (status === 'normal') {
             return 'عادية';
+        }
+
+        if (status === 'not_cold') {
+            return 'غير باردة';
         }
 
         return 'غير محددة';
 
     }
 
-
-    // =========================================================
-    // Price Text
-    // =========================================================
 
     function getPriceText(price) {
 
@@ -484,11 +507,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    function escapeHtml(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return '';
+
+        }
+
+
+        return String(value)
+
+            .replace(
+                /&/g,
+                '&amp;'
+            )
+
+            .replace(
+                /</g,
+                '&lt;'
+            )
+
+            .replace(
+                />/g,
+                '&gt;'
+            )
+
+            .replace(
+                /"/g,
+                '&quot;'
+            )
+
+            .replace(
+                /'/g,
+                '&#39;'
+            );
+
+    }
+
+
     // =========================================================
-    // Create Popup
+    // POPUP
     // =========================================================
 
-    function createSourcePopup(source) {
+    function createSourcePopup(
+        source
+    ) {
 
         const latitude =
             Number(source.latitude);
@@ -500,22 +567,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const distance =
             userLatitude !== null &&
             userLongitude !== null
+
                 ? calculateDistance(
                     userLatitude,
                     userLongitude,
                     latitude,
                     longitude
                 )
+
                 : null;
 
 
+        const name =
+            escapeHtml(
+                source.name ||
+                'مصدر مياه'
+            );
+
+
         const typeText =
-            getTypeText(source.type);
+            getTypeText(
+                source.type
+            );
+
 
         const tempText =
             getTemperatureText(
                 source.temp_status
             );
+
 
         const priceText =
             getPriceText(
@@ -524,6 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         return `
+
             <div
                 dir="rtl"
                 style="
@@ -531,64 +612,63 @@ document.addEventListener('DOMContentLoaded', () => {
                     font-family:Tajawal,Arial,sans-serif;
                     color:#172033;
                     text-align:right;
-                    overflow:hidden;
                 "
             >
 
                 ${
                     source.photo_url
-                        ? `
-                            <img
-                                src="${source.photo_url}"
-                                alt="${source.name || 'مصدر مياه'}"
-                                style="
-                                    width:100%;
-                                    height:150px;
-                                    object-fit:cover;
-                                    border-radius:14px;
-                                    display:block;
-                                    margin-bottom:12px;
-                                "
-                                onerror="this.style.display='none'"
-                            >
-                        `
-                        : `
-                            <div
-                                style="
-                                    width:100%;
-                                    height:150px;
-                                    border-radius:14px;
-                                    background:linear-gradient(
-                                        135deg,
-                                        #eaf7ff,
-                                        #d8f5f5
-                                    );
-                                    display:flex;
-                                    align-items:center;
-                                    justify-content:center;
-                                    margin-bottom:12px;
-                                    font-size:48px;
-                                "
-                            >
-                                💧
-                            </div>
-                        `
+
+                    ?
+
+                    `
+                    <img
+                        src="${escapeHtml(source.photo_url)}"
+                        alt="${name}"
+                        style="
+                            width:100%;
+                            height:150px;
+                            object-fit:cover;
+                            border-radius:14px;
+                            margin-bottom:12px;
+                        "
+                    >
+                    `
+
+                    :
+
+                    `
+                    <div
+                        style="
+                            width:100%;
+                            height:150px;
+                            border-radius:14px;
+                            background:linear-gradient(
+                                135deg,
+                                #eaf7ff,
+                                #d8f5f5
+                            );
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            margin-bottom:12px;
+                            font-size:48px;
+                        "
+                    >
+                        💧
+                    </div>
+                    `
                 }
 
 
-                <div style="margin-bottom:8px;">
-
-                    <strong
-                        style="
-                            font-size:18px;
-                            font-weight:700;
-                            color:#172033;
-                        "
-                    >
-                        ${source.name || 'مصدر مياه'}
-                    </strong>
-
-                </div>
+                <strong
+                    style="
+                        font-size:18px;
+                        display:block;
+                        margin-bottom:8px;
+                    "
+                >
+                    ${name}
+                </strong>
 
 
                 <div
@@ -598,7 +678,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         margin-bottom:14px;
                     "
                 >
-
                     💧 ${typeText}
 
                     ${
@@ -615,7 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         display:grid;
                         grid-template-columns:1fr 1fr;
                         gap:8px;
-                        margin-bottom:14px;
+                        margin-bottom:12px;
                     "
                 >
 
@@ -627,24 +706,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         "
                     >
 
-                        <div
+                        <small
                             style="
                                 color:#8A94A6;
-                                font-size:11px;
+                                display:block;
                                 margin-bottom:4px;
                             "
                         >
                             المياه
-                        </div>
+                        </small>
 
-                        <div
-                            style="
-                                font-size:13px;
-                                font-weight:700;
-                            "
-                        >
+                        <strong>
                             💧 ${tempText}
-                        </div>
+                        </strong>
 
                     </div>
 
@@ -657,30 +731,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         "
                     >
 
-                        <div
+                        <small
                             style="
                                 color:#8A94A6;
-                                font-size:11px;
+                                display:block;
                                 margin-bottom:4px;
                             "
                         >
                             السعر
-                        </div>
+                        </small>
 
-                        <div
-                            style="
-                                font-size:13px;
-                                font-weight:700;
-                            "
-                        >
-                            ${
-                                source.price_type === 'free'
-                                    ? '✓ مجانية'
-                                    : source.price_type === 'paid'
-                                        ? '💰 مدفوعة'
-                                        : 'غير محدد'
-                            }
-                        </div>
+                        <strong>
+                            ${priceText}
+                        </strong>
 
                     </div>
 
@@ -689,19 +752,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div
                     style="
-                        width:100%;
-                        box-sizing:border-box;
                         background:#EAF6FF;
                         color:#0077D9;
                         padding:11px;
                         border-radius:10px;
-                        font-size:14px;
-                        font-weight:700;
                         text-align:center;
+                        font-weight:700;
                         margin-bottom:10px;
                     "
                 >
-
                     📍 يبعد عنك
 
                     ${
@@ -718,205 +777,143 @@ document.addEventListener('DOMContentLoaded', () => {
                         font-size:10px;
                         color:#98A2B3;
                         text-align:center;
-                        padding-top:8px;
-                        border-top:1px solid #EAECF0;
                     "
                 >
-
                     ${latitude.toFixed(5)},
                     ${longitude.toFixed(5)}
-
                 </div>
 
             </div>
+
         `;
 
     }
 
 
     // =========================================================
-    // Remove Water Markers
-    // =========================================================
-
-    function clearWaterMarkers() {
-
-        waterMarkers.forEach(marker => {
-
-            if (map.hasLayer(marker)) {
-
-                map.removeLayer(marker);
-
-            }
-
-        });
-
-        waterMarkers = [];
-
-    }
-
-
-    // =========================================================
-    // Create Water Marker
-    // =========================================================
-
-    function createWaterMarker(source) {
-
-        const latitude =
-            Number(source.latitude);
-
-        const longitude =
-            Number(source.longitude);
-
-
-        if (
-            Number.isNaN(latitude) ||
-            Number.isNaN(longitude)
-        ) {
-
-            return null;
-
-        }
-
-
-        const marker =
-            L.marker(
-                [latitude, longitude],
-                {
-                    icon: waterIcon
-                }
-            );
-
-
-        marker.bindPopup(
-            createSourcePopup(source)
-        );
-
-
-        marker.sourceData = source;
-
-
-        marker.addTo(map);
-
-
-        waterMarkers.push(marker);
-
-
-        return marker;
-
-    }
-
-
-    // =========================================================
-    // Render Water Sources
+    // RENDER SOURCES
     // =========================================================
 
     function renderWaterSources() {
 
-        clearWaterMarkers();
+        waterMarkersLayer.clearLayers();
 
 
         const normalizedSearch =
-            searchQuery.trim().toLowerCase();
+            searchQuery
+                .trim()
+                .toLowerCase();
 
 
-        waterSources.forEach(source => {
+        waterSources.forEach(
+            source => {
 
-            if (
-                source.latitude === null ||
-                source.latitude === undefined ||
-                source.longitude === null ||
-                source.longitude === undefined
-            ) {
+                const latitude =
+                    Number(source.latitude);
 
-                return;
-
-            }
-
-
-            let matchesFilter = true;
-
-
-            if (activeFilter === 'cooler') {
-
-                matchesFilter =
-                    source.type === 'cooler';
-
-            }
-
-
-            if (activeFilter === 'tap') {
-
-                matchesFilter =
-                    source.type === 'tap';
-
-            }
-
-
-            if (activeFilter === 'drinkable') {
-
-                matchesFilter = true;
-
-            }
-
-
-            if (activeFilter === 'open') {
-
-                matchesFilter = true;
-
-            }
-
-
-            if (!matchesFilter) {
-
-                return;
-
-            }
-
-
-            if (normalizedSearch) {
-
-                const sourceName =
-                    String(
-                        source.name || ''
-                    ).toLowerCase();
-
-
-                const sourceType =
-                    getTypeText(
-                        source.type
-                    ).toLowerCase();
+                const longitude =
+                    Number(source.longitude);
 
 
                 if (
-                    !sourceName.includes(
-                        normalizedSearch
-                    ) &&
-                    !sourceType.includes(
-                        normalizedSearch
-                    )
+                    !Number.isFinite(latitude) ||
+                    !Number.isFinite(longitude)
                 ) {
 
                     return;
 
                 }
 
+
+                // Filter
+
+                if (
+                    activeFilter === 'cooler' &&
+                    source.type !== 'cooler'
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    activeFilter === 'tap' &&
+                    source.type !== 'tap'
+                ) {
+
+                    return;
+
+                }
+
+
+                // Search
+
+                if (normalizedSearch) {
+
+                    const name =
+                        String(
+                            source.name || ''
+                        ).toLowerCase();
+
+
+                    const type =
+                        getTypeText(
+                            source.type
+                        ).toLowerCase();
+
+
+                    if (
+                        !name.includes(
+                            normalizedSearch
+                        ) &&
+
+                        !type.includes(
+                            normalizedSearch
+                        )
+                    ) {
+
+                        return;
+
+                    }
+
+                }
+
+
+                const marker =
+                    L.marker(
+                        [latitude, longitude],
+                        {
+                            icon: waterIcon
+                        }
+                    );
+
+
+                marker.bindPopup(
+                    createSourcePopup(
+                        source
+                    )
+                );
+
+
+                marker.addTo(
+                    waterMarkersLayer
+                );
+
             }
-
-
-            createWaterMarker(source);
-
-        });
+        );
 
 
         console.log(
-            `📍 Rendered ${waterMarkers.length} water marker(s).`
+            'Rendered sources:',
+            waterMarkersLayer.getLayers().length
         );
 
     }
 
 
     // =========================================================
-    // Find Nearest Water Source
+    // FIND NEAREST
     // =========================================================
 
     function findNearestWaterSource() {
@@ -926,10 +923,6 @@ document.addEventListener('DOMContentLoaded', () => {
             userLongitude === null
         ) {
 
-            console.warn(
-                'User location is not available yet.'
-            );
-
             return null;
 
         }
@@ -937,7 +930,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!waterSources.length) {
 
-            nearestWaterSource = null;
+            nearestWaterSource =
+                null;
 
             updateNearestSourceCard();
 
@@ -948,79 +942,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let nearest = null;
 
-        let shortestDistance = Infinity;
+        let shortestDistance =
+            Infinity;
 
 
-        waterSources.forEach(source => {
+        waterSources.forEach(
+            source => {
 
-            const sourceLatitude =
-                Number(source.latitude);
+                const latitude =
+                    Number(source.latitude);
 
-            const sourceLongitude =
-                Number(source.longitude);
+                const longitude =
+                    Number(source.longitude);
 
 
-            if (
-                Number.isNaN(sourceLatitude) ||
-                Number.isNaN(sourceLongitude)
-            ) {
+                if (
+                    !Number.isFinite(latitude) ||
+                    !Number.isFinite(longitude)
+                ) {
 
-                return;
+                    return;
+
+                }
+
+
+                const distance =
+                    calculateDistance(
+                        userLatitude,
+                        userLongitude,
+                        latitude,
+                        longitude
+                    );
+
+
+                if (
+                    distance <
+                    shortestDistance
+                ) {
+
+                    shortestDistance =
+                        distance;
+
+
+                    nearest = {
+                        ...source,
+                        distance
+                    };
+
+                }
 
             }
+        );
 
 
-            const distance =
-                calculateDistance(
-                    userLatitude,
-                    userLongitude,
-                    sourceLatitude,
-                    sourceLongitude
-                );
-
-
-            if (distance < shortestDistance) {
-
-                shortestDistance =
-                    distance;
-
-
-                nearest = {
-                    ...source,
-                    distance
-                };
-
-            }
-
-        });
-
-
-        nearestWaterSource = nearest;
-
-
-        if (nearestWaterSource) {
-
-            console.log(
-                '=============================='
-            );
-
-            console.log(
-                '📍 Nearest Water Source:',
-                nearestWaterSource
-            );
-
-            console.log(
-                'Distance:',
-                formatDistance(
-                    nearestWaterSource.distance
-                )
-            );
-
-            console.log(
-                '=============================='
-            );
-
-        }
+        nearestWaterSource =
+            nearest;
 
 
         updateNearestSourceCard();
@@ -1032,20 +1008,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Update Nearest Source Card
+    // NEAREST CARD
     // =========================================================
 
     function updateNearestSourceCard() {
-
-        const card =
-            document.querySelector(
-                '.nearest-source'
-            );
 
         const distanceElement =
             document.getElementById(
                 'nearest-distance'
             );
+
 
         const typeElement =
             document.getElementById(
@@ -1054,7 +1026,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         if (
-            !card ||
             !distanceElement ||
             !typeElement
         ) {
@@ -1066,53 +1037,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!nearestWaterSource) {
 
-            card.style.display = 'none';
+            distanceElement.textContent =
+                'لا يوجد مصدر مياه قريب';
+
+            typeElement.textContent =
+                'لم يتم العثور على مصدر مياه قريب';
 
             return;
 
         }
 
 
-        card.style.display = '';
-
-
         distanceElement.innerHTML = `
-            <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-            >
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-            </svg>
+
+            📍
 
             ${formatDistance(
                 nearestWaterSource.distance
             )}
+
         `;
 
 
-        const typeText =
-            getTypeText(
-                nearestWaterSource.type
-            );
-
-
         typeElement.textContent =
+
             nearestWaterSource.name
-                ? `${nearestWaterSource.name} • ${typeText}`
-                : typeText;
+
+                ?
+
+                `${nearestWaterSource.name} • ${getTypeText(
+                    nearestWaterSource.type
+                )}`
+
+                :
+
+                getTypeText(
+                    nearestWaterSource.type
+                );
 
     }
 
 
     // =========================================================
-    // Go To Nearest Source
+    // GO TO NEAREST
     // =========================================================
 
     function goToNearestSource() {
@@ -1140,6 +1107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 nearestWaterSource.latitude
             );
 
+
         const longitude =
             Number(
                 nearestWaterSource.longitude
@@ -1155,31 +1123,38 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
 
-        const marker =
-            waterMarkers.find(
-                m =>
-                    m.sourceData &&
-                    String(m.sourceData.id) ===
-                    String(nearestWaterSource.id)
+        setTimeout(() => {
+
+            waterMarkersLayer.eachLayer(
+                marker => {
+
+                    const position =
+                        marker.getLatLng();
+
+
+                    if (
+                        Math.abs(
+                            position.lat -
+                            latitude
+                        ) < 0.000001 &&
+
+                        Math.abs(
+                            position.lng -
+                            longitude
+                        ) < 0.000001
+                    ) {
+
+                        marker.openPopup();
+
+                    }
+
+                }
             );
 
-
-        if (marker) {
-
-            setTimeout(() => {
-
-                marker.openPopup();
-
-            }, 500);
-
-        }
+        }, 400);
 
     }
 
-
-    // =========================================================
-    // Find Nearest Button
-    // =========================================================
 
     const findNearestButton =
         document.getElementById(
@@ -1191,72 +1166,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         findNearestButton.addEventListener(
             'click',
-            () => {
-
-                const mapLink =
-                    document.querySelector(
-                        '[data-target="view-map"]'
-                    );
-
-
-                if (mapLink) {
-
-                    mapLink.click();
-
-                }
-
-
-                setTimeout(() => {
-
-                    map.invalidateSize();
-
-                    goToNearestSource();
-
-                }, 250);
-
-            }
+            goToNearestSource
         );
 
     }
 
 
     // =========================================================
-    // Close Nearest Card
-    // =========================================================
-
-    const closeNearestSourceButton =
-        document.getElementById(
-            'close-nearest-source'
-        );
-
-
-    if (closeNearestSourceButton) {
-
-        closeNearestSourceButton.addEventListener(
-            'click',
-            () => {
-
-                const card =
-                    document.querySelector(
-                        '.nearest-source'
-                    );
-
-
-                if (card) {
-
-                    card.style.display =
-                        'none';
-
-                }
-
-            }
-        );
-
-    }
-
-
-    // =========================================================
-    // Load Water Sources From API
+    // LOAD API
     // =========================================================
 
     async function loadWaterSources() {
@@ -1264,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
 
             console.log(
-                '💧 Loading water sources...'
+                'Loading water sources...'
             );
 
 
@@ -1274,7 +1191,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         method: 'GET',
                         headers: {
-                            Accept:
+                            'Accept':
                                 'application/json'
                         }
                     }
@@ -1284,7 +1201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
 
                 throw new Error(
-                    `HTTP error: ${response.status}`
+                    `HTTP ${response.status}`
                 );
 
             }
@@ -1305,12 +1222,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 !Array.isArray(result.data)
             ) {
 
-                console.error(
-                    'Invalid API response:',
-                    result
+                throw new Error(
+                    'Invalid API response'
                 );
-
-                return;
 
             }
 
@@ -1326,13 +1240,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             console.log(
-                `✅ Loaded ${waterSources.length} water source(s).`
+                `Loaded ${waterSources.length} source(s).`
             );
 
         } catch (error) {
 
             console.error(
-                '❌ Error loading water sources:',
+                'Error loading water sources:',
                 error
             );
 
@@ -1342,218 +1256,396 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Source Location Selection
+    // ADD LOCATION MAP
     // =========================================================
 
-    const sourceLocation =
-        document.getElementById(
-            'source-location'
-        );
+    function initAddLocationMap() {
 
-    const latitudeInput =
-        document.getElementById(
-            'latitude'
-        );
+        if (addMap) {
 
-    const longitudeInput =
-        document.getElementById(
-            'longitude'
-        );
-
-
-    function activateSourceLocationSelection() {
-
-        const mapLink =
-            document.querySelector(
-                '[data-target="view-map"]'
+            setTimeout(
+                () => addMap.invalidateSize(),
+                100
             );
 
-
-        if (mapLink) {
-
-            mapLink.click();
+            return;
 
         }
 
 
-        setTimeout(() => {
+        const startLat =
+            userLatitude !== null
+                ? userLatitude
+                : 30.0444;
 
-            map.invalidateSize();
+
+        const startLng =
+            userLongitude !== null
+                ? userLongitude
+                : 31.2357;
 
 
-            alert(
-                'اضغط على الخريطة لتحديد مكان مصدر المياه 📍'
+        addMap =
+            L.map(
+                'add-location-map',
+                {
+                    zoomControl: true
+                }
+            ).setView(
+                [startLat, startLng],
+                16
             );
 
 
-            map.once(
-                'click',
-                handleSourceMapClick
-            );
+        L.tileLayer(
+            'https://{s}.google.com/vt/lyrs=m&hl=ar&x={x}&y={y}&z={z}&apistyle=s.t%3A3%7Cp.v%3Aoff',
+            {
+                maxZoom: 20,
+                subdomains: [
+                    'mt0',
+                    'mt1',
+                    'mt2',
+                    'mt3'
+                ],
+                attribution:
+                    '&copy; Google Maps'
+            }
+        ).addTo(addMap);
 
-        }, 250);
+
+        addMap.on(
+            'click',
+            event => {
+
+                setAddLocation(
+                    event.latlng.lat,
+                    event.latlng.lng
+                );
+
+            }
+        );
+
+
+        setAddLocation(
+            startLat,
+            startLng
+        );
+
+
+        setTimeout(
+            () => addMap.invalidateSize(),
+            150
+        );
 
     }
 
 
-    function handleSourceMapClick(e) {
+    // =========================================================
+    // SET ADD LOCATION
+    // =========================================================
 
-        const latitude =
-            e.latlng.lat;
+    function setAddLocation(
+        latitude,
+        longitude
+    ) {
 
-        const longitude =
-            e.latlng.lng;
-
-
-        selectedSourceLocation = {
-            latitude,
-            longitude
-        };
+        const latInput =
+            document.getElementById(
+                'input-latitude'
+            );
 
 
-        if (latitudeInput) {
+        const lngInput =
+            document.getElementById(
+                'input-longitude'
+            );
 
-            latitudeInput.value =
-                latitude.toFixed(7);
+
+        const locationSelected =
+            document.getElementById(
+                'location-selected'
+            );
+
+
+        if (latInput) {
+
+            latInput.value =
+                Number(latitude).toFixed(7);
 
         }
 
 
-        if (longitudeInput) {
+        if (lngInput) {
 
-            longitudeInput.value =
-                longitude.toFixed(7);
+            lngInput.value =
+                Number(longitude).toFixed(7);
 
         }
 
 
-        if (selectedSourceMarker) {
+        if (addMarker) {
 
-            map.removeLayer(
-                selectedSourceMarker
+            addMarker.setLatLng(
+                [latitude, longitude]
+            );
+
+        } else {
+
+            addMarker =
+                L.marker(
+                    [latitude, longitude],
+                    {
+                        icon:
+                            addLocationIcon,
+                        draggable: true
+                    }
+                ).addTo(addMap);
+
+
+            addMarker.on(
+                'dragend',
+                () => {
+
+                    const position =
+                        addMarker.getLatLng();
+
+
+                    setAddLocation(
+                        position.lat,
+                        position.lng
+                    );
+
+                }
             );
 
         }
 
 
-        selectedSourceMarker =
-            L.marker(
-                [latitude, longitude],
-                {
-                    icon: selectedLocationIcon,
-                    zIndexOffset: 2000
-                }
-            ).addTo(map);
+        if (locationSelected) {
 
+            locationSelected.innerHTML = `
 
-        selectedSourceMarker.bindPopup(
-            `
-                <div
-                    dir="rtl"
-                    style="
-                        font-family:Tajawal,Arial;
-                        text-align:center;
-                        font-weight:700;
-                    "
-                >
-                    📍 موقع مصدر المياه
+                <span>
+                    ✓
+                </span>
 
-                    <br>
+                تم تحديد الموقع
 
-                    <span
-                        style="
-                            color:#667085;
-                            font-size:11px;
-                        "
-                    >
-                        ${latitude.toFixed(6)},
-                        ${longitude.toFixed(6)}
-                    </span>
-                </div>
-            `
-        ).openPopup();
+                <span style="font-weight:500;">
+                    ${Number(latitude).toFixed(6)},
+                    ${Number(longitude).toFixed(6)}
+                </span>
 
-
-        if (sourceLocation) {
-
-            sourceLocation.innerHTML = `
-                <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    style="margin-left:8px;"
-                >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-
-                تم تحديد الموقع ✓
             `;
 
-
-            sourceLocation.style.background =
-                '#EAF6FF';
-
-            sourceLocation.style.borderColor =
-                '#0077D9';
-
-            sourceLocation.style.color =
-                '#0077D9';
-
         }
 
+    }
 
-        const addLink =
-            document.querySelector(
-                '[data-target="view-add"]'
+
+    // =========================================================
+    // RADIO OPTIONS
+    // =========================================================
+
+    function setupRadioGroup(
+        groupName
+    ) {
+
+        const radios =
+            document.querySelectorAll(
+                `input[name="${groupName}"]`
             );
 
 
-        if (addLink) {
+        radios.forEach(
+            radio => {
 
-            setTimeout(() => {
+                radio.addEventListener(
+                    'change',
+                    () => {
 
-                addLink.click();
+                        radios.forEach(
+                            item => {
 
-            }, 400);
+                                const label =
+                                    item.closest(
+                                        '.radio-option'
+                                    );
 
-        }
+
+                                if (label) {
+
+                                    label.classList.remove(
+                                        'selected'
+                                    );
+
+                                }
+
+                            }
+                        );
 
 
-        console.log(
-            '📍 Selected source location:',
-            latitude,
-            longitude
+                        const selected =
+                            radio.closest(
+                                '.radio-option'
+                            );
+
+
+                        if (selected) {
+
+                            selected.classList.add(
+                                'selected'
+                            );
+
+                        }
+
+
+                        if (
+                            groupName === 'type'
+                        ) {
+
+                            const otherInput =
+                                document.getElementById(
+                                    'input-type-other'
+                                );
+
+
+                            if (!otherInput) {
+
+                                return;
+
+                            }
+
+
+                            if (
+                                radio.value ===
+                                'other'
+                            ) {
+
+                                otherInput.classList.add(
+                                    'show'
+                                );
+
+                                setTimeout(
+                                    () => {
+                                        otherInput.focus();
+                                    },
+                                    50
+                                );
+
+                            } else {
+
+                                otherInput.classList.remove(
+                                    'show'
+                                );
+
+                                otherInput.value =
+                                    '';
+
+                            }
+
+                        }
+
+                    }
+                );
+
+            }
         );
 
     }
 
 
-    if (sourceLocation) {
+    setupRadioGroup('type');
 
-        sourceLocation.addEventListener(
-            'click',
-            activateSourceLocationSelection
+    setupRadioGroup('temp_status');
+
+    setupRadioGroup('price_type');
+
+
+    // =========================================================
+    // PHOTO PREVIEW
+    // =========================================================
+
+    const photoInput =
+        document.getElementById(
+            'input-photo'
         );
 
 
-        sourceLocation.addEventListener(
-            'keydown',
-            (e) => {
+    const photoBox =
+        document.getElementById(
+            'photo-upload-box'
+        );
 
-                if (
-                    e.key === 'Enter' ||
-                    e.key === ' '
-                ) {
 
-                    e.preventDefault();
+    const photoPreview =
+        document.getElementById(
+            'photo-preview'
+        );
 
-                    activateSourceLocationSelection();
+
+    if (photoInput) {
+
+        photoInput.addEventListener(
+            'change',
+            () => {
+
+                const file =
+                    photoInput.files?.[0];
+
+
+                if (!file) {
+
+                    return;
 
                 }
+
+
+                if (
+                    !file.type.startsWith(
+                        'image/'
+                    )
+                ) {
+
+                    alert(
+                        'من فضلك اختر ملف صورة.'
+                    );
+
+                    photoInput.value =
+                        '';
+
+                    return;
+
+                }
+
+
+                const reader =
+                    new FileReader();
+
+
+                reader.onload =
+                    event => {
+
+                        if (photoPreview) {
+
+                            photoPreview.src =
+                                event.target.result;
+
+                        }
+
+
+                        if (photoBox) {
+
+                            photoBox.classList.add(
+                                'has-image'
+                            );
+
+                        }
+
+                    };
+
+
+                reader.readAsDataURL(file);
 
             }
         );
@@ -1562,7 +1654,271 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Add Source Form
+    // NAVIGATION
+    // =========================================================
+
+    const navLinks =
+        document.querySelectorAll(
+            '.nav-link'
+        );
+
+
+    const views =
+        document.querySelectorAll(
+            '.app-view'
+        );
+
+
+    function navigateTo(
+        targetId
+    ) {
+
+        if (!targetId) {
+
+            return;
+
+        }
+
+
+        navLinks.forEach(
+            link => {
+
+                if (
+                    link.getAttribute(
+                        'data-target'
+                    ) === targetId
+                ) {
+
+                    link.classList.add(
+                        'active'
+                    );
+
+                } else {
+
+                    link.classList.remove(
+                        'active'
+                    );
+
+                }
+
+            }
+        );
+
+
+        views.forEach(
+            view => {
+
+                if (
+                    view.id === targetId
+                ) {
+
+                    view.style.display =
+                        'flex';
+
+                    view.classList.add(
+                        'active'
+                    );
+
+                } else {
+
+                    view.style.display =
+                        'none';
+
+                    view.classList.remove(
+                        'active'
+                    );
+
+                }
+
+            }
+        );
+
+
+        if (
+            targetId === 'view-map'
+        ) {
+
+            setTimeout(
+                () => {
+
+                    map.invalidateSize();
+
+                },
+                100
+            );
+
+        }
+
+
+        if (
+            targetId === 'view-add'
+        ) {
+
+            setTimeout(
+                () => {
+
+                    initAddLocationMap();
+
+                },
+                100
+            );
+
+        }
+
+    }
+
+
+    navLinks.forEach(
+        link => {
+
+            link.addEventListener(
+                'click',
+                event => {
+
+                    event.preventDefault();
+
+
+                    const targetId =
+                        link.getAttribute(
+                            'data-target'
+                        );
+
+
+                    navigateTo(
+                        targetId
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    // =========================================================
+    // FILTER CHIPS
+    // =========================================================
+
+    const chips =
+        document.querySelectorAll(
+            '.chip'
+        );
+
+
+    chips.forEach(
+        chip => {
+
+            chip.addEventListener(
+                'click',
+                () => {
+
+                    chips.forEach(
+                        item => {
+
+                            item.classList.remove(
+                                'active'
+                            );
+
+                        }
+                    );
+
+
+                    chip.classList.add(
+                        'active'
+                    );
+
+
+                    activeFilter =
+                        chip.dataset.filter ||
+                        'drinkable';
+
+
+                    renderWaterSources();
+
+                }
+            );
+
+        }
+    );
+
+
+    // =========================================================
+    // SEARCH
+    // =========================================================
+
+    const searchInput =
+        document.getElementById(
+            'water-search'
+        );
+
+
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            'input',
+            event => {
+
+                searchQuery =
+                    event.target.value ||
+                    '';
+
+
+                renderWaterSources();
+
+            }
+        );
+
+    }
+
+
+    // =========================================================
+    // FILTER BUTTON
+    // =========================================================
+
+    const filterButton =
+        document.getElementById(
+            'filter-btn'
+        );
+
+
+    if (filterButton) {
+
+        filterButton.addEventListener(
+            'click',
+            () => {
+
+                const filters =
+                    document.querySelector(
+                        '.filters-chips'
+                    );
+
+
+                if (!filters) {
+
+                    return;
+
+                }
+
+
+                const current =
+                    getComputedStyle(
+                        filters
+                    ).display;
+
+
+                filters.style.display =
+                    current === 'none'
+                        ? 'flex'
+                        : 'none';
+
+            }
+        );
+
+    }
+
+
+    // =========================================================
+    // ADD SOURCE FORM
     // =========================================================
 
     const addSourceForm =
@@ -1575,174 +1931,242 @@ document.addEventListener('DOMContentLoaded', () => {
 
         addSourceForm.addEventListener(
             'submit',
-            async (e) => {
+            async event => {
 
-                e.preventDefault();
+                event.preventDefault();
 
 
-                console.log(
-                    '📤 Submitting water source...'
-                );
+                const statusElement =
+                    document.getElementById(
+                        'add-source-status'
+                    );
 
 
                 const submitButton =
                     document.getElementById(
-                        'add-source-btn'
+                        'submit-add-source'
                     );
 
 
-                try {
+                const showStatus =
+                    (
+                        message,
+                        error = false
+                    ) => {
 
-                    const latitude =
-                        latitudeInput?.value;
-
-                    const longitude =
-                        longitudeInput?.value;
-
-
-                    if (
-                        !latitude ||
-                        !longitude
-                    ) {
-
-                        alert(
-                            'من فضلك حدد موقع مصدر المياه على الخريطة أولاً 📍'
-                        );
-
-                        return;
-
-                    }
-
-
-                    const name =
-                        document
-                            .getElementById(
-                                'source-name'
-                            )
-                            ?.value
-                            .trim() || '';
-
-
-                    const type =
-                        document.querySelector(
-                            'input[name="type"]:checked'
-                        )?.value;
-
-
-                    const tempStatus =
-                        document.querySelector(
-                            'input[name="temp_status"]:checked'
-                        )?.value;
-
-
-                    const priceType =
-                        document.querySelector(
-                            'input[name="price_type"]:checked'
-                        )?.value;
-
-
-                    if (!type) {
-
-                        alert(
-                            'من فضلك اختر نوع المصدر.'
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (!tempStatus) {
-
-                        alert(
-                            'من فضلك اختر حالة المياه.'
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (!priceType) {
-
-                        alert(
-                            'من فضلك اختر التكلفة.'
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (type === 'other') {
-
-                        const otherTypeInput =
-                            document.getElementById(
-                                'input-type-other'
-                            );
-
-
-                        const otherType =
-                            otherTypeInput
-                                ?.value
-                                .trim();
-
-
-                        if (!otherType) {
-
-                            alert(
-                                'من فضلك اكتب نوع المصدر.'
-                            );
-
-                            otherTypeInput?.focus();
+                        if (!statusElement) {
 
                             return;
 
                         }
 
-                    }
+
+                        statusElement.style.display =
+                            'block';
 
 
-                    const data = {
+                        statusElement.textContent =
+                            message;
 
-                        name,
 
-                        type,
+                        statusElement.style.background =
+                            error
+                                ? '#FEECEC'
+                                : '#EAF6FF';
 
-                        temp_status:
-                            tempStatus,
 
-                        price_type:
-                            priceType,
-
-                        latitude:
-                            Number(latitude),
-
-                        longitude:
-                            Number(longitude),
-
-                        photo_url:
-                            null
+                        statusElement.style.color =
+                            error
+                                ? '#D92D20'
+                                : '#0077D9';
 
                     };
 
 
-                    console.log(
-                        '📦 Data being sent:',
-                        data
+                const lat =
+                    parseFloat(
+                        document.getElementById(
+                            'input-latitude'
+                        )?.value
                     );
 
 
-                    if (submitButton) {
+                const lng =
+                    parseFloat(
+                        document.getElementById(
+                            'input-longitude'
+                        )?.value
+                    );
 
-                        submitButton.disabled =
-                            true;
 
-                        submitButton.textContent =
-                            'جاري إضافة المصدر...';
+                if (
+                    !Number.isFinite(lat) ||
+                    !Number.isFinite(lng)
+                ) {
+
+                    showStatus(
+                        'من فضلك حدد موقع مصدر المياه على الخريطة أولاً.',
+                        true
+                    );
+
+                    return;
+
+                }
+
+
+                const name =
+                    document.getElementById(
+                        'input-name'
+                    )?.value
+                    ?.trim() || 'مصدر مياه';
+
+
+                const typeInput =
+                    addSourceForm.querySelector(
+                        'input[name="type"]:checked'
+                    );
+
+
+                const tempInput =
+                    addSourceForm.querySelector(
+                        'input[name="temp_status"]:checked'
+                    );
+
+
+                const priceInput =
+                    addSourceForm.querySelector(
+                        'input[name="price_type"]:checked'
+                    );
+
+
+                if (!typeInput) {
+
+                    showStatus(
+                        'من فضلك اختر نوع المصدر.',
+                        true
+                    );
+
+                    return;
+
+                }
+
+
+                if (!tempInput) {
+
+                    showStatus(
+                        'من فضلك اختر حالة المياه.',
+                        true
+                    );
+
+                    return;
+
+                }
+
+
+                if (!priceInput) {
+
+                    showStatus(
+                        'من فضلك اختر التكلفة.',
+                        true
+                    );
+
+                    return;
+
+                }
+
+
+                let finalType =
+                    typeInput.value;
+
+
+                if (
+                    finalType === 'other'
+                ) {
+
+                    const otherInput =
+                        document.getElementById(
+                            'input-type-other'
+                        );
+
+
+                    const otherValue =
+                        otherInput
+                            ?.value
+                            ?.trim();
+
+
+                    if (!otherValue) {
+
+                        showStatus(
+                            'من فضلك اكتب نوع المصدر.',
+                            true
+                        );
+
+                        otherInput?.focus();
+
+                        return;
 
                     }
 
+
+                    /*
+                     * مهم:
+                     * قاعدة البيانات الحالية تستخدم
+                     * cooler / tap.
+                     *
+                     * لذلك نحافظ على "other"
+                     * كقيمة نوع عامة.
+                     */
+                    finalType = 'other';
+
+                }
+
+
+                /*
+                 * الصورة حاليًا للمعاينة فقط.
+                 * الـ API الحالي لا يحتوي على Storage
+                 * للصور، لذلك photo_url = null.
+                 */
+
+                const payload = {
+
+                    name: name,
+
+                    type: finalType,
+
+                    temp_status:
+                        tempInput.value,
+
+                    price_type:
+                        priceInput.value,
+
+                    latitude: lat,
+
+                    longitude: lng,
+
+                    photo_url: null
+
+                };
+
+
+                console.log(
+                    'Sending water source:',
+                    payload
+                );
+
+
+                if (submitButton) {
+
+                    submitButton.disabled =
+                        true;
+
+                    submitButton.textContent =
+                        'جاري إضافة المصدر...';
+
+                }
+
+
+                try {
 
                     const response =
                         await fetch(
@@ -1751,27 +2175,54 @@ document.addEventListener('DOMContentLoaded', () => {
                                 method: 'POST',
 
                                 headers: {
+
                                     'Content-Type':
                                         'application/json',
 
-                                    Accept:
+                                    'Accept':
                                         'application/json'
+
                                 },
 
                                 body:
                                     JSON.stringify(
-                                        data
+                                        payload
                                     )
+
                             }
                         );
 
 
-                    const result =
-                        await response.json();
+                    const rawText =
+                        await response.text();
+
+
+                    let result;
+
+
+                    try {
+
+                        result =
+                            JSON.parse(
+                                rawText
+                            );
+
+                    } catch (parseError) {
+
+                        console.error(
+                            'Invalid server response:',
+                            rawText
+                        );
+
+                        throw new Error(
+                            'الخادم لم يُرجع استجابة صحيحة.'
+                        );
+
+                    }
 
 
                     console.log(
-                        '📥 API response:',
+                        'POST response:',
                         result
                     );
 
@@ -1783,108 +2234,213 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         throw new Error(
                             result.message ||
-                            `HTTP error: ${response.status}`
+                            `HTTP ${response.status}`
                         );
 
                     }
 
 
-                    alert(
-                        'تمت إضافة مصدر المياه بنجاح 💧'
+                    showStatus(
+                        'تمت إضافة مصدر المياه بنجاح 💧',
+                        false
                     );
 
+
+                    // -----------------------------------------
+                    // Reset
+                    // -----------------------------------------
 
                     addSourceForm.reset();
 
 
-                    if (latitudeInput) {
+                    // Restore default selected chips
 
-                        latitudeInput.value = '';
-
-                    }
-
-
-                    if (longitudeInput) {
-
-                        longitudeInput.value = '';
-
-                    }
-
-
-                    selectedSourceLocation =
-                        null;
-
-
-                    if (selectedSourceMarker) {
-
-                        map.removeLayer(
-                            selectedSourceMarker
+                    document
+                        .querySelectorAll(
+                            '.radio-option'
+                        )
+                        .forEach(
+                            label => {
+                                label.classList.remove(
+                                    'selected'
+                                );
+                            }
                         );
 
-                        selectedSourceMarker =
+
+                    document
+                        .querySelector(
+                            'input[name="type"][value="cooler"]'
+                        )
+                        ?.closest(
+                            '.radio-option'
+                        )
+                        ?.classList.add(
+                            'selected'
+                        );
+
+
+                    document
+                        .querySelector(
+                            'input[name="temp_status"][value="cold"]'
+                        )
+                        ?.closest(
+                            '.radio-option'
+                        )
+                        ?.classList.add(
+                            'selected'
+                        );
+
+
+                    document
+                        .querySelector(
+                            'input[name="price_type"][value="free"]'
+                        )
+                        ?.closest(
+                            '.radio-option'
+                        )
+                        ?.classList.add(
+                            'selected'
+                        );
+
+
+                    const otherTypeInput =
+                        document.getElementById(
+                            'input-type-other'
+                        );
+
+
+                    if (otherTypeInput) {
+
+                        otherTypeInput.value =
+                            '';
+
+                        otherTypeInput.classList.remove(
+                            'show'
+                        );
+
+                    }
+
+
+                    // Reset coordinates
+
+                    const latInput =
+                        document.getElementById(
+                            'input-latitude'
+                        );
+
+
+                    const lngInput =
+                        document.getElementById(
+                            'input-longitude'
+                        );
+
+
+                    if (latInput) {
+
+                        latInput.value =
+                            '';
+
+                    }
+
+
+                    if (lngInput) {
+
+                        lngInput.value =
+                            '';
+
+                    }
+
+
+                    if (addMarker && addMap) {
+
+                        addMap.removeLayer(
+                            addMarker
+                        );
+
+                        addMarker =
                             null;
 
                     }
 
 
-                    if (sourceLocation) {
-
-                        sourceLocation.innerHTML = `
-                            <svg
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                style="margin-left:8px;"
-                            >
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                <circle cx="12" cy="10" r="3"></circle>
-                            </svg>
-
-                            اختر الموقع على الخريطة
-                        `;
+                    const locationSelected =
+                        document.getElementById(
+                            'location-selected'
+                        );
 
 
-                        sourceLocation.style.background =
-                            '#EBF3F8';
+                    if (locationSelected) {
 
-                        sourceLocation.style.borderColor =
-                            'var(--border-color)';
-
-                        sourceLocation.style.color =
-                            'var(--primary-blue)';
+                        locationSelected.innerHTML =
+                            '📍 لم يتم تحديد الموقع بعد';
 
                     }
 
+
+                    // Reset photo
+
+                    if (photoInput) {
+
+                        photoInput.value =
+                            '';
+
+                    }
+
+
+                    if (photoPreview) {
+
+                        photoPreview.src =
+                            '';
+
+                    }
+
+
+                    if (photoBox) {
+
+                        photoBox.classList.remove(
+                            'has-image'
+                        );
+
+                    }
+
+
+                    // Reload API
 
                     await loadWaterSources();
 
 
-                    const mapLink =
-                        document.querySelector(
-                            '[data-target="view-map"]'
-                        );
+                    // Stay on Add Source page
 
+                    setTimeout(
+                        () => {
 
-                    if (mapLink) {
+                            if (
+                                statusElement
+                            ) {
 
-                        mapLink.click();
+                                statusElement.style.display =
+                                    'none';
 
-                    }
+                            }
+
+                        },
+                        4000
+                    );
+
 
                 } catch (error) {
 
                     console.error(
-                        '❌ Error adding water source:',
+                        'Error adding water source:',
                         error
                     );
 
 
-                    alert(
-                        'حدث خطأ أثناء إضافة المصدر.\n\n' +
-                        error.message
+                    showStatus(
+                        error.message ||
+                        'حدث خطأ أثناء إضافة المصدر.',
+                        true
                     );
 
                 } finally {
@@ -1908,400 +2464,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Photo Selection
-    // =========================================================
-
-    const sourcePhoto =
-        document.getElementById(
-            'source-photo'
-        );
-
-
-    if (sourcePhoto) {
-
-        sourcePhoto.addEventListener(
-            'change',
-            () => {
-
-                const file =
-                    sourcePhoto.files?.[0];
-
-
-                if (!file) {
-                    return;
-                }
-
-
-                const label =
-                    sourcePhoto.closest(
-                        'label'
-                    );
-
-
-                if (label) {
-
-                    label.dataset.originalText =
-                        label.dataset.originalText ||
-                        'اضغط لإضافة صورة';
-
-
-                    label.lastChild.textContent =
-                        ` ${file.name}`;
-
-                }
-
-            }
-        );
-
-    }
-
-
-    // =========================================================
-    // Filter Chips
-    // =========================================================
-
-    const chips =
-        document.querySelectorAll(
-            '.chip'
-        );
-
-
-    chips.forEach(chip => {
-
-        chip.addEventListener(
-            'click',
-            () => {
-
-                chips.forEach(c => {
-
-                    c.classList.remove(
-                        'active'
-                    );
-
-                });
-
-
-                chip.classList.add(
-                    'active'
-                );
-
-
-                activeFilter =
-                    chip.dataset.filter ||
-                    'drinkable';
-
-
-                renderWaterSources();
-
-            }
-        );
-
-    });
-
-
-    // =========================================================
-    // Search
-    // =========================================================
-
-    const searchInput =
-        document.getElementById(
-            'water-search'
-        );
-
-
-    if (searchInput) {
-
-        searchInput.addEventListener(
-            'input',
-            (e) => {
-
-                searchQuery =
-                    e.target.value || '';
-
-
-                renderWaterSources();
-
-            }
-        );
-
-    }
-
-
-    // =========================================================
-    // Filter Button
-    // =========================================================
-
-    const filterButton =
-        document.getElementById(
-            'filter-btn'
-        );
-
-
-    if (filterButton) {
-
-        filterButton.addEventListener(
-            'click',
-            () => {
-
-                const filters =
-                    document.querySelector(
-                        '.filters-chips'
-                    );
-
-
-                if (!filters) {
-                    return;
-                }
-
-
-                if (
-                    filters.style.display ===
-                    'none'
-                ) {
-
-                    filters.style.display =
-                        'flex';
-
-                } else {
-
-                    filters.style.display =
-                        'none';
-
-                }
-
-            }
-        );
-
-    }
-
-
-    // =========================================================
-    // Navigation
-    // =========================================================
-
-    const navLinks =
-        document.querySelectorAll(
-            '.nav-link'
-        );
-
-
-    const views =
-        document.querySelectorAll(
-            '.app-view'
-        );
-
-
-    navLinks.forEach(link => {
-
-        link.addEventListener(
-            'click',
-            (e) => {
-
-                e.preventDefault();
-
-
-                const targetId =
-                    link.getAttribute(
-                        'data-target'
-                    );
-
-
-                if (!targetId) {
-                    return;
-                }
-
-
-                navLinks.forEach(nav => {
-
-                    if (
-                        nav.getAttribute(
-                            'data-target'
-                        ) === targetId
-                    ) {
-
-                        nav.classList.add(
-                            'active'
-                        );
-
-                    } else {
-
-                        nav.classList.remove(
-                            'active'
-                        );
-
-                    }
-
-                });
-
-
-                views.forEach(view => {
-
-                    if (
-                        view.id === targetId
-                    ) {
-
-                        view.style.display =
-                            'flex';
-
-
-                        view.classList.add(
-                            'active'
-                        );
-
-
-                        if (
-                            view.id === 'view-map'
-                        ) {
-
-                            setTimeout(() => {
-
-                                map.invalidateSize();
-
-                            }, 100);
-
-                        }
-
-                    } else {
-
-                        view.style.display =
-                            'none';
-
-
-                        view.classList.remove(
-                            'active'
-                        );
-
-                    }
-
-                });
-
-            }
-        );
-
-    });
-
-
-    // =========================================================
-    // Form Radio Chips
-    // =========================================================
-
-    function setupRadioChips(groupName) {
-
-        const radios =
-            document.querySelectorAll(
-                `input[name="${groupName}"]`
-            );
-
-
-        radios.forEach(radio => {
-
-            radio.addEventListener(
-                'change',
-                (e) => {
-
-                    radios.forEach(r => {
-
-                        const label =
-                            r.closest(
-                                'label'
-                            );
-
-
-                        if (label) {
-
-                            label.style.background =
-                                'transparent';
-
-                            label.style.borderColor =
-                                'var(--border-color)';
-
-                            label.style.color =
-                                'var(--dark-navy)';
-
-                            label.style.fontWeight =
-                                '500';
-
-                        }
-
-                    });
-
-
-                    const selectedLabel =
-                        e.target.closest(
-                            'label'
-                        );
-
-
-                    if (selectedLabel) {
-
-                        selectedLabel.style.background =
-                            'rgba(0, 119, 217, 0.05)';
-
-                        selectedLabel.style.borderColor =
-                            'var(--primary-blue)';
-
-                        selectedLabel.style.color =
-                            'var(--primary-blue)';
-
-                        selectedLabel.style.fontWeight =
-                            '700';
-
-                    }
-
-
-                    if (
-                        groupName === 'type'
-                    ) {
-
-                        const otherInput =
-                            document.getElementById(
-                                'input-type-other'
-                            );
-
-
-                        if (otherInput) {
-
-                            if (
-                                e.target.value ===
-                                'other'
-                            ) {
-
-                                otherInput.style.display =
-                                    'block';
-
-                                otherInput.focus();
-
-                            } else {
-
-                                otherInput.style.display =
-                                    'none';
-
-                                otherInput.value =
-                                    '';
-
-                            }
-
-                        }
-
-                    }
-
-                }
-            );
-
-        });
-
-    }
-
-
-    setupRadioChips('type');
-
-    setupRadioChips('temp_status');
-
-    setupRadioChips('price_type');
-
-
-    // =========================================================
-    // Start Application
+    // INITIALIZE
     // =========================================================
 
     getUserLocation();
@@ -2309,8 +2472,20 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWaterSources();
 
 
+    // Open Add Map if page is opened with #add
+    if (
+        window.location.hash === '#add'
+    ) {
+
+        navigateTo(
+            'view-add'
+        );
+
+    }
+
+
     console.log(
-        '💧 عطشان App Started Successfully'
+        '💧 عطشان FINAL initialized successfully'
     );
 
 });
