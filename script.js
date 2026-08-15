@@ -565,9 +565,10 @@ function updateNearestSourceCard() {
     const typeElement =
         document.getElementById('nearest-source-type');
 
-    if (!card || !distanceElement || !typeElement) {
-        return;
-    }
+   if (!nearestWaterSource) {
+    card.style.display = 'none';
+    return;
+}
 
     // No nearest source
     if (!nearestWaterSource) {
