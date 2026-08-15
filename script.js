@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // عطشان - Main Application
     // =========================================================
 
+    console.log('💧 عطشان App Starting...');
+
 
     // =========================================================
     // Initialize Map
@@ -80,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <line x1="16" y1="6" x2="16" y2="22"></line>
                     </svg>
                 `;
-
 
             } else {
 
@@ -256,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         console.log(
-            'User location:',
+            '📍 User location:',
             latitude,
             longitude
         );
@@ -315,7 +316,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             },
 
-
             (error) => {
 
                 console.warn(
@@ -333,7 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 findNearestWaterSource();
 
             },
-
 
             {
                 enableHighAccuracy: true,
@@ -359,14 +358,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const R = 6371;
 
-
         const dLat =
             (lat2 - lat1) * Math.PI / 180;
 
-
         const dLon =
             (lon2 - lon1) * Math.PI / 180;
-
 
         const a =
             Math.sin(dLat / 2) *
@@ -378,14 +374,12 @@ document.addEventListener('DOMContentLoaded', () => {
             Math.sin(dLon / 2) *
             Math.sin(dLon / 2);
 
-
         const c =
             2 *
             Math.atan2(
                 Math.sqrt(a),
                 Math.sqrt(1 - a)
             );
-
 
         return R * c;
 
@@ -428,18 +422,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function getTypeText(type) {
 
         if (type === 'cooler') {
-
             return 'كولدير مياه';
-
         }
-
 
         if (type === 'tap') {
-
             return 'حنفية مياه';
-
         }
 
+        if (type === 'other') {
+            return 'مصدر مياه آخر';
+        }
 
         return 'مصدر مياه';
 
@@ -453,32 +445,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function getTemperatureText(status) {
 
         if (status === 'cold') {
-
             return 'باردة';
-
         }
-
 
         if (status === 'sometimes_cold') {
-
             return 'أحيانًا باردة';
-
         }
-
 
         if (status === 'not_cold') {
-
             return 'غير باردة';
-
         }
-
 
         if (status === 'normal') {
-
             return 'عادية';
-
         }
-
 
         return 'غير محددة';
 
@@ -492,18 +472,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function getPriceText(price) {
 
         if (price === 'free') {
-
             return 'مجانية';
-
         }
-
 
         if (price === 'paid') {
-
             return 'مدفوعة';
-
         }
-
 
         return 'غير محدد';
 
@@ -519,7 +493,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const latitude =
             Number(source.latitude);
 
-
         const longitude =
             Number(source.longitude);
 
@@ -527,26 +500,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const distance =
             userLatitude !== null &&
             userLongitude !== null
-
                 ? calculateDistance(
                     userLatitude,
                     userLongitude,
                     latitude,
                     longitude
                 )
-
                 : null;
 
 
         const typeText =
             getTypeText(source.type);
 
-
         const tempText =
             getTemperatureText(
                 source.temp_status
             );
-
 
         const priceText =
             getPriceText(
@@ -555,7 +524,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         return `
-
             <div
                 dir="rtl"
                 style="
@@ -569,56 +537,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 ${
                     source.photo_url
-
-                    ?
-
-                    `
-                    <img
-                        src="${source.photo_url}"
-                        alt="${source.name || 'مصدر مياه'}"
-                        style="
-                            width:100%;
-                            height:150px;
-                            object-fit:cover;
-                            border-radius:14px;
-                            display:block;
-                            margin-bottom:12px;
-                        "
-                        onerror="this.style.display='none'"
-                    >
-                    `
-
-                    :
-
-                    `
-                    <div
-                        style="
-                            width:100%;
-                            height:150px;
-                            border-radius:14px;
-                            background:linear-gradient(
-                                135deg,
-                                #eaf7ff,
-                                #d8f5f5
-                            );
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            margin-bottom:12px;
-                            font-size:48px;
-                        "
-                    >
-                        💧
-                    </div>
-                    `
+                        ? `
+                            <img
+                                src="${source.photo_url}"
+                                alt="${source.name || 'مصدر مياه'}"
+                                style="
+                                    width:100%;
+                                    height:150px;
+                                    object-fit:cover;
+                                    border-radius:14px;
+                                    display:block;
+                                    margin-bottom:12px;
+                                "
+                                onerror="this.style.display='none'"
+                            >
+                        `
+                        : `
+                            <div
+                                style="
+                                    width:100%;
+                                    height:150px;
+                                    border-radius:14px;
+                                    background:linear-gradient(
+                                        135deg,
+                                        #eaf7ff,
+                                        #d8f5f5
+                                    );
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    margin-bottom:12px;
+                                    font-size:48px;
+                                "
+                            >
+                                💧
+                            </div>
+                        `
                 }
 
 
-                <div
-                    style="
-                        margin-bottom:8px;
-                    "
-                >
+                <div style="margin-bottom:8px;">
 
                     <strong
                         style="
@@ -771,7 +729,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
 
             </div>
-
         `;
 
     }
@@ -793,21 +750,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         });
 
-
         waterMarkers = [];
 
     }
 
 
     // =========================================================
-    // Add Source Marker
+    // Create Water Marker
     // =========================================================
 
     function createWaterMarker(source) {
 
         const latitude =
             Number(source.latitude);
-
 
         const longitude =
             Number(source.longitude);
@@ -878,10 +833,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
 
-            // -------------------------
-            // Type Filter
-            // -------------------------
-
             let matchesFilter = true;
 
 
@@ -908,8 +859,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
 
-            // "open" currently has no opening-hours
-            // column in the database.
             if (activeFilter === 'open') {
 
                 matchesFilter = true;
@@ -923,10 +872,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             }
 
-
-            // -------------------------
-            // Search
-            // -------------------------
 
             if (normalizedSearch) {
 
@@ -946,7 +891,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     !sourceName.includes(
                         normalizedSearch
                     ) &&
-
                     !sourceType.includes(
                         normalizedSearch
                     )
@@ -965,7 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         console.log(
-            `Rendered ${waterMarkers.length} water marker(s).`
+            `📍 Rendered ${waterMarkers.length} water marker(s).`
         );
 
     }
@@ -1009,24 +953,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         waterSources.forEach(source => {
 
+            const sourceLatitude =
+                Number(source.latitude);
+
+            const sourceLongitude =
+                Number(source.longitude);
+
+
             if (
-                source.latitude === null ||
-                source.latitude === undefined ||
-                source.longitude === null ||
-                source.longitude === undefined
+                Number.isNaN(sourceLatitude) ||
+                Number.isNaN(sourceLongitude)
             ) {
 
                 return;
 
             }
-
-
-            const sourceLatitude =
-                Number(source.latitude);
-
-
-            const sourceLongitude =
-                Number(source.longitude);
 
 
             const distance =
@@ -1038,20 +979,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
 
 
-            if (
-                distance < shortestDistance
-            ) {
+            if (distance < shortestDistance) {
 
                 shortestDistance =
                     distance;
 
 
                 nearest = {
-
                     ...source,
-
-                    distance: distance
-
+                    distance
                 };
 
             }
@@ -1059,8 +995,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
 
-        nearestWaterSource =
-            nearest;
+        nearestWaterSource = nearest;
 
 
         if (nearestWaterSource) {
@@ -1070,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             console.log(
-                'Nearest Water Source:',
+                '📍 Nearest Water Source:',
                 nearestWaterSource
             );
 
@@ -1107,12 +1042,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 '.nearest-source'
             );
 
-
         const distanceElement =
             document.getElementById(
                 'nearest-distance'
             );
-
 
         const typeElement =
             document.getElementById(
@@ -1144,7 +1077,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         distanceElement.innerHTML = `
-
             <svg
                 width="16"
                 height="16"
@@ -1162,7 +1094,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ${formatDistance(
                 nearestWaterSource.distance
             )}
-
         `;
 
 
@@ -1174,9 +1105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         typeElement.textContent =
             nearestWaterSource.name
-
                 ? `${nearestWaterSource.name} • ${typeText}`
-
                 : typeText;
 
     }
@@ -1210,7 +1139,6 @@ document.addEventListener('DOMContentLoaded', () => {
             Number(
                 nearestWaterSource.latitude
             );
-
 
         const longitude =
             Number(
@@ -1336,7 +1264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
 
             console.log(
-                'Loading water sources...'
+                '💧 Loading water sources...'
             );
 
 
@@ -1346,7 +1274,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     {
                         method: 'GET',
                         headers: {
-                            'Accept':
+                            Accept:
                                 'application/json'
                         }
                     }
@@ -1398,14 +1326,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             console.log(
-                `Loaded ${waterSources.length} water source(s).`
+                `✅ Loaded ${waterSources.length} water source(s).`
             );
-
 
         } catch (error) {
 
             console.error(
-                'Error loading water sources:',
+                '❌ Error loading water sources:',
                 error
             );
 
@@ -1423,12 +1350,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'source-location'
         );
 
-
     const latitudeInput =
         document.getElementById(
             'latitude'
         );
-
 
     const longitudeInput =
         document.getElementById(
@@ -1466,7 +1391,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleSourceMapClick
             );
 
-
         }, 250);
 
     }
@@ -1477,17 +1401,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const latitude =
             e.latlng.lat;
 
-
         const longitude =
             e.latlng.lng;
 
 
         selectedSourceLocation = {
-
-            latitude: latitude,
-
-            longitude: longitude
-
+            latitude,
+            longitude
         };
 
 
@@ -1537,7 +1457,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     "
                 >
                     📍 موقع مصدر المياه
+
                     <br>
+
                     <span
                         style="
                             color:#667085;
@@ -1555,7 +1477,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sourceLocation) {
 
             sourceLocation.innerHTML = `
-
                 <svg
                     width="24"
                     height="24"
@@ -1570,17 +1491,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 </svg>
 
                 تم تحديد الموقع ✓
-
             `;
 
 
             sourceLocation.style.background =
                 '#EAF6FF';
 
-
             sourceLocation.style.borderColor =
                 '#0077D9';
-
 
             sourceLocation.style.color =
                 '#0077D9';
@@ -1588,7 +1506,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        // Go back to Add view
         const addLink =
             document.querySelector(
                 '[data-target="view-add"]'
@@ -1607,7 +1524,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         console.log(
-            'Selected source location:',
+            '📍 Selected source location:',
             latitude,
             longitude
         );
@@ -1664,7 +1581,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 console.log(
-                    'Submitting water source...'
+                    '📤 Submitting water source...'
                 );
 
 
@@ -1676,13 +1593,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 try {
 
-                    // -----------------------------------------
-                    // Coordinates
-                    // -----------------------------------------
-
                     const latitude =
                         latitudeInput?.value;
-
 
                     const longitude =
                         longitudeInput?.value;
@@ -1702,10 +1614,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
 
-                    // -----------------------------------------
-                    // Name
-                    // -----------------------------------------
-
                     const name =
                         document
                             .getElementById(
@@ -1715,19 +1623,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             .trim() || '';
 
 
-                    // -----------------------------------------
-                    // Type
-                    // -----------------------------------------
-
                     const type =
                         document.querySelector(
                             'input[name="type"]:checked'
                         )?.value;
 
-
-                    // -----------------------------------------
-                    // Temperature
-                    // -----------------------------------------
 
                     const tempStatus =
                         document.querySelector(
@@ -1735,19 +1635,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         )?.value;
 
 
-                    // -----------------------------------------
-                    // Price
-                    // -----------------------------------------
-
                     const priceType =
                         document.querySelector(
                             'input[name="price_type"]:checked'
                         )?.value;
 
-
-                    // -----------------------------------------
-                    // Validation
-                    // -----------------------------------------
 
                     if (!type) {
 
@@ -1782,13 +1674,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
 
-                    // -----------------------------------------
-                    // Other Type
-                    // -----------------------------------------
-
-                    let finalType = type;
-
-
                     if (type === 'other') {
 
                         const otherTypeInput =
@@ -1815,26 +1700,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         }
 
-
-                        // Keep database value as "other"
-                        finalType = 'other';
-
                     }
 
 
-                    // -----------------------------------------
-                    // Prepare Data
-                    // -----------------------------------------
-
                     const data = {
 
-                        name: name,
+                        name,
 
-                        type: finalType,
+                        type,
 
-                        temp_status: tempStatus,
+                        temp_status:
+                            tempStatus,
 
-                        price_type: priceType,
+                        price_type:
+                            priceType,
 
                         latitude:
                             Number(latitude),
@@ -1842,20 +1721,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         longitude:
                             Number(longitude),
 
-                        photo_url: null
+                        photo_url:
+                            null
 
                     };
 
 
                     console.log(
-                        'Data being sent:',
+                        '📦 Data being sent:',
                         data
                     );
 
-
-                    // -----------------------------------------
-                    // Loading
-                    // -----------------------------------------
 
                     if (submitButton) {
 
@@ -1868,10 +1744,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
 
-                    // -----------------------------------------
-                    // API
-                    // -----------------------------------------
-
                     const response =
                         await fetch(
                             '/api/water-sources',
@@ -1882,7 +1754,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     'Content-Type':
                                         'application/json',
 
-                                    'Accept':
+                                    Accept:
                                         'application/json'
                                 },
 
@@ -1899,14 +1771,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                     console.log(
-                        'API response:',
+                        '📥 API response:',
                         result
                     );
 
-
-                    // -----------------------------------------
-                    // Error
-                    // -----------------------------------------
 
                     if (
                         !response.ok ||
@@ -1921,34 +1789,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
 
-                    // -----------------------------------------
-                    // Success
-                    // -----------------------------------------
-
                     alert(
                         'تمت إضافة مصدر المياه بنجاح 💧'
                     );
 
-
-                    // -----------------------------------------
-                    // Reset Form
-                    // -----------------------------------------
 
                     addSourceForm.reset();
 
 
                     if (latitudeInput) {
 
-                        latitudeInput.value =
-                            '';
+                        latitudeInput.value = '';
 
                     }
 
 
                     if (longitudeInput) {
 
-                        longitudeInput.value =
-                            '';
+                        longitudeInput.value = '';
 
                     }
 
@@ -1972,7 +1830,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (sourceLocation) {
 
                         sourceLocation.innerHTML = `
-
                             <svg
                                 width="24"
                                 height="24"
@@ -1987,17 +1844,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             </svg>
 
                             اختر الموقع على الخريطة
-
                         `;
 
 
                         sourceLocation.style.background =
                             '#EBF3F8';
 
-
                         sourceLocation.style.borderColor =
                             'var(--border-color)';
-
 
                         sourceLocation.style.color =
                             'var(--primary-blue)';
@@ -2005,16 +1859,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
 
-                    // -----------------------------------------
-                    // Reload Data
-                    // -----------------------------------------
-
                     await loadWaterSources();
 
-
-                    // -----------------------------------------
-                    // Go Map
-                    // -----------------------------------------
 
                     const mapLink =
                         document.querySelector(
@@ -2028,11 +1874,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     }
 
-
                 } catch (error) {
 
                     console.error(
-                        'Error adding water source:',
+                        '❌ Error adding water source:',
                         error
                     );
 
@@ -2041,7 +1886,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         'حدث خطأ أثناء إضافة المصدر.\n\n' +
                         error.message
                     );
-
 
                 } finally {
 
@@ -2084,9 +1928,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 if (!file) {
-
                     return;
-
                 }
 
 
@@ -2115,7 +1957,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================================================
-    // Chips
+    // Filter Chips
     // =========================================================
 
     const chips =
@@ -2208,9 +2050,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 if (!filters) {
-
                     return;
-
                 }
 
 
@@ -2267,9 +2107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 if (!targetId) {
-
                     return;
-
                 }
 
 
@@ -2315,14 +2153,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             view.id === 'view-map'
                         ) {
 
-                            setTimeout(
-                                () => {
+                            setTimeout(() => {
 
-                                    map.invalidateSize();
+                                map.invalidateSize();
 
-                                },
-                                100
-                            );
+                            }, 100);
 
                         }
 
