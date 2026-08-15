@@ -294,17 +294,12 @@ window.userLongitude = longitude;
     `;
 
 
-    const waterIcon = L.divIcon({
-
-        className: 'custom-leaflet-marker',
-
-        html: waterIconHtml,
-
-        iconSize: [40, 48],
-
-        iconAnchor: [20, 48]
-
-    });
+    const waterIcon = L.icon({
+    iconUrl: 'images/Marker.png',
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+    popupAnchor: [0, -48]
+});
 
 
     // =========================
