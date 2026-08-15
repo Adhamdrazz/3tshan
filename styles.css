@@ -798,8 +798,8 @@ h1, h2, h3, h4 {
 
 /* ضبط حجم لوجو عطشان في الـ Navbar */
 .logo img {
-    width: 52px;
-    height: 52px;
+    width: 104px;
+    height: 104px;
     object-fit: contain;
     display: block;
 }
