@@ -565,10 +565,9 @@ function updateNearestSourceCard() {
     const typeElement =
         document.getElementById('nearest-source-type');
 
-   if (!nearestWaterSource) {
-    card.style.display = 'none';
-    return;
-}
+    if (!card || !distanceElement || !typeElement) {
+        return;
+    }
 
     // No nearest source
     if (!nearestWaterSource) {
@@ -592,6 +591,7 @@ function updateNearestSourceCard() {
             stroke-linejoin="round">
 
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+
             <circle cx="12" cy="10" r="3"></circle>
 
         </svg>
@@ -614,6 +614,26 @@ function updateNearestSourceCard() {
         nearestWaterSource.name
             ? `${nearestWaterSource.name} • ${typeText}`
             : typeText;
+}
+
+
+// Close nearest source card
+const closeNearestSourceButton =
+    document.getElementById('close-nearest-source');
+
+if (closeNearestSourceButton) {
+
+    closeNearestSourceButton.addEventListener('click', () => {
+
+        const card =
+            document.querySelector('.nearest-source');
+
+        if (card) {
+            card.style.display = 'none';
+        }
+
+    });
+
 }
 
 
