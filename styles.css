@@ -803,3 +803,7 @@ h1, h2, h3, h4 {
     object-fit: contain;
     display: block;
 }
+
+.nearest-source {
+    display: none;
+}
