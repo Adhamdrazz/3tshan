@@ -1,1168 +1,421 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>عطشان - ابحث عن أقرب مصدر مياه</title>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap"
-        rel="stylesheet"
-    >
-
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin=""
-    >
-
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="styles.css">
-
-    <style>
-
-        /* =====================================================
-           ADD SOURCE PAGE
-        ===================================================== */
-
-        .add-form-card {
-            width: 100%;
-            max-width: 850px;
-            margin: 0 auto;
-        }
-
-        .add-form {
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
-        }
-
-        .form-section {
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-        }
-
-        .form-label {
-            font-weight: 700;
-            color: var(--dark-navy, #172033);
-            font-size: 15px;
-        }
-
-        .form-help {
-            margin: 0;
-            color: #64748B;
-            font-size: 12px;
-            line-height: 1.6;
-        }
-
-        /* Location map */
-
-        .add-location-map-wrapper {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-            border-radius: 16px;
-            border: 1px solid #D9E2EC;
-            background: #EBF3F8;
-        }
-
-        #add-location-map {
-            width: 100%;
-            height: 330px;
-            min-height: 330px;
-        }
-
-        .location-map-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            z-index: 500;
-            background: rgba(255,255,255,.95);
-            color: #172033;
-            padding: 9px 13px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 700;
-            box-shadow: 0 4px 15px rgba(0,0,0,.12);
-            pointer-events: none;
-        }
-
-        .location-selected {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            background: #EAF6FF;
-            color: #0077D9;
-            border-radius: 10px;
-            padding: 10px 12px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        /* Inputs */
-
-        .form-input {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 13px 14px;
-            border: 1px solid #D9E2EC;
-            border-radius: 11px;
-            background: #fff;
-            color: #172033;
-            font-family: inherit;
-            font-size: 14px;
-            outline: none;
-            transition: .2s;
-        }
-
-        .form-input:focus {
-            border-color: #0077D9;
-            box-shadow: 0 0 0 3px rgba(0,119,217,.08);
-        }
-
-        /* Radio chips */
-
-        .radio-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .radio-options.two {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .radio-option {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 50px;
-            padding: 10px 12px;
-            box-sizing: border-box;
-            border: 1px solid #D9E2EC;
-            border-radius: 11px;
-            background: #fff;
-            color: #172033;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: .2s;
-            user-select: none;
-        }
-
-        .radio-option:hover {
-            border-color: #0077D9;
-            background: #F7FBFF;
-        }
-
-        .radio-option input {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .radio-option.selected {
-            background: rgba(0,119,217,.06);
-            border-color: #0077D9;
-            color: #0077D9;
-            font-weight: 700;
-        }
-
-        .radio-check {
-            width: 17px;
-            height: 17px;
-            border: 2px solid #AAB7C4;
-            border-radius: 50%;
-            margin-left: 8px;
-            box-sizing: border-box;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .radio-option.selected .radio-check {
-            border-color: #0077D9;
-        }
-
-        .radio-option.selected .radio-check::after {
-            content: "";
-            position: absolute;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #0077D9;
-            top: 3px;
-            left: 3px;
-        }
-
-        /* Other type */
-
-        #input-type-other {
-            display: none;
-        }
-
-        #input-type-other.show {
-            display: block;
-        }
-
-        /* Photo */
-
-        .photo-upload {
-            position: relative;
-            width: 100%;
-            min-height: 130px;
-            border: 2px dashed #CBD5E1;
-            border-radius: 14px;
-            background: #FAFCFE;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            overflow: hidden;
-            transition: .2s;
-        }
-
-        .photo-upload:hover {
-            border-color: #0077D9;
-            background: #F7FBFF;
-        }
-
-        .photo-upload input {
-            display: none;
-        }
-
-        .photo-upload-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            color: #64748B;
-            font-size: 13px;
-            text-align: center;
-            padding: 15px;
-        }
-
-        .photo-preview {
-            display: none;
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-        }
-
-        .photo-upload.has-image .photo-preview {
-            display: block;
-        }
-
-        .photo-upload.has-image .photo-upload-content {
-            display: none;
-        }
-
-        /* Status */
-
-        #add-source-status {
-            display: none;
-            padding: 12px;
-            border-radius: 11px;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        /* Mobile */
-
-        @media (max-width: 700px) {
-
-            .radio-options,
-            .radio-options.two {
-                grid-template-columns: 1fr;
-            }
-
-            #add-location-map {
-                height: 300px;
-                min-height: 300px;
-            }
-
-            .add-form-card {
-                padding: 0;
-            }
-
-        }
-
-    </style>
 </head>
-
-
 <body class="account-page">
-
-<!-- =========================================================
-     NAVBAR
-========================================================= -->
-
-<header class="top-nav">
-
-    <div class="nav-container">
-
-        <div class="logo">
-
-            <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-            >
-                <path
-                    d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"
-                    fill="#0077D9"
-                />
-
-                <path
-                    d="M12 18C14.7614 18 17 15.7614 17 13C17 10.2386 12 6 12 6C12 6 7 10.2386 7 13C7 15.7614 9.2386 18 12 18Z"
-                    fill="#00C2C7"
-                />
-            </svg>
-
-            <span>عطشان</span>
-
-        </div>
-
-
-        <nav class="nav-links">
-
-            <a
-                href="#"
-                data-target="view-map"
-                class="nav-link active"
-            >
-                الخريطة
-            </a>
-
-            <a
-                href="#"
-                data-target="view-add"
-                class="nav-link"
-            >
-                أضف مصدرًا
-            </a>
-
-            <a
-                href="#"
-                data-target="view-account"
-                class="nav-link"
-            >
-                حسابي
-            </a>
-
-        </nav>
-
-
-        <div class="nav-actions">
-
-            <button
-                class="btn-primary"
-                id="find-nearest-btn"
-                type="button"
-            >
-                اعثر على أقرب مصدر
-            </button>
-
-            <a
-                href="#"
-                data-target="view-account"
-                class="btn-icon nav-link"
-            >
-                <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
+    <!-- Navbar (Desktop/Tablet) -->
+    <header class="top-nav">
+        <div class="nav-container">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" fill="#0077D9"/>
+                    <path d="M12 18C14.7614 18 17 15.7614 17 13C17 10.2386 12 6 12 6C12 6 7 10.2386 7 13C7 15.7614 9.2386 18 12 18Z" fill="#00C2C7"/>
                 </svg>
-            </a>
-
-        </div>
-
-    </div>
-
-</header>
-
-
-<div id="view-container">
-
-
-<!-- =========================================================
-     MAP PAGE
-========================================================= -->
-
-<main
-    class="main-layout app-view active"
-    id="view-map"
->
-
-    <aside class="side-panel">
-
-        <div class="card nearest-source">
-
-            <div class="card-header">
-
-                <div class="icon-circle">
-
-                    <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#0077D9"
-                        stroke-width="2"
-                    >
-                        <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
-                    </svg>
-
-                </div>
-
-
-                <div class="source-info">
-
-                    <h3>
-                        أقرب مصدر مياه
-                    </h3>
-
-                    <p
-                        class="distance"
-                        id="nearest-distance"
-                    >
-                        جاري تحديد المسافة...
-                    </p>
-
-                </div>
-
+                <span>عطشان</span>
             </div>
-
-
-            <div class="card-body">
-
-                <p
-                    class="source-type"
-                    id="nearest-source-type"
-                >
-                    جاري البحث عن أقرب مصدر مياه...
-                </p>
-
+            <nav class="nav-links">
+                <a href="#" data-target="view-map" class="nav-link active">الخريطة</a>
+                <a href="#" data-target="view-add" class="nav-link">أضف مصدرًا</a>
+                <a href="#" data-target="view-account" class="nav-link">حسابي</a>
+            </nav>
+            <div class="nav-actions">
+                <button id="find-nearest-btn" type="button" class="btn-primary">اعثر على أقرب مصدر</button>
+                <a href="#" data-target="view-account" class="btn-icon nav-link">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </a>
             </div>
-
-
-            <div class="card-actions">
-
-                <button
-                    class="btn-secondary full-width nav-link"
-                    id="add-source-from-home"
-                    data-target="view-add"
-                    type="button"
-                >
-                    إضافة مصدر جديد
-                </button>
-
-            </div>
-
         </div>
-
-    </aside>
-
-
-    <section class="map-area">
-
-        <div class="search-overlay">
-
-            <div class="search-bar">
-
-                <svg
-                    class="search-icon"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#0077D9"
-                    stroke-width="2"
-                >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-
-                <input
-                    type="text"
-                    id="water-search"
-                    placeholder="ابحث عن مصدر مياه..."
-                >
-
-                <button
-                    class="btn-filter"
-                    id="filter-btn"
-                    type="button"
-                >
-                    <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#1A2B4C"
-                        stroke-width="2"
-                    >
-                        <line x1="4" y1="21" x2="4" y2="14"></line>
-                        <line x1="4" y1="10" x2="4" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12" y2="3"></line>
-                        <line x1="20" y1="21" x2="20" y2="16"></line>
-                        <line x1="20" y1="12" x2="20" y2="3"></line>
-                        <line x1="1" y1="14" x2="7" y2="14"></line>
-                        <line x1="9" y1="8" x2="15" y2="8"></line>
-                        <line x1="17" y1="16" x2="23" y2="16"></line>
-                    </svg>
-                </button>
-
-            </div>
-
-
-            <div class="filters-chips">
-
-                <button
-                    class="chip active"
-                    data-filter="drinkable"
-                    type="button"
-                >
-                    مياه صالحة للشرب
-                </button>
-
-                <button
-                    class="chip"
-                    data-filter="cooler"
-                    type="button"
-                >
-                    كولدير
-                </button>
-
-                <button
-                    class="chip"
-                    data-filter="tap"
-                    type="button"
-                >
-                    صنبور
-                </button>
-
-                <button
-                    class="chip"
-                    data-filter="open"
-                    type="button"
-                >
-                    مفتوح الآن
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="map-container"
-            id="map"
-        ></div>
-
-
-        <div
-            class="map-actions"
-            style="
-                position:absolute;
-                top:100px;
-                left:16px;
-                z-index:20;
-                display:flex;
-                flex-direction:column;
-                gap:8px;
-            "
-        >
-
-            <button
-                id="toggle-layer-btn"
-                style="
-                    background:var(--white);
-                    border:none;
-                    box-shadow:var(--shadow-md);
-                    border-radius:var(--radius-sm);
-                    width:48px;
-                    height:48px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    cursor:pointer;
-                    color:var(--primary-blue);
-                "
-                type="button"
-            >
-
-                <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
-                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                </svg>
-
-            </button>
-
-        </div>
-
-    </section>
-
-</main>
-
-
-<!-- =========================================================
-     ADD SOURCE PAGE
-========================================================= -->
-
-<main
-    class="account-layout app-view"
-    id="view-add"
-    style="display:none;"
->
-
-    <div class="account-container add-form-card">
-
-        <div class="account-header">
-
-            <h2>
-                أضف مصدرًا
-            </h2>
-
-        </div>
-
-
-        <div
-            class="card"
-            style="padding:24px;"
-        >
-
-            <form
-                id="add-source-form"
-                class="add-form"
-            >
-
-
-                <!-- LOCATION -->
-
-                <div class="form-section">
-
-                    <label class="form-label">
-                        تحديد الموقع
-                    </label>
-
-
-                    <div class="add-location-map-wrapper">
-
-                        <div
-                            class="location-map-badge"
-                        >
-                            📍 اضغط على الخريطة لتحديد المكان
-                        </div>
-
-
-                        <div
-                            id="add-location-map"
-                        ></div>
-
+    </header>
+ 
+  <div id="view-container">
+    <!-- Map Area -->
+    <main class="main-layout app-view active" id="view-map">
+ 
+        <!-- Sidebar / Overlay Card -->
+        <aside class="side-panel">
+ 
+            <div class="card nearest-source">
+ 
+                <div class="card-header">
+ 
+                    <div class="icon-circle">
+                        <svg width="24" height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#0077D9"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+ 
+                            <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path>
+ 
+                        </svg>
                     </div>
-
-
-                    <div
-                        id="location-selected"
-                        class="location-selected"
-                    >
-                        📍 لم يتم تحديد الموقع بعد
-                    </div>
-
-
-                    <p class="form-help">
-                        يمكنك التكبير والتصغير وتحريك الخريطة ثم الضغط على المكان الدقيق لمصدر المياه.
-                    </p>
-
-
-                    <input
-                        type="hidden"
-                        id="input-latitude"
-                    >
-
-                    <input
-                        type="hidden"
-                        id="input-longitude"
-                    >
-
-                </div>
-
-
-                <!-- NAME -->
-
-                <div class="form-section">
-
-                    <label
-                        class="form-label"
-                        for="input-name"
-                    >
-                        اسم المصدر (اختياري)
-                    </label>
-
-                    <input
-                        class="form-input"
-                        type="text"
-                        id="input-name"
-                        placeholder="مثال: كولدير مسجد النور"
-                    >
-
-                </div>
-
-
-                <!-- TYPE -->
-
-                <div class="form-section">
-
-                    <label class="form-label">
-                        نوع المصدر
-                    </label>
-
-
-                    <div class="radio-options">
-
-                        <label class="radio-option selected">
-
-                            <input
-                                type="radio"
-                                name="type"
-                                value="cooler"
-                                checked
-                            >
-
-                            <span class="radio-check"></span>
-
-                            كولدير
-
-                        </label>
-
-
-                        <label class="radio-option">
-
-                            <input
-                                type="radio"
-                                name="type"
-                                value="tap"
-                            >
-
-                            <span class="radio-check"></span>
-
-                            صنبور
-
-                        </label>
-
-
-                        <label class="radio-option">
-
-                            <input
-                                type="radio"
-                                name="type"
-                                value="other"
-                            >
-
-                            <span class="radio-check"></span>
-
-                            أخرى
-
-                        </label>
-
-                    </div>
-
-
-                    <input
-                        class="form-input"
-                        type="text"
-                        id="input-type-other"
-                        placeholder="اكتب نوع المصدر..."
-                    >
-
-                </div>
-
-
-                <!-- TEMPERATURE -->
-
-                <div class="form-section">
-
-                    <label class="form-label">
-                        حالة المياه
-                    </label>
-
-
-                    <div class="radio-options">
-
-                        <label class="radio-option selected">
-
-                            <input
-                                type="radio"
-                                name="temp_status"
-                                value="cold"
-                                checked
-                            >
-
-                            <span class="radio-check"></span>
-
-                            باردة
-
-                        </label>
-
-
-                        <label class="radio-option">
-
-                            <input
-                                type="radio"
-                                name="temp_status"
-                                value="sometimes_cold"
-                            >
-
-                            <span class="radio-check"></span>
-
-                            أحيانًا باردة
-
-                        </label>
-
-
-                        <label class="radio-option">
-
-                            <input
-                                type="radio"
-                                name="temp_status"
-                                value="not_cold"
-                            >
-
-                            <span class="radio-check"></span>
-
-                            غير باردة
-
-                        </label>
-
-                    </div>
-
-                </div>
-
-
-                <!-- PRICE -->
-
-                <div class="form-section">
-
-                    <label class="form-label">
-                        التكلفة
-                    </label>
-
-
-                    <div class="radio-options two">
-
-                        <label class="radio-option selected">
-
-                            <input
-                                type="radio"
-                                name="price_type"
-                                value="free"
-                                checked
-                            >
-
-                            <span class="radio-check"></span>
-
-                            مجاني
-
-                        </label>
-
-
-                        <label class="radio-option">
-
-                            <input
-                                type="radio"
-                                name="price_type"
-                                value="paid"
-                            >
-
-                            <span class="radio-check"></span>
-
-                            بمقابل مادي
-
-                        </label>
-
-                    </div>
-
-                </div>
-
-
-                <!-- PHOTO -->
-
-                <div class="form-section">
-
-                    <label class="form-label">
-                        صورة المصدر (اختياري)
-                    </label>
-
-
-                    <label
-                        class="photo-upload"
-                        id="photo-upload-box"
-                    >
-
-                        <input
-                            type="file"
-                            id="input-photo"
-                            accept="image/*"
-                        >
-
-
-                        <div class="photo-upload-content">
-
-                            <svg
-                                width="32"
-                                height="32"
+ 
+                    <button id="close-nearest-source" type="button" aria-label="إغلاق" style="margin-right:auto;width:32px;height:32px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#667085;border-radius:50%;font-size:24px;line-height:1;">×</button>
+                    <div class="source-info">
+ 
+                        <h3>
+                            أقرب مصدر مياه
+                        </h3>
+ 
+                        <p class="distance" id="nearest-distance">
+ 
+                            <svg width="16" height="16"
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="currentColor"
-                                stroke-width="1.8"
-                            >
-                                <rect
-                                    x="3"
-                                    y="3"
-                                    width="18"
-                                    height="18"
-                                    rx="2"
-                                ></rect>
-
-                                <circle
-                                    cx="8.5"
-                                    cy="8.5"
-                                    r="1.5"
-                                ></circle>
-
-                                <polyline
-                                    points="21 15 16 10 5 21"
-                                ></polyline>
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round">
+ 
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+ 
+                                <circle cx="12" cy="10" r="3"></circle>
+ 
                             </svg>
-
-
-                            <span>
-                                اضغط لإضافة صورة
-                            </span>
-
-
-                            <small>
-                                JPG / PNG
-                            </small>
-
-                        </div>
-
-
-                        <img
-                            id="photo-preview"
-                            class="photo-preview"
-                            alt="معاينة الصورة"
-                        >
-
-                    </label>
-
-                    <p class="form-help">
-                        سيتم عرض معاينة الصورة هنا. حفظ الصورة على الخادم يحتاج Storage مخصصًا للصور.
-                    </p>
-
+ 
+                            جاري تحديد المسافة...
+ 
+                        </p>
+ 
+                    </div>
+ 
                 </div>
-
-
-                <!-- STATUS -->
-
-                <div
-                    id="add-source-status"
-                ></div>
-
-
-                <!-- SUBMIT -->
-
-                <button
-                    type="submit"
-                    id="submit-add-source"
-                    class="btn-primary full-width"
-                >
-                    إضافة المصدر
-                </button>
-
-
-            </form>
-
-        </div>
-
-    </div>
-
-</main>
-
-
-<!-- =========================================================
-     ACCOUNT PAGE
-========================================================= -->
-
-<main
-    class="account-layout app-view"
-    id="view-account"
-    style="display:none;"
->
-
-    <div class="account-container">
-
-        <div class="account-header">
-
-            <h2>
-                حسابي
-            </h2>
-
-        </div>
-
-
-        <div class="card welcome-card">
-
-            <div class="welcome-text">
-
-                <h3>
-                    مرحبًا بك!
-                </h3>
-
-                <p>
-                    شكرًا لمساهمتك في الحفاظ على كل قطرة 💙
-                </p>
-
-            </div>
-
-
-            <div class="user-avatar-container">
-
-                <div class="user-avatar">
-
-                    <svg
-                        width="40"
-                        height="40"
-                        viewBox="0 0 24 24"
-                        fill="var(--primary-blue)"
+ 
+                <div class="card-body">
+ 
+                    <p
+                        class="source-type"
+                        id="nearest-source-type"
                     >
-                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/>
-                    </svg>
-
+                        جاري البحث عن أقرب مصدر مياه...
+                    </p>
+ 
                 </div>
-
+ 
+                <div class="card-actions">
+ 
+                    <button
+                        class="btn-secondary full-width nav-link"
+                        id="add-source-from-home"
+                        data-target="view-add"
+                        type="button"
+                    >
+ 
+                        <svg width="18" height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#7AC943"
+                            stroke-width="2">
+ 
+                            <line x1="12" y1="5"
+                                x2="12" y2="19"></line>
+ 
+                            <line x1="5" y1="12"
+                                x2="19" y2="12"></line>
+ 
+                        </svg>
+ 
+                        إضافة مصدر جديد
+ 
+                    </button>
+ 
+                </div>
+ 
             </div>
-
-        </div>
-
+ 
+        </aside>
+ 
+            <!-- Map Area -->
+            <section class="map-area">
+                <div class="search-overlay">
+                    <div class="search-bar">
+                        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0077D9" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input id="water-search" type="text" placeholder="ابحث عن أقرب مصدر مياه...">
+                        <button id="filter-btn" type="button" class="btn-filter">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A2B4C" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                        </button>
+                    </div>
+                    <div class="filters-chips">
+                        <button type="button" class="chip active" data-filter="drinkable">مياه صالحة للشرب</button>
+                        <button type="button" class="chip" data-filter="cooler">كولدير</button>
+                        <button type="button" class="chip" data-filter="tap">صنبور</button>
+                        <button type="button" class="chip" data-filter="open">مفتوح الآن</button>
+                    </div>
+                </div>
+                <div class="map-container" id="map"></div>
+                
+                <div class="map-actions" style="position: absolute; top: 100px; left: 16px; z-index: 20; display: flex; flex-direction: column; gap: 8px;">
+                    <button id="toggle-layer-btn" style="background: var(--white); border: none; box-shadow: var(--shadow-md); border-radius: var(--radius-sm); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--primary-blue); transition: 0.2s;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+                    </button>
+                </div>
+            </section>
+        </main>
+ 
+        <!-- Add Area -->
+        <main class="account-layout app-view" id="view-add" style="display: none;">
+            <div class="account-container">
+                <div class="account-header">
+                    <h2>إضافة مصدر مياه</h2>
+                </div>
+                
+                <div class="card" style="padding: 24px;">
+                    <form id="add-source-form" style="display: flex; flex-direction: column; gap: 20px;">
+                        <!-- Location -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 700; color: var(--dark-navy);">تحديد الموقع</label>
+                            <div id="add-location-map" style="height: 200px; background: #EBF3F8; border-radius: var(--radius-sm); border: 1px solid var(--border-color); cursor: pointer;"></div>
+                            <p id="add-location-hint" style="font-size: 12px; color: #64748B; margin: 0;">اضغط على الخريطة لتحديد موقع المصدر</p>
+                            <input type="hidden" id="input-latitude">
+                            <input type="hidden" id="input-longitude">
+                        </div>
+ 
+                        <!-- Name -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 700; color: var(--dark-navy);">اسم المصدر (اختياري)</label>
+                            <input type="text" id="input-name" placeholder="مثال: كولدير مسجد النور" style="padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; font-size: 1rem; outline: none;">
+                        </div>
+                        
+                        <!-- Type -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 700; color: var(--dark-navy);">نوع المصدر</label>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <label class="radio-chip" style="flex: 1; min-width: 80px; padding: 12px; border: 1px solid var(--primary-blue); border-radius: var(--radius-sm); text-align: center; cursor: pointer; background: rgba(0, 119, 217, 0.05); color: var(--primary-blue); font-weight: 700;">
+                                    <input type="radio" name="type" value="cooler" checked style="display: none;">
+                                    كولدير
+                                </label>
+                                <label class="radio-chip" style="flex: 1; min-width: 80px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); text-align: center; cursor: pointer; color: var(--dark-navy); font-weight: 500;">
+                                    <input type="radio" name="type" value="tap" style="display: none;">
+                                    صنبور
+                                </label>
+                                <label class="radio-chip" style="flex: 1; min-width: 80px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); text-align: center; cursor: pointer; color: var(--dark-navy); font-weight: 500;">
+                                    <input type="radio" name="type" value="other" style="display: none;">
+                                    أخرى
+                                </label>
+                            </div>
+                            <input type="text" id="input-type-other" placeholder="حدد نوع المصدر..." style="display: none; margin-top: 8px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: inherit; font-size: 1rem; outline: none;">
+                        </div>
+ 
+                        <!-- Temperature -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 700; color: var(--dark-navy);">حالة المياه</label>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <label class="radio-chip" style="flex: 1; min-width: 80px; padding: 12px; border: 1px solid var(--primary-blue); border-radius: var(--radius-sm); text-align: center; cursor: pointer; background: rgba(0, 119, 217, 0.05); color: var(--primary-blue); font-weight: 700;">
+                                    <input type="radio" name="temp" value="cold" checked style="display: none;">
+                                    باردة
+                                </label>
+                                <label class="radio-chip" style="flex: 1; min-width: 80px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); text-align: center; cursor: pointer; color: var(--dark-navy); font-weight: 500;">
+                                    <input type="radio" name="temp" value="normal" style="display: none;">
+                                    أحياناً باردة
+                                </label>
+                                <label class="radio-chip" style="flex: 1; min-width: 80px; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); text-align: center; cursor: pointer; color: var(--dark-navy); font-weight: 500;">
+                                    <input type="radio" name="temp" value="not_cold" style="display: none;">
+                                    غير باردة
+                                </label>
+                            </div>
+                        </div>
+ 
+                        <!-- Price -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 700; color: var(--dark-navy);">التكلفة</label>
+                            <div style="display: flex; gap: 8px;">
+                                <label class="radio-chip" style="flex: 1; padding: 12px; border: 1px solid var(--primary-blue); border-radius: var(--radius-sm); text-align: center; cursor: pointer; background: rgba(0, 119, 217, 0.05); color: var(--primary-blue); font-weight: 700;">
+                                    <input type="radio" name="price" value="free" checked style="display: none;">
+                                    مجاني
+                                </label>
+                                <label class="radio-chip" style="flex: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); text-align: center; cursor: pointer; color: var(--dark-navy); font-weight: 500;">
+                                    <input type="radio" name="price" value="paid" style="display: none;">
+                                    بمقابل مادي
+                                </label>
+                            </div>
+                        </div>
+ 
+                        <!-- Photo -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="font-weight: 700; color: var(--dark-navy);">صورة المصدر (اختياري)</label>
+                            <label id="photo-upload-label" style="height: 100px; background: var(--white); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--border-color); color: #64748B; font-weight: 500; cursor: pointer; gap: 8px; transition: 0.2s;">
+                                <input type="file" id="input-photo" accept="image/*" style="display: none;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                اضغط لإضافة صورة
+                            </label>
+                            <p id="photo-file-name" style="font-size: 11px; color: #98A2B3; margin: 0;">الصورة اختيارية</p>
+                        </div>
+ 
+                        <p id="add-source-status" style="display:none; font-size: 13px; font-weight: 600; text-align:center; margin:0; padding:10px; border-radius: var(--radius-sm);"></p>
+ 
+                        <button type="submit" id="submit-add-source" class="btn-primary full-width" style="margin-top: 16px;">
+                            إضافة المصدر
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+ 
+        <!-- Account Area -->
+        <main class="account-layout app-view" id="view-account" style="display: none;">
+            <div class="account-container">
+                <div class="account-header">
+                    <h2>حسابي</h2>
+                    <button class="btn-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--dark-navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    </button>
+                </div>
+ 
+                <div class="card welcome-card">
+                    <div class="welcome-text">
+                        <h3>مرحبًا بك!</h3>
+                        <p>شكرًا لمساهمتك في الحفاظ على كل قطرة 💙</p>
+                    </div>
+                    <div class="user-avatar-container">
+                        <div class="user-avatar">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--primary-blue)" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/>
+                            </svg>
+                        </div>
+                        <div class="avatar-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" fill="#0077D9"/>
+                                <path d="M12 18C14.7614 18 17 15.7614 17 13C17 10.2386 12 6 12 6C12 6 7 10.2386 7 13C7 15.7614 9.2386 18 12 18Z" fill="#00C2C7"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+ 
+                <div class="stats-row">
+                    <div class="card stat-card">
+                        <div class="stat-icon-wrapper blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path></svg>
+                            <div class="plus-badge">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            </div>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number blue-text">12</span>
+                            <span class="stat-label">مصادر أضفتها</span>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon-wrapper green">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--lime-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            <div class="check-badge">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number green-text">4</span>
+                            <span class="stat-label">بلاغات ساهمت بها</span>
+                        </div>
+                    </div>
+                </div>
+ 
+                <div class="layout-row">
+                    <div class="card contribution-card">
+                        <div class="contribution-header">
+                            <div class="contribution-title">
+                                <h3>مساهمتك تصنع فرقًا</h3>
+                                <p>كل مساهمة تقرّب مجتمعنا من بيئة أفضل</p>
+                            </div>
+                            <div class="icon-circle contribution-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0077D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path></svg>
+                            </div>
+                        </div>
+                        <div class="contribution-body">
+                            <div class="progress-section">
+                                <div class="points-info right-info">
+                                    <span class="points-label">إلى المستوى التالي</span>
+                                    <span class="points-val blue-text">40 نقطة</span>
+                                </div>
+                                <div class="progress-ring">
+                                    <svg width="80" height="80" viewBox="0 0 80 80">
+                                        <circle class="ring-bg" cx="40" cy="40" r="32" stroke="#E2E8F0" stroke-width="8" fill="none" />
+                                        <circle class="ring-fill" cx="40" cy="40" r="32" stroke="var(--primary-blue)" stroke-width="8" fill="none" stroke-dasharray="201" stroke-dashoffset="15" stroke-linecap="round" transform="rotate(-90 40 40)" />
+                                    </svg>
+                                    <div class="ring-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path></svg>
+                                    </div>
+                                </div>
+                                <div class="points-info left-info">
+                                    <span class="points-label">إجمالي النقاط</span>
+                                    <span class="points-val blue-text">960 <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--primary-blue)" stroke="var(--primary-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"></path></svg></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+ 
+                    <div class="card account-list">
+                        <a href="#" class="list-item">
+                            <div class="list-icon-wrapper">
+                                <div class="list-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                                </div>
+                                <span class="list-text">المصادر المحفوظة</span>
+                            </div>
+                            <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </a>
+                        <a href="#" class="list-item">
+                            <div class="list-icon-wrapper">
+                                <div class="list-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                                </div>
+                                <span class="list-text">إشعارات التطبيق</span>
+                            </div>
+                            <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </a>
+                        <a href="#" class="list-item">
+                            <div class="list-icon-wrapper">
+                                <div class="list-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                </div>
+                                <span class="list-text">الخصوصية</span>
+                            </div>
+                            <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </a>
+                        <a href="#" class="list-item no-border">
+                            <div class="list-icon-wrapper">
+                                <div class="list-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                </div>
+                                <span class="list-text">عن عطشان</span>
+                            </div>
+                            <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-
-</main>
-
-
-</div>
-
-
-<!-- =========================================================
-     MOBILE NAV
-========================================================= -->
-
-<nav class="bottom-nav">
-
-    <a
-        href="#"
-        data-target="view-map"
-        class="nav-item nav-link active"
-    >
-        <div class="nav-icon">
-            <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-            </svg>
-        </div>
-
-        <span>
-            الخريطة
-        </span>
-    </a>
-
-
-    <a
-        href="#"
-        data-target="view-add"
-        class="nav-item nav-link"
-    >
-        <div class="nav-icon">
-            <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-        </div>
-
-        <span>
-            إضافة
-        </span>
-    </a>
-
-
-    <a
-        href="#"
-        data-target="view-account"
-        class="nav-item nav-link"
-    >
-        <div class="nav-icon">
-            <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-        </div>
-
-        <span>
-            الحساب
-        </span>
-    </a>
-
-</nav>
-
-
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-></script>
-
-<script src="script.js"></script>
-
+ 
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+        <a href="#" data-target="view-map" class="nav-item nav-link active">
+            <div class="nav-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            </div>
+            <span>الخريطة</span>
+        </a>
+        <a href="#" data-target="view-add" class="nav-item nav-link">
+            <div class="nav-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </div>
+            <span>إضافة</span>
+        </a>
+        <a href="#" data-target="view-account" class="nav-item nav-link">
+            <div class="nav-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <span>الحساب</span>
+        </a>
+    </nav>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="script.js"></script>
 </body>
 </html>
+ 
