@@ -1,122 +1,319 @@
 import { neon } from '@neondatabase/serverless';
 
+
+// =========================================================
+// Database Connection
+// =========================================================
+
 const sql = neon(process.env.DATABASE_URL);
 
+
+// =========================================================
+// Main API Handler
+// =========================================================
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+    // =======================================================
+    // CORS
+    // =======================================================
 
-  try {
-    // GET
-    if (req.method === 'GET') {
-      const sources = await sql`
-        SELECT
-          id,
-          name,
-          type,
-          temp_status,
-          price_type,
-          latitude,
-          longitude,
-          photo_url,
-          status,
-          created_at
-        FROM water_sources
-        ORDER BY created_at DESC
-      `;
+    res.setHeader(
+        'Access-Control-Allow-Origin',
+        '*'
+    );
 
-      return res.status(200).json({
-        success: true,
-        data: sources
-      });
-    }
+    res.setHeader(
+        'Access-Control-Allow-Methods',
+        'GET,POST,OPTIONS'
+    );
 
-    // POST
-    if (req.method === 'POST') {
-      let body = req.body;
+    res.setHeader(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Accept'
+    );
 
-      // Parse body if Vercel gives it as text
-      if (typeof body === 'string') {
-        try {
-          body = JSON.parse(body);
-        } catch (error) {
-          return res.status(400).json({
-            success: false,
-            message: 'Invalid JSON body'
-          });
-        }
-      }
 
-      body = body || {};
+    // =======================================================
+    // OPTIONS
+    // =======================================================
 
-      const name = body.name;
-      const type = body.type;
-      const temp_status = body.temp_status;
-      const price_type = body.price_type;
-      const latitude = body.latitude;
-      const longitude = body.longitude;
-      const photo_url = body.photo_url;
+    if (req.method === 'OPTIONS') {
 
-      if (
-        !name ||
-        !type ||
-        latitude === undefined ||
-        longitude === undefined
-      ) {
-        return res.status(400).json({
-          success: false,
-          message: 'Missing required fields',
-          received: body
+        return res.status(200).json({
+            success: true
         });
-      }
 
-      const [source] = await sql`
-        INSERT INTO water_sources (
-          name,
-          type,
-          temp_status,
-          price_type,
-          latitude,
-          longitude,
-          photo_url,
-          status
-        )
-        VALUES (
-          ${name},
-          ${type},
-          ${temp_status || null},
-          ${price_type || null},
-          ${latitude},
-          ${longitude},
-          ${photo_url || null},
-          'pending'
-        )
-        RETURNING *
-      `;
-
-      return res.status(201).json({
-        success: true,
-        data: source
-      });
     }
+
+
+    // =======================================================
+    // GET
+    // =======================================================
+
+    if (req.method === 'GET') {
+
+        try {
+
+            const result = await sql`
+                SELECT
+                    id,
+                    name,
+                    type,
+                    temp_status,
+                    price_type,
+                    latitude,
+                    longitude,
+                    photo_url,
+                    status,
+                    created_at
+                FROM water_sources
+                ORDER BY created_at DESC
+            `;
+
+
+            return res.status(200).json({
+
+                success: true,
+
+                data: result
+
+            });
+
+        } catch (error) {
+
+            console.error(
+                'GET water sources error:',
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    'حدث خطأ أثناء تحميل مصادر المياه.',
+
+                error:
+                    error.message
+
+            });
+
+        }
+
+    }
+
+
+    // =======================================================
+    // POST
+    // =======================================================
+
+    if (req.method === 'POST') {
+
+        try {
+
+            // -------------------------------------------------
+            // Get Request Body
+            // -------------------------------------------------
+
+            let body = req.body;
+
+
+            // Vercel may sometimes provide body as string
+            if (typeof body === 'string') {
+
+                try {
+
+                    body = JSON.parse(body);
+
+                } catch (parseError) {
+
+                    return res.status(400).json({
+
+                        success: false,
+
+                        message:
+                            'بيانات JSON غير صحيحة.'
+
+                    });
+
+                }
+
+            }
+
+
+            body = body || {};
+
+
+            console.log(
+                'POST body:',
+                body
+            );
+
+
+            // -------------------------------------------------
+            // Extract Data
+            // -------------------------------------------------
+
+            const {
+                name,
+                type,
+                temp_status,
+                price_type,
+                latitude,
+                longitude,
+                photo_url
+            } = body;
+
+
+            // -------------------------------------------------
+            // Validate Required Fields
+            // -------------------------------------------------
+
+            if (
+                !type ||
+                !temp_status ||
+                !price_type ||
+                latitude === undefined ||
+                latitude === null ||
+                longitude === undefined ||
+                longitude === null
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'Missing required fields'
+
+                });
+
+            }
+
+
+            // -------------------------------------------------
+            // Validate Coordinates
+            // -------------------------------------------------
+
+            const latitudeNumber =
+                Number(latitude);
+
+            const longitudeNumber =
+                Number(longitude);
+
+
+            if (
+                Number.isNaN(latitudeNumber) ||
+                Number.isNaN(longitudeNumber)
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'إحداثيات الموقع غير صحيحة.'
+
+                });
+
+            }
+
+
+            // -------------------------------------------------
+            // Insert Into Database
+            // -------------------------------------------------
+
+            const result = await sql`
+                INSERT INTO water_sources (
+                    name,
+                    type,
+                    temp_status,
+                    price_type,
+                    latitude,
+                    longitude,
+                    photo_url,
+                    status
+                )
+                VALUES (
+                    ${name || null},
+                    ${type},
+                    ${temp_status},
+                    ${price_type},
+                    ${latitudeNumber},
+                    ${longitudeNumber},
+                    ${photo_url || null},
+                    'pending'
+                )
+                RETURNING
+                    id,
+                    name,
+                    type,
+                    temp_status,
+                    price_type,
+                    latitude,
+                    longitude,
+                    photo_url,
+                    status,
+                    created_at
+            `;
+
+
+            // -------------------------------------------------
+            // Success
+            // -------------------------------------------------
+
+            return res.status(201).json({
+
+                success: true,
+
+                data: result[0]
+
+            });
+
+        } catch (error) {
+
+            console.error(
+                'POST water source error:',
+                error
+            );
+
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    'حدث خطأ أثناء إضافة مصدر المياه.',
+
+                error:
+                    error.message
+
+            });
+
+        }
+
+    }
+
+
+    // =======================================================
+    // Method Not Allowed
+    // =======================================================
+
+    res.setHeader(
+        'Allow',
+        'GET, POST, OPTIONS'
+    );
+
 
     return res.status(405).json({
-      success: false,
-      message: 'Method not allowed'
+
+        success: false,
+
+        message:
+            'Method not allowed'
+
     });
 
-  } catch (error) {
-    console.error('API Error:', error);
-
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: error.message
-    });
-  }
 }
