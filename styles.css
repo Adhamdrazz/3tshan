@@ -804,3 +804,28 @@ h1, h2, h3, h4 {
     display: block;
 }
 
+
+.close-nearest-source {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #8a94a6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s ease;
+}
+
+.close-nearest-source:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.close-nearest-source svg {
+    width: 17px;
+    height: 17px;
+}
