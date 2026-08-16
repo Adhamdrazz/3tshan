@@ -805,10 +805,10 @@ h1, h2, h3, h4 {
     }
 
     .submit-add-source-btn {
-        position: sticky;
-        bottom: 84px;
-        z-index: 25;
-        box-shadow: 0 8px 22px rgba(0, 119, 217, 0.24);
+        position: static;
+        width: 100%;
+        margin-top: 16px;
+        box-shadow: none;
     }
 
     /* Account Page Mobile Fixes */
