@@ -157,12 +157,7 @@
                 <button id="dashboard-nav" class="active"><span class="nav-icon">▦</span> لوحة التحكم</button>
                 <button id="sources-nav"><span class="nav-icon">◉</span> مصادر المياه</button>
                 <button id="countries-nav"><span class="nav-icon">▤</span> الدول</button>
-                <button id="users-nav"><span class="nav-icon">♙</span> المستخدمون</button>
                 <button id="map-nav"><span class="nav-icon">⌖</span> الخريطة</button>
-                <button id="contributions-nav"><span class="nav-icon">♧</span> المساهمات</button>
-                <button id="reports-nav"><span class="nav-icon">⚑</span> البلاغات</button>
-                <button id="photos-nav"><span class="nav-icon">▣</span> الصور</button>
-                <button id="reviews-nav"><span class="nav-icon">☆</span> التقييمات</button>
                 <button id="settings-nav"><span class="nav-icon">⚙</span> الإعدادات</button>
             </nav>
             <div class="sidebar-spacer"></div>
@@ -445,7 +440,7 @@
                     ${source.photo_url ? `<img class="source-photo" src="${escapeHtml(source.photo_url)}" alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}">` : ''}
                     <div class="source-details"><span class="detail"><strong>المياه:</strong> ${tempText(source.temp_status)}</span><span class="detail"><strong>السعر:</strong> ${priceText(source.price_type)}</span><span class="detail"><strong>الدولة:</strong> ${escapeHtml(source.country || 'غير محددة')}</span><span class="detail"><strong>المحافظة:</strong> ${escapeHtml(source.province || 'غير محددة')}</span></div>
                     <div class="location">⌖ ${Number(source.latitude).toFixed(5)}, ${Number(source.longitude).toFixed(5)}</div>
-                    <div class="card-actions"><button class="approve" data-id="${Number(source.id)}" data-status="approved">✓ قبول المصدر</button><button class="reject" data-id="${Number(source.id)}" data-status="rejected">× رفض</button></div>
+                    <div class="card-actions"><button type="button" class="approve" data-id="${Number(source.id)}" data-status="approved" onclick="reviewSource(${Number(source.id)}, 'approved'); return false;">✓ قبول المصدر</button><button type="button" class="reject" data-id="${Number(source.id)}" data-status="rejected" onclick="reviewSource(${Number(source.id)}, 'rejected'); return false;">× رفض</button></div>
                 </article>
             `).join('');
         }
@@ -491,6 +486,8 @@
             }
         }
 
+        window.reviewSource = updateStatus;
+
         document.getElementById('login-btn').addEventListener('click', async () => {
             const token = tokenInput.value.trim();
             if (!token) { loginStatus.textContent = 'اكتب رمز المشرف أولًا.'; return; }
@@ -521,16 +518,12 @@
         document.getElementById('search-input').addEventListener('input', renderSources);
         document.getElementById('type-filter').addEventListener('change', renderSources);
         document.getElementById('countries-search').addEventListener('input', renderCountries);
-        document.getElementById('dashboard-nav').addEventListener('click', showDashboardSection);
-        document.getElementById('sources-nav').addEventListener('click', showSourcesSection);
-        document.getElementById('countries-nav').addEventListener('click', showCountries);
-        document.getElementById('users-nav').addEventListener('click', showUsers);
-        document.getElementById('map-nav').addEventListener('click', () => { window.location.href = '/'; });
-        document.getElementById('contributions-nav').addEventListener('click', showContributions);
-        document.getElementById('reports-nav').addEventListener('click', showReports);
-        document.getElementById('photos-nav').addEventListener('click', showPhotos);
-        document.getElementById('reviews-nav').addEventListener('click', showReviews);
-        document.getElementById('settings-nav').addEventListener('click', showSettings);
+        const bindNav = (id, handler) => document.getElementById(id)?.addEventListener('click', handler);
+        bindNav('dashboard-nav', showDashboardSection);
+        bindNav('sources-nav', showSourcesSection);
+        bindNav('countries-nav', showCountries);
+        bindNav('map-nav', () => { window.location.href = '/'; });
+        bindNav('settings-nav', showSettings);
         document.getElementById('section-refresh').addEventListener('click', () => { const active = document.querySelector('.nav button.active')?.id; if (active === 'contributions-nav') showContributions(); else if (active === 'photos-nav') showPhotos(); else if (active === 'settings-nav') showSettings(); });
         document.getElementById('back-to-sources').addEventListener('click', showSources);
         document.getElementById('add-source-btn').addEventListener('click', () => { window.location.href = '/'; });
