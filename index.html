@@ -990,20 +990,33 @@
 
                 </div>
 
-                <section class="account-impact-card">
-                    <div class="impact-copy">
-                        <span class="impact-kicker">أثر صغير، فرق كبير</span>
-                        <h3>كن سببًا في أن يجد أحدهم الماء</h3>
-                        <p>أضف مصدرًا تعرفه، وساعدنا على بناء خريطة يعتمد عليها كل عطشان. مساهمتك لا تحتاج أكثر من دقيقة، لكنها قد تختصر طريقًا كاملًا على شخص يحتاج الماء.</p>
-                        <button class="btn-primary account-add-cta nav-link" type="button" data-target="view-add">
-                            <span aria-hidden="true">＋</span>
-                            أضف مصدرًا الآن
-                        </button>
+                <section class="player-progress-card">
+                    <div class="player-progress-top">
+                        <div>
+                            <span class="impact-kicker">رحلتك في عطشان</span>
+                            <h3>أنت لا تستخدم الخريطة فقط… أنت تطورها.</h3>
+                            <p>كل مصدر تضيفه يبدأ بـ <strong>+10 نقاط</strong>، وعند اعتماده من المشرف تحصل على <strong>+50 نقطة إضافية</strong>.</p>
+                        </div>
+                        <div class="player-level-badge">
+                            <span>المستوى</span>
+                            <strong id="player-level">1</strong>
+                        </div>
                     </div>
-                    <div class="impact-visual" aria-hidden="true">
-                        <div class="impact-drop">💧</div>
-                        <span class="impact-ripple ripple-one"></span>
-                        <span class="impact-ripple ripple-two"></span>
+                    <div class="player-score-row">
+                        <strong><span id="player-points">0</span> نقطة</strong>
+                        <span>تبقى <b id="player-next">100</b> نقطة للمستوى التالي</span>
+                    </div>
+                    <div class="player-progress-track" aria-label="تقدم المستوى">
+                        <span id="player-progress" style="width:0%"></span>
+                    </div>
+                    <div class="player-achievements">
+                        <div><strong id="player-sources">0</strong><span>مصادر ساهمت بها</span></div>
+                        <div><strong>+10</strong><span>عند إضافة مصدر</span></div>
+                        <div><strong>+50</strong><span>عند اعتماد المصدر</span></div>
+                    </div>
+                    <div class="player-activity-wrap">
+                        <div class="player-activity-title">آخر مساهماتك</div>
+                        <div id="player-activity" class="player-activity"><span>لم تضف مصادر بعد. كن أول من يصنع الأثر.</span></div>
                     </div>
                 </section>
 
@@ -1013,7 +1026,7 @@
                         <span class="about-badge">مجتمع يصنع الأثر</span>
                     </div>
                     <h3>عطشان ليست خريطة فقط… إنها يد تمتد لمن يحتاج.</h3>
-                    <p>في الطريق، قد يبحث شخص عن كوب ماء ولا يعرف أين يجده. هنا يأتي دورك: مصدر واحد تضيفه قد يطمئن مسافرًا، ويساعد طفلًا، ويجعل مكانًا مجهولًا نقطة أمل معروفة للجميع.</p>
+                    <p>أضف مصدرًا تعرفه، وساعدنا على بناء خريطة يعتمد عليها كل عطشان. مساهمتك لا تحتاج أكثر من دقيقة، لكنها قد تختصر طريقًا كاملًا على شخص يحتاج الماء.</p>
                     <blockquote>كل قطرة تعرف مكانها، وكل مساهمة تترك أثرًا.</blockquote>
                     <div class="about-atshan-actions">
                         <button class="btn-secondary nav-link" type="button" data-target="view-add">أريد أن أساهم</button>
@@ -1060,12 +1073,12 @@
 
                         <div class="stat-info">
 
-                            <span class="stat-number blue-text">
-                                12
+                            <span class="stat-number blue-text" id="profile-total-sources">
+                                0
                             </span>
 
                             <span class="stat-label">
-                                مصادر أضفتها
+                                مصادر ساهمت بها
                             </span>
 
                         </div>
@@ -1108,12 +1121,12 @@
 
                         <div class="stat-info">
 
-                            <span class="stat-number green-text">
-                                4
+                            <span class="stat-number green-text" id="profile-pending-sources">
+                                0
                             </span>
 
                             <span class="stat-label">
-                                بلاغات ساهمت بها
+                                مصادر قيد المراجعة
                             </span>
 
                         </div>
@@ -1166,11 +1179,11 @@
                                 <div class="points-info right-info">
 
                                     <span class="points-label">
-                                        إلى المستوى التالي
+                                        كولديرات معتمدة
                                     </span>
 
-                                    <span class="points-val blue-text">
-                                        40 نقطة
+                                    <span class="points-val blue-text" id="profile-coolers">
+                                        0
                                     </span>
 
                                 </div>
@@ -1231,12 +1244,12 @@
                                 <div class="points-info left-info">
 
                                     <span class="points-label">
-                                        إجمالي النقاط
+                                        حنفيات معتمدة
                                     </span>
 
-                                    <span class="points-val blue-text">
+                                    <span class="points-val blue-text" id="profile-taps">
 
-                                        960
+                                        0
 
                                         <svg
                                             width="14"

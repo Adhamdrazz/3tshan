@@ -161,6 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const engagementSessionId = localStorage.getItem(engagementSessionKey) || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `session-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     localStorage.setItem(engagementSessionKey, engagementSessionId);
 
+    const playerIdKey = '3tshan_player_id';
+    const playerId = localStorage.getItem(playerIdKey) || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `player-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    localStorage.setItem(playerIdKey, playerId);
+
     function trackEngagement(eventType, sourceId = null) {
         fetch('/api/water-sources?event=1', {
             method: 'POST',
@@ -1453,6 +1457,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================
+    // Profile Statistics
+    // =========================
+
+    async function loadProfileStats() {
+        try {
+            const response = await fetch(`/api/water-sources?profile=1&player_id=${encodeURIComponent(playerId)}`);
+            const result = await response.json();
+            if (!response.ok || !result.success) throw new Error('تعذر تحميل بيانات الحساب');
+            const overview = result.data?.overview || {};
+            const setText = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) element.textContent = String(value ?? 0);
+            };
+            setText('profile-total-sources', overview.total_sources);
+            setText('profile-pending-sources', overview.pending_sources);
+            setText('profile-coolers', overview.approved_coolers);
+            setText('profile-taps', overview.approved_taps);
+            setText('player-points', result.data?.points || 0);
+            setText('player-level', result.data?.level || 1);
+            setText('player-next', result.data?.points_to_next_level || 100);
+            setText('player-sources', overview.total_sources || 0);
+            const progress = Math.min(100, Math.round(((result.data?.points || 0) % 100)));
+            const progressBar = document.getElementById('player-progress');
+            if (progressBar) progressBar.style.width = `${progress}%`;
+            const activity = document.getElementById('player-activity');
+            if (activity) {
+                const sources = result.data?.sources || [];
+                activity.innerHTML = sources.length ? sources.slice(0, 5).map(source => {
+                    const statusText = source.status === 'approved' ? 'معتمد +50' : source.status === 'pending' ? 'قيد المراجعة' : 'لم يعتمد';
+                    const statusClass = source.status === 'approved' ? 'is-approved' : source.status === 'pending' ? 'is-pending' : 'is-rejected';
+                    return `<div class="player-activity-item"><span><b>${escapeHtml(source.name || 'مصدر مياه')}</b><small>${statusText}</small></span><strong>+${Number(source.points_awarded || 0)}</strong><i class="${statusClass}"></i></div>`;
+                }).join('') : '<span>لم تضف مصادر بعد. كن أول من يصنع الأثر.</span>';
+            }
+        } catch (error) {
+            console.warn('Profile statistics unavailable:', error.message);
+        }
+    }
+
+    // =========================
     // Navigation Logic
     // =========================
 
@@ -1515,6 +1558,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         view.style.display =
                             'flex';
 
+
+                        if (
+                            view.id === 'view-account'
+                        ) {
+                            loadProfileStats();
+                        }
 
                         if (
                             view.id === 'view-map'
@@ -2075,7 +2124,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         photoUrl,
 
                     note:
-                        note
+                        note,
+
+                    player_id:
+                        playerId
 
                 };
 
@@ -2160,11 +2212,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     trackEngagement('source_add', result.data?.id || null);
                     showStatus(
-                        'تمت إضافة المصدر بنجاح، بانتظار المراجعة ✅',
+                        `تمت إضافة المصدر بنجاح! حصلت على +${result.points_awarded || 10} نقطة، وسيضاف رصيد الاعتماد عند قبول المصدر ✅`,
                         false
                     );
 
 
+                    await loadProfileStats();
                     addSourceForm.reset();
                     if (photoInput) photoInput.dispatchEvent(new Event('change'));
 
