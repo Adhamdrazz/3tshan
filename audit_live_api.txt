@@ -1,0 +1,63 @@
+--- https://3tshan-app.vercel.app/api/water-sources
+HTTP/2 200 
+access-control-allow-headers: Content-Type, Accept, X-Admin-Token
+access-control-allow-methods: GET, POST, PATCH, DELETE, OPTIONS
+age: 0
+cache-control: no-store
+content-type: application/json; charset=utf-8
+date: Sun, 16 Aug 2026 20:41:51 GMT
+etag: W/"f6ade-EqjrTBQ3I3edcBFDfZdvzQaLV8M"
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-vercel-cache: MISS
+x-vercel-id: cle1::iad1::dwztn-1786912911221-128e16a82a1a
+content-length: 1010398
+
+{"success":true,"data":[{"id":6,"name":"اختبار4","type":"tap","temp_status":"normal","price_type":"free","latitude":27.196189059927878,"longitude":31.07726377354045,"country":"مصر","province":"أسيوط","photo_url":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAAH0CAYAAADL1t+KAAAQAElEQVR4Aex9B4AlRdX1uVXd/cKEzUsGiSIIimKOGBBz5vvMWT7jb1YwYY6IAVQMBLNrFkUBFZQgOeclsyybw4QXOlT95/ab2Z2N7ISNU719u3LVrdP16tStevPWIFwBgYBAQCAgEBAICGz3CARC3+5fYehAQCAgEBAICAQEgM1L6AHhgEBAICAQEAgIBAS2CAKB0LcIzKG
+--- https://3tshan-app.vercel.app/api/water-sources?profile=1
+HTTP/2 400 
+access-control-allow-headers: Content-Type, Accept, X-Admin-Token
+access-control-allow-methods: GET, POST, PATCH, DELETE, OPTIONS
+age: 0
+cache-control: no-store
+content-type: application/json; charset=utf-8
+date: Sun, 16 Aug 2026 20:41:51 GMT
+etag: W/"3f-SfHPZ9iTw0ZtUq4KWIkXyOoOYXs"
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-vercel-cache: MISS
+x-vercel-id: cle1::iad1::kvfjm-1786912911632-bade5c7f37d4
+content-length: 63
+
+{"success":false,"message":"معرف اللاعب مطلوب."}
+--- https://3tshan-app.vercel.app/admin.html
+HTTP/2 200 
+accept-ranges: bytes
+access-control-allow-origin: *
+age: 0
+cache-control: public, max-age=0, must-revalidate
+content-disposition: inline; filename="admin.html"
+content-type: text/html; charset=utf-8
+date: Sun, 16 Aug 2026 20:41:51 GMT
+etag: "89e9d89fbac1258698d86235a013c7ca"
+last-modified: Sun, 16 Aug 2026 20:41:51 GMT
+server: Vercel
+strict-transport-security: max-age=63072000; includeSubDomains; preload
+x-vercel-cache: MISS
+x-vercel-id: cle1::dgql2-1786912911872-2b13fe292c9b
+content-length: 48807
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة مصادر المياه - عطشان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#1769e0;
+            --primary-dark:#0d55c3;
+            --navy:#15233d;
+            --muted:#78859a;
+           

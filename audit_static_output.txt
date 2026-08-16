@@ -1,0 +1,136 @@
+--- counts ---
+  1382 index.html
+  1474 styles.css
+  2262 script.js
+   600 admin.html
+   317 api/water-sources.js
+    58 schema.sql
+  6093 total
+--- syntax ---
+node:internal/modules/esm/get_format:219
+  throw new ERR_UNKNOWN_FILE_EXTENSION(ext, filepath);
+        ^
+
+TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".html" for /home/ubuntu/3tshan/admin.html
+    at Object.getFileProtocolModuleFormat [as file:] (node:internal/modules/esm/get_format:219:9)
+    at defaultGetFormat (node:internal/modules/esm/get_format:245:36)
+    at checkSyntax (node:internal/main/check_syntax:69:20) {
+  code: 'ERR_UNKNOWN_FILE_EXTENSION'
+}
+
+Node.js v22.13.0
+--- api routes ---
+14:    const databaseUrl = process.env.DATABASE_URL;
+62:    const configuredToken = process.env.ADMIN_TOKEN;
+134:    const allowedOrigin = process.env.ALLOWED_ORIGIN;
+143:    if (req.method === 'OPTIONS') return json(res, 204, null);
+144:    if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(req.method)) {
+158:        if (req.method === 'GET') {
+159:            if (req.query?.auth === '1') {
+166:                if (req.query?.stats === '1') {
+172:                    sql`SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE type = 'cooler')::int AS coolers, COUNT(*) FILTER (WHERE type = 'tap')::int AS taps, COUNT(*) FILTER (WHERE status = 'pending')::int AS pending, COUNT(*) FILTER (WHERE status = 'approved')::int AS approved, COUNT(*) FILTER (WHERE price_type = 'free')::int AS free, COUNT(*) FILTER (WHERE price_type = 'paid')::int AS paid FROM water_sources`,
+173:                    sql`SELECT COALESCE(country, 'غير محددة') AS country, COUNT(*) FILTER (WHERE type = 'cooler')::int AS coolers, COUNT(*)::int AS total FROM water_sources GROUP BY 1 ORDER BY coolers DESC, total DESC`,
+174:                    sql`SELECT COALESCE(country, 'غير محددة') AS country, COALESCE(province, 'غير محددة') AS province, COUNT(*) FILTER (WHERE type = 'cooler')::int AS coolers, COUNT(*)::int AS total FROM water_sources GROUP BY 1, 2 ORDER BY coolers DESC, total DESC`,
+175:                    sql`SELECT type, COUNT(*)::int AS total FROM water_sources GROUP BY type ORDER BY total DESC`,
+176:                    sql`SELECT status, COUNT(*)::int AS total FROM water_sources GROUP BY status ORDER BY total DESC`,
+177:                    sql`SELECT temp_status, COUNT(*)::int AS total FROM water_sources GROUP BY temp_status ORDER BY total DESC`,
+178:                    sql`SELECT price_type, COUNT(*)::int AS total FROM water_sources GROUP BY price_type ORDER BY total DESC`,
+179:                    sql`SELECT COUNT(*) FILTER (WHERE event_type = 'visit')::int AS visits, COUNT(DISTINCT session_id) FILTER (WHERE event_type = 'visit')::int AS unique_visitors, COUNT(*) FILTER (WHERE event_type <> 'visit')::int AS interactions, COUNT(*) FILTER (WHERE event_type = 'source_add')::int AS source_adds, COUNT(*) FILTER (WHERE event_type = 'source_view')::int AS source_views, COUNT(*) FILTER (WHERE event_type = 'nearest_click')::int AS nearest_clicks FROM site_events`
+185:            if (req.query?.profile === '1') {
+186:                const playerId = typeof req.query?.player_id === 'string' ? req.query.player_id.trim().slice(0, 80) : '';
+189:                    sql`SELECT player_id, points, created_at, updated_at FROM player_profiles WHERE player_id = ${playerId}`,
+190:                    sql`SELECT id, name, type, status, points_awarded, created_at FROM water_sources WHERE player_id = ${playerId} ORDER BY created_at DESC LIMIT 20`,
+191:                    sql`SELECT COUNT(*)::int AS total_sources, COUNT(*) FILTER (WHERE status = 'approved')::int AS approved_sources, COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_sources, COUNT(*) FILTER (WHERE type = 'cooler' AND status = 'approved')::int AS approved_coolers, COUNT(*) FILTER (WHERE type = 'tap' AND status = 'approved')::int AS approved_taps FROM water_sources WHERE player_id = ${playerId}`
+200:            const requestedStatus = req.query?.status;
+206:                    ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at FROM water_sources WHERE status = 'pending' ORDER BY created_at DESC`
+208:                        ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at FROM water_sources ORDER BY created_at DESC`
+209:                        : await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at FROM water_sources WHERE status = 'approved' ORDER BY created_at DESC`;
+213:        if (req.method === 'DELETE') {
+219:            const id = Number(req.query?.id || body?.id);
+225:                DELETE FROM water_sources
+235:        if (req.method === 'PATCH') {
+248:            const current = await sql`SELECT status, player_id, points_awarded FROM water_sources WHERE id = ${id}`;
+254:                UPDATE water_sources
+262:                    INSERT INTO player_profiles (player_id, points)
+275:        if (req.method === 'POST' && req.query?.event === '1') {
+284:            const result = await sql`INSERT INTO site_events (event_type, session_id, source_id) VALUES (${eventType}, ${sessionId}, ${sourceId}) RETURNING id`;
+302:            INSERT INTO water_sources (name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, player_id, points_awarded, status) VALUES (${name}, ${type}, ${temp_status}, ${price_type}, ${latitude}, ${longitude}, ${country}, ${province}, ${photo_url}, ${note}, ${player_id}, ${player_id ? 10 : 0}, 'pending')
+307:                INSERT INTO player_profiles (player_id, points)
+314:        console.error(`${req.method} water sources error:`, error);
+--- fetch calls ---
+script.js:68:                toggleBtn.innerHTML = `
+script.js:93:                toggleBtn.innerHTML = `
+script.js:161:    const engagementSessionId = localStorage.getItem(engagementSessionKey) || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `session-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+script.js:162:    localStorage.setItem(engagementSessionKey, engagementSessionId);
+script.js:164:    const playerIdKey = '3tshan_player_id';
+script.js:165:    const playerId = localStorage.getItem(playerIdKey) || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `player-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+script.js:166:    localStorage.setItem(playerIdKey, playerId);
+script.js:169:        fetch('/api/water-sources?event=1', {
+script.js:176:    if (!sessionStorage.getItem('3tshan_visit_recorded')) {
+script.js:177:        sessionStorage.setItem('3tshan_visit_recorded', '1');
+script.js:637:            distanceElement.innerHTML = `
+script.js:676:        distanceElement.innerHTML = `
+script.js:758:                await fetch(
+script.js:869:        suggestions.innerHTML = [...values].slice(0, 80).map(keyword => `<option value="${escapeHtml(keyword)}"></option>`).join('');
+script.js:1137:                ${source.photo_url ? `
+script.js:1138:                    <a href="${escapeHtml(source.photo_url)}" data-watermark-image="${escapeHtml(source.photo_url)}" data-watermark-title="صورة ${escapeHtml(source.name || 'مصدر مياه')}" title="فتح الصورة بالحجم الكامل" style="display:block;">
+script.js:1140:                            src="${escapeHtml(source.photo_url)}"
+script.js:1465:            const response = await fetch(`/api/water-sources?profile=1&player_id=${encodeURIComponent(playerId)}`);
+script.js:1487:                activity.innerHTML = sources.length ? sources.slice(0, 5).map(source => {
+script.js:2123:                    photo_url:
+script.js:2129:                    player_id:
+script.js:2150:                        await fetch(
+admin.html:251:        const getToken = () => sessionStorage.getItem(tokenKey) || '';
+admin.html:258:            localStorage.setItem('3tshan_admin_theme', dark ? 'dark' : 'light');
+admin.html:260:        applyTheme(localStorage.getItem('3tshan_admin_theme') || 'light');
+admin.html:268:                const response = await fetch('/api/water-sources?auth=1', { headers: { 'X-Admin-Token': token } });
+admin.html:278:                sessionStorage.removeItem(tokenKey);
+admin.html:315:            document.getElementById('countries-grid').innerHTML = entries.map(([country, provinces]) => {
+admin.html:343:            sectionContent.innerHTML = content;
+admin.html:394:            const rows = allCountrySources.filter(source => source.photo_url).map(source => [`<img src="${escapeHtml(source.photo_url)}" alt="" style="width:42px;height:32px;object-fit:cover;border-radius:5px">`, escapeHtml(source.name || 'مصدر مياه'), escapeHtml(source.status || 'غير محدد')]);
+admin.html:408:            if (!rows || !rows.length) { element.innerHTML = '<div class="muted" style="font-size:11px">لا توجد بيانات كافية بعد.</div>'; return; }
+admin.html:411:            element.innerHTML = topRows.map(row => {
+admin.html:422:                const response = await fetch('/api/water-sources?stats=1', { headers: { 'X-Admin-Token': getToken() } });
+admin.html:470:            grid.innerHTML = visible.map(source => {
+admin.html:478:                    ${source.photo_url ? `<a href="${escapeHtml(source.photo_url)}" data-watermark-image="${escapeHtml(source.photo_url)}" data-watermark-title="صورة ${escapeHtml(source.name || 'مصدر مياه')}" title="فتح الصورة بالحجم الكامل" style="display:block;"><img class="source-photo" src="${escapeHtml(source.photo_url)}" alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}" style="cursor:zoom-in;"></a>` : ''}
+admin.html:496:                    fetch('/api/water-sources?status=pending', { headers: { 'X-Admin-Token': getToken() } }),
+admin.html:497:                    fetch('/api/water-sources?status=all', { headers: { 'X-Admin-Token': getToken() } })
+admin.html:519:                const response = await fetch('/api/water-sources', { method:'PATCH', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` }, body:JSON.stringify({ id: Number(id), status }) });
+admin.html:541:                const response = await fetch(`/api/water-sources?id=${encodeURIComponent(Number(id))}`, { method:'DELETE', headers:{ 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` } });
+admin.html:562:            sessionStorage.setItem(tokenKey, token);
+admin.html:570:                const response = await fetch('/api/water-sources', { headers: { 'X-Admin-Token': getToken() } });
+admin.html:580:        document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem(tokenKey); showLogin(); });
+--- forms/buttons ---
+index.html:204:                            id="add-source-from-home"
+index.html:257:                            id="water-search"
+index.html:265:                        <datalist id="water-search-suggestions"></datalist>
+index.html:268:                            id="filter-btn"
+index.html:379:            id="view-add"
+index.html:391:                    <form
+index.html:392:                        id="add-source-form"
+index.html:419:                                id="add-location-map"
+index.html:430:                                id="add-location-hint"
+index.html:866:                            <button type="button" id="remove-photo-btn" hidden style="border:0;background:#fff0f2;color:#d94c67;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;">إزالة الصورة</button>
+index.html:872:                            <textarea id="input-note" maxlength="500" placeholder="اكتب أي ملاحظة مهمة عن المصدر..." style="min-height:100px;padding:12px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-family:inherit;font-size:1rem;resize:vertical;outline:none;"></textarea>
+index.html:876:                            type="submit"
+index.html:877:                            id="submit-add-source"
+index.html:885:                            id="add-source-status"
+index.html:908:            id="view-account"
+admin.html:183:                <div class="top-actions"><button id="refresh-btn" class="icon-btn" title="تحديث">↻</button><button class="add-btn" id="export-btn">⇩ تصدير Excel</button></div>
+admin.html:207:                <div class="toolbar"><div class="toolbar-title" id="sources-heading">المصادر قيد المراجعة <span id="count-label" class="toolbar-meta"></span></div><div class="tools"><button id="pending-sources-tab" class="filter active-tab">قيد المراجعة</button><button id="approved-sources-tab" class="filter">المصادر المعتمدة</button><div class="search"><span>⌕</span><input id="search-input" type="search" placeholder="ابحث عن مصدر..."></div><select id="type-filter" class="filter"><option value="all">كل الأنواع</option><option value="cooler">كولدير</option><option value="tap">حنفية</option><option value="other">أخرى</option></select></div></div>
+admin.html:216:                    <div class="tools"><div class="search"><span>⌕</span><input id="countries-search" type="search" placeholder="ابحث عن دولة أو محافظة..."></div><button id="back-to-sources" class="filter">مصادر المياه</button></div>
+admin.html:224:                <div class="toolbar"><div><div id="section-title" class="toolbar-title"></div><div id="section-description" class="muted" style="font-size:12px;margin-top:6px"></div></div><button id="section-refresh" class="filter">تحديث</button></div>
+--- package ---
+{
+  "name": "3tshan",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check script.js && node --check api/water-sources.js",
+    "serve": "npx --yes vercel dev"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "latest"
+  }
+}

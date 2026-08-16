@@ -1,0 +1,682 @@
+--- navigation/view ids ---
+index.html:58:            <nav class="nav-links">
+index.html:59:                <a href="#" data-target="view-map" class="nav-link active">
+index.html:63:                <a href="#" data-target="view-add" class="nav-link">
+index.html:67:                <a href="#" data-target="view-account" class="nav-link">
+index.html:84:                    data-target="view-account"
+index.html:85:                    class="btn-icon nav-link"
+index.html:110:        <main class="main-layout app-view active" id="view-map">
+index.html:203:                            class="btn-secondary full-width nav-link"
+index.html:205:                            data-target="view-add"
+index.html:379:            id="view-add"
+index.html:908:            id="view-account"
+index.html:1304:    <nav class="bottom-nav">
+index.html:1308:            data-target="view-map"
+index.html:1309:            class="nav-item nav-link active"
+index.html:1333:            data-target="view-add"
+index.html:1334:            class="nav-item nav-link"
+index.html:1347:            data-target="view-account"
+index.html:1348:            class="nav-item nav-link"
+script.js:880:    const mobileAddSourceButton = document.getElementById('mobile-add-source-btn');
+script.js:883:            document.querySelector('[data-target="view-add"]')?.click();
+script.js:1266:                        '[data-target="view-map"]'
+script.js:1504:            '.nav-link'
+script.js:1525:                        'data-target'
+script.js:1533:                            'data-target'
+script.js:1563:                            view.id === 'view-account'
+script.js:1569:                            view.id === 'view-map'
+script.js:1585:                            view.id === 'view-add'
+--- load/filter/search/nearest ---
+158:    let nearestWaterSource = null;
+181:    let activeFilter = 'cooler';
+183:    let searchQuery = '';
+235:    function getUserLocation() {
+483:    function findNearestWaterSource() {
+510:        let nearest = null;
+554:                nearest = {
+567:        nearestWaterSource =
+568:            nearest;
+571:        if (nearestWaterSource) {
+582:                nearestWaterSource
+588:                    nearestWaterSource.distance
+602:        return nearestWaterSource;
+615:                'nearest-distance'
+621:                'nearest-source-type'
+635:        if (!nearestWaterSource) {
+702:                nearestWaterSource.distance
+713:            nearestWaterSource.type ===
+724:            nearestWaterSource.type ===
+735:            nearestWaterSource.name
+737:                ? `${nearestWaterSource.name} • ${typeText}`
+748:    async function loadWaterSources() {
+819:            const distanceElement = document.getElementById('nearest-distance');
+820:            const typeElement = document.getElementById('nearest-source-type');
+839:    const searchInput =
+841:            'water-search'
+863:        const suggestions = document.getElementById('water-search-suggestions');
+872:    if (searchInput) {
+873:        searchInput.addEventListener('input', (e) => {
+874:            searchQuery = e.target.value || '';
+889:            'filter-btn'
+943:                activeFilter =
+960:    function renderSourceMarkers() {
+966:            searchQuery
+975:                    activeFilter === 'cooler' &&
+985:                    activeFilter === 'tap' &&
+994:                    activeFilter === 'other' &&
+1254:            'find-nearest-btn'
+1282:                        trackEngagement('nearest_click', nearestWaterSource?.id || null);
+1301:        if (!nearestWaterSource) {
+1308:        if (!nearestWaterSource) {
+1321:                nearestWaterSource.latitude
+1327:                nearestWaterSource.longitude
+1348:            'close-nearest-source'
+1360:                        '.nearest-source'
+1456:    loadWaterSources();
+2224:                    await loadWaterSources();
+--- submission validation ---
+                        statusEl.style.background =
+                            isError
+                                ? '#FEECEC'
+                                : '#EAF6FF';
+
+
+                        statusEl.style.color =
+                            isError
+                                ? '#D92D20'
+                                : '#0077D9';
+
+                    };
+
+
+                const nameInput =
+                    document.getElementById(
+                        'input-name'
+                    );
+
+
+                const typeInput =
+                    addSourceForm.querySelector(
+                        'input[name="type"]:checked'
+                    );
+
+
+                const tempInput =
+                    addSourceForm.querySelector(
+                        'input[name="temp"]:checked'
+                    );
+
+
+                const priceInput =
+                    addSourceForm.querySelector(
+                        'input[name="price"]:checked'
+                    );
+
+
+                const otherTypeInput =
+                    document.getElementById(
+                        'input-type-other'
+                    );
+
+
+                const latInput =
+                    document.getElementById(
+                        'input-latitude'
+                    );
+
+
+                const lngInput =
+                    document.getElementById(
+                        'input-longitude'
+                    );
+
+
+                const latitude =
+                    latInput.value
+                        ? parseFloat(
+                            latInput.value
+                        )
+                        : null;
+
+
+                const longitude =
+                    lngInput.value
+                        ? parseFloat(
+                            lngInput.value
+                        )
+                        : null;
+
+
+                if (
+                    latitude === null ||
+                    longitude === null
+                ) {
+
+                    markFieldError(document.getElementById('add-location-map'), 'اختر موقع المصدر على الخريطة.');
+                    showStatus('من فضلك اختر الموقع على الخريطة أولاً.', true);
+
+                    return;
+
+                }
+
+
+                let type =
+                    typeInput
+                        ? typeInput.value
+                        : 'other';
+
+
+                if (
+                    type === 'other' &&
+                    otherTypeInput &&
+                    otherTypeInput.value.trim()
+                ) {
+
+                    type =
+                        otherTypeInput.value.trim();
+
+                }
+
+
+                const name = nameInput ? nameInput.value.trim() : '';
+                const note = noteInput ? noteInput.value.trim() : '';
+                const selectedPhoto = photoInput && photoInput.files ? photoInput.files[0] : null;
+
+                if (!name) {
+                    markFieldError(nameInput, 'اكتب اسم المصدر.');
+                    showStatus('اسم المصدر مطلوب.', true);
+                    nameInput?.focus();
+                    return;
+                }
+                if (!tempInput?.value || !priceInput?.value || !typeInput?.value) {
+                    const missingGroup = !typeInput?.value ? typeInput : !tempInput?.value ? tempInput : priceInput;
+                    markFieldError(missingGroup?.closest('div'), 'اختر قيمة من الخيارات.');
+                    showStatus('اختر نوع المصدر وحالة المياه والتكلفة.', true);
+                    return;
+                }
+                if (type === 'other' && !otherTypeInput?.value.trim()) {
+                    markFieldError(otherTypeInput, 'اكتب نوع المصدر.');
+                    showStatus('اكتب نوع المصدر في خانة أخرى.', true);
+                    otherTypeInput?.focus();
+                    return;
+                }
+                if (!selectedPhoto) {
+                    markFieldError(document.getElementById('photo-upload-label'), 'أضف صورة المصدر.');
+                    showStatus('يجب إضافة صورة للمصدر.', true);
+                    return;
+                }
+
+
+                let photoUrl = null;
+
+                try {
+                    photoUrl = await readImageAsDataUrl(selectedPhoto);
+                } catch (photoError) {
+                    showStatus(photoError.message, true);
+                    return;
+                }
+
+                const payload = {
+
+                    name: name,
+
+                    type: type,
+
+                    temp_status:
+                        tempInput
+                            ? tempInput.value
+                            : null,
+
+                    price_type:
+                        priceInput
+                            ? priceInput.value
+                            : null,
+
+                    latitude:
+                        latitude,
+
+                    longitude:
+                        longitude,
+
+                    photo_url:
+                        photoUrl,
+
+                    note:
+                        note,
+
+                    player_id:
+                        playerId
+
+                };
+
+
+                if (submitBtn) {
+
+                    submitBtn.disabled =
+                        true;
+
+
+                    submitBtn.textContent =
+                        'جاري الإضافة...';
+
+                }
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            '/api/water-sources',
+                            {
+                                method: 'POST',
+
+                                headers: {
+                                    'Content-Type':
+                                        'application/json'
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        payload
+                                    )
+
+                            }
+                        );
+
+
+                    const rawText =
+                        await response.text();
+
+
+                    let result;
+
+
+                    try {
+
+                        result =
+                            JSON.parse(
+                                rawText
+                            );
+
+                    } catch (
+                        parseError
+                    ) {
+
+                        console.error(
+                            'Server did not return valid JSON. Raw response:',
+                            rawText
+                        );
+
+
+                        throw new Error(
+                            'حدث خطأ غير متوقع من الخادم، حاول مرة أخرى.'
+                        );
+
+                    }
+
+
+                    if (
+                        !response.ok ||
+                        !result.success
+                    ) {
+
+                        throw new Error(
+                            result.message ||
+                            'حدث خطأ أثناء إضافة المصدر'
+                        );
+
+                    }
+
+
+                    trackEngagement('source_add', result.data?.id || null);
+                    showStatus(
+                        `تمت إضافة المصدر بنجاح! حصلت على +${result.points_awarded || 10} نقطة، وسيضاف رصيد الاعتماد عند قبول المصدر ✅`,
+                        false
+                    );
+
+
+                    await loadProfileStats();
+                    addSourceForm.reset();
+                    if (photoInput) photoInput.dispatchEvent(new Event('change'));
+
+                    await loadWaterSources();
+
+
+                } catch (error) {
+
+                    console.error(
+                        'Error adding water source:',
+                        error
+                    );
+
+
+                    showStatus(
+                        error.message ||
+                        'حدث خطأ، حاول مرة أخرى.',
+                        true
+                    );
+
+
+                } finally {
+
+                    if (submitBtn) {
+
+                        submitBtn.disabled =
+                            false;
+
+
+                        submitBtn.textContent =
+                            'إضافة المصدر';
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+});
+--- index head and form labels ---
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+
+                                جاري تحديد المسافة...
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <p
+                            class="source-type"
+                            id="nearest-source-type"
+                        >
+                            جاري البحث عن أقرب مصدر مياه...
+                        </p>
+
+                    </div>
+
+                    <div class="card-actions">
+
+                        <button
+                            class="btn-secondary full-width nav-link"
+                            id="add-source-from-home"
+                            data-target="view-add"
+                            type="button"
+                        >
+
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#7AC943"
+                                stroke-width="2"
+                            >
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+
+                            إضافة مصدر جديد
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+            <!-- Map Area -->
+            <section class="map-area">
+
+                <div class="search-overlay">
+
+                    <div class="search-bar">
+
+                        <svg
+                            class="search-icon"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#0077D9"
+                            stroke-width="2"
+                        >
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line
+                                x1="21"
+                                y1="21"
+                                x2="16.65"
+                                y2="16.65"
+                            ></line>
+                        </svg>
+
+                        <input
+                            id="water-search"
+                            type="search"
+                            list="water-search-suggestions"
+                            autocomplete="off"
+                            placeholder="ابحث باسم المصدر أو النوع أو الدولة..."
+                            aria-label="البحث في مصادر المياه"
+                        >
+
+                        <datalist id="water-search-suggestions"></datalist>
+
+                        <button
+                            id="filter-btn"
+                            type="button"
+                            class="btn-filter"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#1A2B4C"
+                                stroke-width="2"
+                            >
+                                <line x1="4" y1="21" x2="4" y2="14"></line>
+                                <line x1="4" y1="10" x2="4" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12" y2="3"></line>
+                                <line x1="20" y1="21" x2="20" y2="16"></line>
+                                <line x1="20" y1="12" x2="20" y2="3"></line>
+                                <line x1="1" y1="14" x2="7" y2="14"></line>
+                                <line x1="9" y1="8" x2="15" y2="8"></line>
+                                <line x1="17" y1="16" x2="23" y2="16"></line>
+                            </svg>
+                        </button>
+
+                    </div>
+
+                    <div class="filters-chips">
+
+                        <button
+                            type="button"
+                            class="chip active"
+                            data-filter="cooler"
+                        >
+                            كولدير
+                        </button>
+
+                        <button
+                            type="button"
+                            class="chip"
+                            data-filter="tap"
+                        >
+                            صنبور
+                        </button>
+
+                        <button
+                            type="button"
+                            class="chip"
+                            data-filter="other"
+                        >
+                            أخرى
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="map-container" id="map"></div>
+
+                <div
+                    class="map-actions"
+                    style="
+                        position:absolute;
+                        top:100px;
+                        left:16px;
+                        z-index:20;
+                        display:flex;
+                        flex-direction:column;
+                        gap:8px;
+                    "
+                >
+
+                    <button
+                        id="toggle-layer-btn"
+                        style="
+                            background:var(--white);
+                            border:none;
+                            box-shadow:var(--shadow-md);
+                            border-radius:var(--radius-sm);
+                            width:48px;
+                            height:48px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            cursor:pointer;
+                            color:var(--primary-blue);
+                            transition:0.2s;
+                        "
+                    >
+                        <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                        </svg>
+                    </button>
+
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Add Area -->
+        <main
+            class="account-layout app-view"
+            id="view-add"
+            style="display:none;"
+        >
+
+            <div class="account-container">
+
+                <div class="account-header">
+                    <h2>إضافة مصدر مياه</h2>
+                </div>
+
+                <div class="card" style="padding:24px;">
+
+                    <form
+                        id="add-source-form"
+                        style="
+                            display:flex;
+                            flex-direction:column;
+                            gap:20px;
+                        "
+                    >
+
+                        <!-- Location -->
+                        <div
+                            style="
+                                display:flex;
+                                flex-direction:column;
+                                gap:8px;
+                            "
+                        >
+
+                            <label
+                                style="
+                                    font-weight:700;
+                                    color:var(--dark-navy);
+                                "
+                            >
+                                تحديد الموقع
+                            </label>
+
+                            <div
+                                id="add-location-map"
+                                style="
+                                    height:200px;
+                                    background:#EBF3F8;
+                                    border-radius:var(--radius-sm);
+                                    border:1px solid var(--border-color);
+                                    cursor:pointer;
+                                "
+                            ></div>
+
+                            <p
+                                id="add-location-hint"
+                                style="
+                                    font-size:12px;
+                                    color:#64748B;
+                                    margin:0;
+                                "
+                            >
+                                اضغط على الخريطة لتحديد موقع المصدر
+                            </p>
+
+                            <input
+                                type="hidden"
+                                id="input-latitude"
+                            >
+
+                            <input
+                                type="hidden"
+                                id="input-longitude"
+                            >
+
+                        </div>
+
+                        <!-- Name -->
+                        <div
+                            style="
+                                display:flex;
+                                flex-direction:column;
+                                gap:8px;
+                            "
+                        >
+
+                            <label
+                                style="
+                                    font-weight:700;
+                                    color:var(--dark-navy);
+                                "
+                            >
+                                اسم المصدر
+                            </label>
+
+                            <input

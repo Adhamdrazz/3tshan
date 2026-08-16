@@ -1,0 +1,60 @@
+--- git status ---
+ [31mM[m api/water-sources.js
+ [31mM[m index.html
+ [31mM[m package.json
+ [31mM[m script.js
+ [31mM[m styles.css
+[31m??[m 3tshan-about-disclaimer.zip
+[31m??[m 3tshan-account-page.zip
+[31m??[m 3tshan-account-warning-order.zip
+[31m??[m 3tshan-filter-final.zip
+[31m??[m 3tshan-final.zip
+[31m??[m 3tshan-fixed.zip
+[31m??[m 3tshan-nearest-card.zip
+[31m??[m 3tshan-player-system.zip
+[31m??[m 3tshan-profile-real-data.zip
+[31m??[m 3tshan-search-final.zip
+[31m??[m 3tshan-slogan-cleanup.zip
+[31m??[m 3tshan-watermark.zip
+[31m??[m DEPLOYMENT_AR.md
+[31m??[m PROJECT_AUDIT_AR.md
+[31m??[m admin.html
+[31m??[m analyze_live_response.py
+[31m??[m audit_admin_output.txt
+[31m??[m audit_browser_findings.md
+[31m??[m audit_frontend_output.txt
+[31m??[m audit_live_api.txt
+[31m??[m audit_repo_hygiene.txt
+[31m??[m audit_static_output.txt
+[31m??[m countries_migration.sql
+[31m??[m fixes.patch
+[31m??[m geocode_backfill.sh
+[31m??[m geocoding_notes.md
+[31m??[m inspection_findings.md
+[31m??[m player_progress_migration.sql
+[31m??[m schema.sql
+[31m??[m watermark-viewer.js
+--- tracked large files ---
+4.0K	images/.gitkeep
+4.0K	package.json
+20K	api/water-sources.js
+28K	styles.css
+56K	index.html
+56K	script.js
+600K	images/logo.svg.png
+1.3M	images/Marker.png
+1.7M	images/logo.png
+--- zip files ---
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 20:18 3tshan-about-disclaimer.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 19:54 3tshan-account-page.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 20:36 3tshan-account-warning-order.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 19:34 3tshan-filter-final.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 19:15 3tshan-final.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 19:02 3tshan-fixed.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 19:49 3tshan-nearest-card.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 20:06 3tshan-player-system.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 20:01 3tshan-profile-real-data.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 19:43 3tshan-search-final.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 20:30 3tshan-slogan-cleanup.zip
+-rw-r--r-- 1 ubuntu ubuntu 3.5M Aug 16 19:12 3tshan-watermark.zip
+--- ignore files ---

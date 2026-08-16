@@ -8,12 +8,14 @@ CREATE TABLE IF NOT EXISTS water_sources (
     latitude DOUBLE PRECISION NOT NULL CHECK (latitude BETWEEN -90 AND 90),
     longitude DOUBLE PRECISION NOT NULL CHECK (longitude BETWEEN -180 AND 180),
     photo_url TEXT,
+    note TEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS country VARCHAR(120);
 ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS province VARCHAR(120);
+ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS note TEXT;
 
 CREATE INDEX IF NOT EXISTS water_sources_country_province_idx
     ON water_sources (country, province);
@@ -37,3 +39,20 @@ CREATE INDEX IF NOT EXISTS site_events_type_created_at_idx
 
 CREATE INDEX IF NOT EXISTS site_events_session_created_at_idx
     ON site_events (session_id, created_at DESC);
+
+
+CREATE TABLE IF NOT EXISTS player_profiles (
+    player_id VARCHAR(80) PRIMARY KEY,
+    points INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS player_id VARCHAR(80);
+ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS points_awarded INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS water_sources_player_id_idx
+    ON water_sources (player_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS player_profiles_points_idx
+    ON player_profiles (points DESC);

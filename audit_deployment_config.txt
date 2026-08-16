@@ -1,0 +1,152 @@
+--- deploy files ---
+--- external assets ---
+./.git/hooks/fsmonitor-watchman.sample:8:# (https://facebook.github.io/watchman/) with git to speed up detecting
+./.git/hooks/fsmonitor-watchman.sample:11:# The hook is passed a version (currently 2) and last update token
+./.git/hooks/fsmonitor-watchman.sample:12:# formatted as a string and outputs to stdout a new update token and
+./.git/hooks/fsmonitor-watchman.sample:13:# all files that have been modified since the update token. Paths must
+./.git/hooks/fsmonitor-watchman.sample:19:my ($version, $last_update_token) = @ARGV;
+./.git/hooks/fsmonitor-watchman.sample:22:# print STDERR "$0 $version $last_update_token\n";
+./.git/hooks/fsmonitor-watchman.sample:83:	# changed since $last_update_token but not from the .git folder.
+./.git/hooks/fsmonitor-watchman.sample:90:	if (substr($last_update_token, 0, 1) eq "c") {
+./.git/hooks/fsmonitor-watchman.sample:91:		$last_update_token = "\"$last_update_token\"";
+./.git/hooks/fsmonitor-watchman.sample:92:		$last_update_line = qq[\n"since": $last_update_token,];
+./.git/hooks/fsmonitor-watchman.sample:151:		$last_update_token = $o->{clock};
+./.git/config:7:	url = https://github.com/Adhamdrazz/3tshan.git
+./.git/logs/refs/remotes/origin/HEAD:1:0000000000000000000000000000000000000000 d1817ae84d88bf7232caefdfc233852528868237 Ubuntu <ubuntu@305f57cac429.(none)> 1786860232 +0000	clone: from https://github.com/Adhamdrazz/3tshan.git
+./.git/logs/refs/heads/main:1:0000000000000000000000000000000000000000 d1817ae84d88bf7232caefdfc233852528868237 Ubuntu <ubuntu@305f57cac429.(none)> 1786860232 +0000	clone: from https://github.com/Adhamdrazz/3tshan.git
+./.git/logs/HEAD:1:0000000000000000000000000000000000000000 d1817ae84d88bf7232caefdfc233852528868237 Ubuntu <ubuntu@305f57cac429.(none)> 1786860232 +0000	clone: from https://github.com/Adhamdrazz/3tshan.git
+./api/water-sources.js:14:    const databaseUrl = process.env.DATABASE_URL;
+./api/water-sources.js:16:        const error = new Error('DATABASE_URL is not configured');
+./api/water-sources.js:34:    const url = new URL('https://nominatim.openstreetmap.org/reverse');
+./api/water-sources.js:62:    const configuredToken = process.env.ADMIN_TOKEN;
+./api/water-sources.js:63:    const receivedToken = req.headers?.['x-admin-token'];
+./api/water-sources.js:65:    const bearerToken = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+./api/water-sources.js:66:    return Boolean(configuredToken && (receivedToken === configuredToken || bearerToken === configuredToken));
+./api/water-sources.js:140:    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, X-Admin-Token');
+./index.html:13:        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 12 2 12 2C12 2 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z' fill='%230077D9'/%3E%3Cpath d='M12 18C14.7614 18 17 15.7614 17 13C17 10.2386 12 6 12 6C12 6 7 10.2386 7 13C7 15.7614 9.2386 18 12 18Z' fill='%2300C2C7'/%3E%3C/svg%3E"
+./index.html:17:        href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap"
+./index.html:23:        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+./index.html:43:                    xmlns="http://www.w3.org/2000/svg"
+./index.html:960:                                xmlns="http://www.w3.org/2000/svg"
+./index.html:974:                                xmlns="http://www.w3.org/2000/svg"
+./index.html:1373:        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+./script.js:17:        'https://{s}.google.com/vt/lyrs=m&hl=ar&x={x}&y={y}&z={z}&apistyle=s.t%3A3%7Cp.v%3Aoff',
+./script.js:27:        'https://{s}.google.com/vt/lyrs=y&hl=ar&x={x}&y={y}&z={z}&apistyle=s.t%3A3%7Cp.v%3Aoff',
+./script.js:340:                xmlns="http://www.w3.org/2000/svg"
+./script.js:1783:            'https://{s}.google.com/vt/lyrs=m&hl=ar&x={x}&y={y}&z={z}&apistyle=s.t%3A3%7Cp.v%3Aoff',
+./inspection_findings.md:11:الرابط المنشور هو https://3tshan.vercel.app. الواجهة تُحمّل وتعرض واجهة عربية RTL وخريطة Leaflet وأزرار التنقل والنماذج.
+./inspection_findings.md:15:طلب GET إلى `https://3tshan.vercel.app/api/water-sources` يعيد صفحة Vercel بحالة 500، بالرمز `FUNCTION_INVOCATION_FAILED`. لذلك لا تُحمّل مصادر المياه في الواجهة، وتظهر الخريطة بدون بيانات المصادر.
+./inspection_findings.md:19:`package.json` يعرّف الاعتماد `@neondatabase/serverless` فقط، وملف `api/water-sources.js` يستورد `neon` بصورة صحيحة ويستعمل `neon(process.env.DATABASE_URL)`. سبب 500 ليس خطأ صياغة في الملف؛ يلزم التحقق من `DATABASE_URL` في Vercel، اتصال Neon، وبنية جدول `water_sources` وسجلات الدالة.
+./admin.html:7:    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+./admin.html:157:            <label for="admin-token">رمز المشرف</label>
+./admin.html:158:            <input id="admin-token" type="password" autocomplete="current-password" placeholder="ADMIN_TOKEN">
+./admin.html:231:        const tokenKey = '3tshan_admin_token';
+./admin.html:234:        const tokenInput = document.getElementById('admin-token');
+./admin.html:251:        const getToken = () => sessionStorage.getItem(tokenKey) || '';
+./admin.html:266:        async function verifyAdminToken(token) {
+./admin.html:268:                const response = await fetch('/api/water-sources?auth=1', { headers: { 'X-Admin-Token': token } });
+./admin.html:276:        async function showDashboard(token = getToken()) {
+./admin.html:277:            if (!token || !(await verifyAdminToken(token))) {
+./admin.html:278:                sessionStorage.removeItem(tokenKey);
+./admin.html:403:            showSection('settings-nav', 'الإعدادات', 'إعدادات لوحة الإدارة والتطبيق', `<div class="settings-grid"><div class="card"><strong>تحديث البيانات</strong><p class="muted">يتم تحديث الإحصائيات من قاعدة البيانات عند الضغط على زر التحديث.</p><button class="primary" onclick="loadSources();loadAnalytics()">تحديث الآن</button></div><div class="card"><strong>الأمان</strong><p class="muted">لوحة الإدارة محمية بمتغير ADMIN_TOKEN ولا يتم عرض قيمته داخل الصفحة.</p></div><div class="card"><strong>اللغة</strong><p class="muted">الواجهة الحالية باللغة العربية واتجاه RTL.</p></div></div>`);
+./admin.html:422:                const response = await fetch('/api/water-sources?stats=1', { headers: { 'X-Admin-Token': getToken() } });
+./admin.html:496:                    fetch('/api/water-sources?status=pending', { headers: { 'X-Admin-Token': getToken() } }),
+./admin.html:497:                    fetch('/api/water-sources?status=all', { headers: { 'X-Admin-Token': getToken() } })
+./admin.html:518:                const token = getToken();
+./admin.html:519:                const response = await fetch('/api/water-sources', { method:'PATCH', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` }, body:JSON.stringify({ id: Number(id), status }) });
+./admin.html:537:            const token = getToken();
+./admin.html:541:                const response = await fetch(`/api/water-sources?id=${encodeURIComponent(Number(id))}`, { method:'DELETE', headers:{ 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` } });
+./admin.html:555:            const token = tokenInput.value.trim();
+./admin.html:556:            if (!token) { loginStatus.textContent = 'اكتب رمز المشرف أولًا.'; return; }
+./admin.html:559:            const valid = await verifyAdminToken(token);
+./admin.html:562:            sessionStorage.setItem(tokenKey, token);
+./admin.html:564:            await showDashboard(token);
+./admin.html:566:        tokenInput.addEventListener('keydown', event => { if (event.key === 'Enter') document.getElementById('login-btn').click(); });
+./admin.html:570:                const response = await fetch('/api/water-sources', { headers: { 'X-Admin-Token': getToken() } });
+./admin.html:580:        document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem(tokenKey); showLogin(); });
+./admin.html:596:        if (getToken()) showDashboard();
+./geocoding_notes.md:12:- https://operations.osmfoundation.org/policies/nominatim/
+./geocoding_notes.md:13:- https://nominatim.org/release-docs/3.6/api/Reverse/
+./geocode_backfill.sh:5:  curl -sS --get 'https://nominatim.openstreetmap.org/reverse' \
+--- script includes ---
+index.html:17:        href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap"
+index.html:23:        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+index.html:152:                                font-size:26px;
+index.html:411:                                    font-weight:700;
+index.html:432:                                    font-size:12px;
+index.html:463:                                    font-weight:700;
+index.html:479:                                    font-family:inherit;
+index.html:480:                                    font-size:1rem;
+index.html:498:                                    font-weight:700;
+index.html:525:                                        font-weight:700;
+index.html:549:                                        font-weight:500;
+index.html:572:                                        font-weight:500;
+index.html:596:                                    font-family:inherit;
+index.html:597:                                    font-size:1rem;
+index.html:615:                                    font-weight:700;
+index.html:642:                                        font-weight:700;
+index.html:666:                                        font-weight:500;
+index.html:689:                                        font-weight:500;
+index.html:716:                                    font-weight:700;
+index.html:741:                                        font-weight:700;
+index.html:764:                                        font-weight:500;
+index.html:791:                                    font-weight:700;
+index.html:810:                                    font-weight:500;
+index.html:858:                                    font-size:11px;
+index.html:866:                            <button type="button" id="remove-photo-btn" hidden style="border:0;background:#fff0f2;color:#d94c67;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;">إزالة الصورة</button>
+index.html:871:                            <label for="input-note" style="font-weight:700;color:var(--dark-navy);">ملاحظة</label>
+index.html:872:                            <textarea id="input-note" maxlength="500" placeholder="اكتب أي ملاحظة مهمة عن المصدر..." style="min-height:100px;padding:12px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-family:inherit;font-size:1rem;resize:vertical;outline:none;"></textarea>
+index.html:888:                                font-size:13px;
+index.html:889:                                font-weight:600;
+index.html:1372:    <script
+index.html:1373:        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+index.html:1378:    <script src="watermark-viewer.js"></script>
+index.html:1379:    <script src="script.js"></script>
+admin.html:7:    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+admin.html:30:        body { margin:0; background:var(--bg); color:var(--navy); font-family:Tajawal,Arial,sans-serif; transition:background .2s,color .2s; }
+admin.html:31:        button,input { font:inherit; }
+admin.html:35:        .brand { display:flex; flex-direction:column; align-items:center; gap:5px; padding:0 15px 25px; color:#637189; font-size:15px; font-weight:800; }
+admin.html:38:        .nav-title { color:#8692a4; font-size:11px; padding:0 16px 9px; display:flex; justify-content:space-between; }
+admin.html:40:        .nav button { border:0; background:transparent; color:#758196; border-radius:9px; padding:10px 15px; display:flex; align-items:center; gap:12px; text-align:right; transition:.18s; font-size:12px; }
+admin.html:43:        .nav-icon { width:20px; text-align:center; font-size:15px; }
+admin.html:45:        .avatar { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:#e9f1ff; color:var(--primary); font-weight:800; font-size:12px; }
+admin.html:46:        .sidebar-footer-tools { border-top:1px solid var(--line); padding:15px 0 6px; display:flex; align-items:center; gap:7px; color:#78859a; font-size:9px; }
+admin.html:47:        .sidebar-footer-tools button { border:1px solid var(--line); background:#fff; color:#78859a; border-radius:7px; height:25px; min-width:27px; font-size:10px; }
+admin.html:49:        .logout { width:100%; margin-top:7px; background:#fff7f8; border:0; border-radius:7px; color:var(--red); text-align:center; padding:8px; font-size:11px; }
+admin.html:52:        .heading h1 { margin:0; font-size:28px; letter-spacing:-.3px; }
+admin.html:53:        .heading p { color:var(--muted); margin:7px 0 0; font-size:13px; }
+admin.html:55:        .add-btn { border:0; color:#fff; background:var(--primary); border-radius:9px; padding:12px 18px; font-weight:700; box-shadow:0 5px 12px #1769e033; }
+admin.html:59:        .stat-label { color:var(--muted); font-size:12px; margin-bottom:7px; }
+admin.html:60:        .stat-value { font-size:25px; font-weight:800; }
+admin.html:61:        .stat-icon { width:40px; height:40px; display:grid; place-items:center; border-radius:11px; color:var(--primary); background:#edf4ff; font-size:19px; }
+admin.html:66:        .analytics-heading { font-size:18px; font-weight:800; margin:4px 0 14px; }
+admin.html:69:        .analytics-card-title { font-weight:800; font-size:13px; margin-bottom:16px; }
+admin.html:72:        .bar-label { display:flex; justify-content:space-between; color:#66758b; font-size:10px; }
+admin.html:80:        .toolbar-title { font-size:17px; font-weight:800; }
+admin.html:81:        .toolbar-meta { color:var(--muted); font-size:12px; font-weight:400; margin-right:8px; }
+admin.html:94:        .source-icon { width:37px; height:37px; border-radius:10px; display:grid; place-items:center; background:#edf5ff; color:var(--primary); font-size:17px; flex-shrink:0; }
+admin.html:95:        .source-title h2 { margin:0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+admin.html:96:        .source-title small { color:var(--muted); font-size:11px; display:block; margin-top:4px; }
+admin.html:97:        .badge { border-radius:20px; padding:5px 8px; font-size:10px; font-weight:700; white-space:nowrap; background:#fff6e6; color:#c78316; }
+admin.html:100:        .source-note { margin:10px 0; padding:10px 12px; border-radius:8px; background:var(--soft); color:var(--muted); font-size:11px; line-height:1.7; }
+admin.html:101:        .detail { color:#67758b; background:#f7f9fc; border-radius:6px; padding:6px 8px; font-size:10px; }
+admin.html:103:        .location { border-top:1px solid var(--line); padding-top:11px; color:var(--muted); font-size:11px; }
+admin.html:105:        .delete-source { flex:1; border:0; border-radius:8px; padding:10px; background:#fff0f2; color:var(--red); font-weight:700; cursor:pointer; }
+admin.html:106:        .card-actions button { flex:1; border:0; border-radius:7px; padding:9px 7px; font-weight:700; font-size:12px; }
+admin.html:113:        .country-card h2 { margin:0; font-size:16px; }
+admin.html:114:        .country-count { color:var(--primary); background:#edf4ff; border-radius:20px; padding:5px 9px; font-size:11px; font-weight:800; }
+admin.html:115:        .province-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f3f8; color:#607089; font-size:12px; }
+admin.html:121:        .settings-grid p { line-height:1.8; font-size:12px; }
+admin.html:122:        .primary { border:0; border-radius:8px; padding:9px 14px; background:var(--primary); color:#fff; font-weight:700; }
+admin.html:127:        .status { min-height:23px; color:var(--red); font-size:12px; margin-top:13px; }
+admin.html:132:        .login-card p { color:var(--muted); font-size:13px; margin:0 0 22px; }
+admin.html:133:        .login-card label { display:block; font-weight:700; font-size:13px; margin-bottom:7px; }
+admin.html:135:        .login-card button { width:100%; border:0; border-radius:9px; padding:12px; background:var(--primary); color:#fff; font-weight:700; }
+admin.html:139:        @media (max-width:500px) { .grid,.stats,.analytics-grid { grid-template-columns:1fr; } .heading h1 { font-size:24px; } }
+admin.html:146:.watermark-viewer-close{position:absolute;top:14px;right:18px;z-index:3;width:44px;height:44px;border:1px solid rgba(255,255,255,.35);border-radius:50%;color:#fff;background:rgba(0,0,0,.42);font-size:32px;line-height:1;cursor:pointer}
+admin.html:218:                <p class="muted" style="font-size:12px;margin:0 0 16px">إحصاءات الكولديرات المستخرجة تلقائيًا من إحداثيات المصادر.</p>
+admin.html:224:                <div class="toolbar"><div><div id="section-title" class="toolbar-title"></div><div id="section-description" class="muted" style="font-size:12px;margin-top:6px"></div></div><button id="section-refresh" class="filter">تحديث</button></div>
+admin.html:230:    <script>
+admin.html:336:            return `<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>${headers.map(header => `<th style="padding:12px;text-align:right;border-bottom:1px solid var(--line);color:var(--muted)">${header}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(cell => `<td style="padding:12px;border-bottom:1px solid #f0f3f8">${cell}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+admin.html:408:            if (!rows || !rows.length) { element.innerHTML = '<div class="muted" style="font-size:11px">لا توجد بيانات كافية بعد.</div>'; return; }
+admin.html:598:<script src="watermark-viewer.js"></script>
