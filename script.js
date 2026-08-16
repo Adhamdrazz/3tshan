@@ -1106,12 +1106,14 @@ document.addEventListener('DOMContentLoaded', () => {
             >
 
                 ${source.photo_url ? `
-                    <img
-                        src="${escapeHtml(source.photo_url)}"
-                        alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}"
-                        style="width:100%;height:130px;object-fit:contain;background:#eef4f8;border-radius:14px;margin-bottom:12px;display:block;"
-                        onerror="this.outerHTML='<div style=\"width:100%;height:130px;border-radius:14px;background:linear-gradient(135deg,#eaf7ff,#d8f5f5);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:48px;\">💧</div>'"
-                    >
+                    <a href="${escapeHtml(source.photo_url)}" target="_blank" rel="noopener" title="فتح الصورة بالحجم الكامل" style="display:block;">
+                        <img
+                            src="${escapeHtml(source.photo_url)}"
+                            alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}"
+                            style="width:100%;height:130px;object-fit:contain;background:#eef4f8;border-radius:14px;margin-bottom:12px;display:block;cursor:zoom-in;"
+                            onerror="this.outerHTML='<div style=\"width:100%;height:130px;border-radius:14px;background:linear-gradient(135deg,#eaf7ff,#d8f5f5);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:48px;\">💧</div>'"
+                        >
+                    </a>
                 ` : `
                     <div style="width:100%;height:130px;border-radius:14px;background:linear-gradient(135deg,#eaf7ff,#d8f5f5);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:48px;">💧</div>
                 `}

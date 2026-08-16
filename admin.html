@@ -99,7 +99,8 @@
         .detail { color:#67758b; background:#f7f9fc; border-radius:6px; padding:6px 8px; font-size:10px; }
         .detail strong { color:#33435e; }
         .location { border-top:1px solid var(--line); padding-top:11px; color:var(--muted); font-size:11px; }
-        .card-actions { display:flex; gap:7px; margin-top:13px; }
+        .card-actions { display:flex; gap:8px; margin-top:14px; }
+        .delete-source { flex:1; border:0; border-radius:8px; padding:10px; background:#fff0f2; color:var(--red); font-weight:700; cursor:pointer; }
         .card-actions button { flex:1; border:0; border-radius:7px; padding:9px 7px; font-weight:700; font-size:12px; }
         .approve { color:var(--green); background:var(--green-bg); }
         .reject { color:var(--red); background:var(--red-bg); }
@@ -434,15 +435,20 @@
             });
             countLabel.textContent = `${visible.length} مصدر`;
             emptyState.hidden = visible.length !== 0;
-            grid.innerHTML = visible.map(source => `
+            grid.innerHTML = visible.map(source => {
+                const statusLabel = source.status === 'approved' ? 'معتمد' : source.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة';
+                const actionHtml = source.status === 'pending'
+                    ? `<button type="button" class="approve" data-id="${Number(source.id)}" data-status="approved" onclick="reviewSource(${Number(source.id)}, 'approved'); return false;">✓ قبول المصدر</button><button type="button" class="reject" data-id="${Number(source.id)}" data-status="rejected" onclick="reviewSource(${Number(source.id)}, 'rejected'); return false;">× رفض</button>`
+                    : `<button type="button" class="delete-source" data-id="${Number(source.id)}" onclick="deleteSource(${Number(source.id)}); return false;">🗑 حذف المصدر</button>`;
+                return `
                 <article class="source-card">
-                    <div class="source-head"><div class="source-title"><div class="source-icon">💧</div><div><h2>${escapeHtml(source.name || 'مصدر مياه')}</h2><small>${typeText(source.type)}</small></div></div><span class="badge">قيد المراجعة</span></div>
-                    ${source.photo_url ? `<img class="source-photo" src="${escapeHtml(source.photo_url)}" alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}">` : ''}
+                    <div class="source-head"><div class="source-title"><div class="source-icon">💧</div><div><h2>${escapeHtml(source.name || 'مصدر مياه')}</h2><small>${typeText(source.type)}</small></div></div><span class="badge">${statusLabel}</span></div>
+                    ${source.photo_url ? `<a href="${escapeHtml(source.photo_url)}" target="_blank" rel="noopener" title="فتح الصورة بالحجم الكامل" style="display:block;"><img class="source-photo" src="${escapeHtml(source.photo_url)}" alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}" style="cursor:zoom-in;"></a>` : ''}
                     <div class="source-details"><span class="detail"><strong>المياه:</strong> ${tempText(source.temp_status)}</span><span class="detail"><strong>السعر:</strong> ${priceText(source.price_type)}</span><span class="detail"><strong>الدولة:</strong> ${escapeHtml(source.country || 'غير محددة')}</span><span class="detail"><strong>المحافظة:</strong> ${escapeHtml(source.province || 'غير محددة')}</span></div>
                     <div class="location">⌖ ${Number(source.latitude).toFixed(5)}, ${Number(source.longitude).toFixed(5)}</div>
-                    <div class="card-actions"><button type="button" class="approve" data-id="${Number(source.id)}" data-status="approved" onclick="reviewSource(${Number(source.id)}, 'approved'); return false;">✓ قبول المصدر</button><button type="button" class="reject" data-id="${Number(source.id)}" data-status="rejected" onclick="reviewSource(${Number(source.id)}, 'rejected'); return false;">× رفض</button></div>
-                </article>
-            `).join('');
+                    <div class="card-actions">${actionHtml}</div>
+                </article>`;
+            }).join('');
         }
 
         async function loadSources() {
@@ -455,8 +461,8 @@
                 const pendingResult = await pendingResponse.json();
                 const allResult = await allResponse.json();
                 if (!pendingResponse.ok || !pendingResult.success) throw new Error(pendingResult.message || 'تعذر تحميل المصادر.');
-                allSources = pendingResult.data;
-                allCountrySources = allResult.success ? allResult.data : allSources;
+                allSources = allResult.success ? allResult.data : pendingResult.data;
+                allCountrySources = allSources;
                 updateStats(allCountrySources);
                 renderSources();
                 renderCountries();
@@ -487,6 +493,25 @@
         }
 
         window.reviewSource = updateStatus;
+
+        async function deleteSource(id) {
+            if (!window.confirm('هل أنت متأكد من حذف هذا المصدر نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+            const token = getToken();
+            dashboardStatus.className = 'status';
+            dashboardStatus.textContent = 'جاري حذف المصدر...';
+            try {
+                const response = await fetch(`/api/water-sources?id=${encodeURIComponent(Number(id))}`, { method:'DELETE', headers:{ 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` } });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.message || 'تعذر حذف المصدر.');
+                await loadSources();
+                dashboardStatus.className = 'status success';
+                dashboardStatus.textContent = 'تم حذف المصدر ولن يظهر للمستخدمين.';
+            } catch (error) {
+                dashboardStatus.className = 'status';
+                dashboardStatus.textContent = error.message;
+            }
+        }
+        window.deleteSource = deleteSource;
 
         document.getElementById('login-btn').addEventListener('click', async () => {
             const token = tokenInput.value.trim();
