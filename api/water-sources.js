@@ -61,7 +61,9 @@ async function reverseGeocode(latitude, longitude) {
 function isAdminRequest(req) {
     const configuredToken = process.env.ADMIN_TOKEN;
     const receivedToken = req.headers?.['x-admin-token'];
-    return Boolean(configuredToken && receivedToken && receivedToken === configuredToken);
+    const authorization = req.headers?.authorization || '';
+    const bearerToken = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+    return Boolean(configuredToken && (receivedToken === configuredToken || bearerToken === configuredToken));
 }
 
 
