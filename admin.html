@@ -107,6 +107,13 @@
         .province-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f3f8; color:#607089; font-size:12px; }
         .province-row:last-child { border-bottom:0; }
         .province-row strong { color:var(--navy); }
+        .settings-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+        .settings-grid .card { border:1px solid var(--line); border-radius:12px; padding:18px; background:#fff; }
+        .settings-grid strong { display:block; margin-bottom:8px; }
+        .settings-grid p { line-height:1.8; font-size:12px; }
+        .primary { border:0; border-radius:8px; padding:9px 14px; background:var(--primary); color:#fff; font-weight:700; }
+        @media (max-width:1100px) { .settings-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        @media (max-width:500px) { .settings-grid { grid-template-columns:1fr; } }
         @media (max-width:1100px) { .country-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
         @media (max-width:500px) { .country-grid { grid-template-columns:1fr; } }
         .status { min-height:23px; color:var(--red); font-size:12px; margin-top:13px; }
@@ -141,16 +148,16 @@
             <div class="brand"><img src="images/logo.png" alt="شعار عطشان"><span>عطشان</span></div>
             <div class="nav-title">الرئيسية <span>⌄</span></div>
             <nav class="nav">
-                <button class="active"><span class="nav-icon">▦</span> لوحة التحكم</button>
-                <button><span class="nav-icon">◉</span> مصادر المياه</button>
+                <button id="dashboard-nav" class="active"><span class="nav-icon">▦</span> لوحة التحكم</button>
+                <button id="sources-nav"><span class="nav-icon">◉</span> مصادر المياه</button>
                 <button id="countries-nav"><span class="nav-icon">▤</span> الدول</button>
-                <button><span class="nav-icon">♙</span> المستخدمون</button>
-                <button><span class="nav-icon">⌖</span> الخريطة</button>
-                <button><span class="nav-icon">♧</span> المساهمات</button>
-                <button><span class="nav-icon">⚑</span> البلاغات</button>
-                <button><span class="nav-icon">▣</span> الصور</button>
-                <button><span class="nav-icon">☆</span> التقييمات</button>
-                <button><span class="nav-icon">⚙</span> الإعدادات</button>
+                <button id="users-nav"><span class="nav-icon">♙</span> المستخدمون</button>
+                <button id="map-nav"><span class="nav-icon">⌖</span> الخريطة</button>
+                <button id="contributions-nav"><span class="nav-icon">♧</span> المساهمات</button>
+                <button id="reports-nav"><span class="nav-icon">⚑</span> البلاغات</button>
+                <button id="photos-nav"><span class="nav-icon">▣</span> الصور</button>
+                <button id="reviews-nav"><span class="nav-icon">☆</span> التقييمات</button>
+                <button id="settings-nav"><span class="nav-icon">⚙</span> الإعدادات</button>
             </nav>
             <div class="sidebar-spacer"></div>
             <div class="sidebar-footer-tools"><button title="الوضع الليلي">☾</button><button title="اللغة">EN</button><span>Super Admin</span><div class="avatar">م</div></div>
@@ -196,6 +203,11 @@
                 <div id="countries-grid" class="country-grid"></div>
                 <div id="countries-empty" class="empty" hidden>لا توجد بيانات دولة أو محافظة حتى الآن.</div>
             </section>
+
+            <section id="section-view" class="panel" hidden>
+                <div class="toolbar"><div><div id="section-title" class="toolbar-title"></div><div id="section-description" class="muted" style="font-size:12px;margin-top:6px"></div></div><button id="section-refresh" class="filter">تحديث</button></div>
+                <div id="section-content"></div>
+            </section>
         </main>
     </div>
 
@@ -209,6 +221,10 @@
         const grid = document.getElementById('sources-grid');
         const emptyState = document.getElementById('empty-state');
         const countLabel = document.getElementById('count-label');
+        const sectionView = document.getElementById('section-view');
+        const sectionTitle = document.getElementById('section-title');
+        const sectionDescription = document.getElementById('section-description');
+        const sectionContent = document.getElementById('section-content');
         let allSources = [];
         let allCountrySources = [];
 
@@ -250,19 +266,88 @@
             }).join('');
         }
 
-        function showCountries() {
+        function setActiveNav(id) {
+            document.querySelectorAll('.nav button').forEach(button => button.classList.toggle('active', button.id === id));
+        }
+
+        function hideMainPanels() {
             document.querySelector('.stats').hidden = true;
-            document.querySelector('.panel:not(#countries-view)').hidden = true;
+            document.querySelector('.analytics-panel').hidden = true;
+            document.querySelector('.panel:not(#countries-view):not(#section-view)').hidden = true;
+            document.getElementById('countries-view').hidden = true;
+            sectionView.hidden = true;
+        }
+
+        function renderTable(headers, rows, emptyMessage = 'لا توجد بيانات متاحة حاليًا.') {
+            if (!rows.length) return `<div class="empty">${emptyMessage}</div>`;
+            return `<div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr>${headers.map(header => `<th style="padding:12px;text-align:right;border-bottom:1px solid var(--line);color:var(--muted)">${header}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(cell => `<td style="padding:12px;border-bottom:1px solid #f0f3f8">${cell}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+        }
+
+        function showSection(id, title, description, content) {
+            hideMainPanels();
+            sectionTitle.textContent = title;
+            sectionDescription.textContent = description;
+            sectionContent.innerHTML = content;
+            sectionView.hidden = false;
+            setActiveNav(id);
+        }
+
+        function showDashboardSection() {
+            sectionView.hidden = true;
+            document.querySelector('.stats').hidden = false;
+            document.querySelector('.analytics-panel').hidden = false;
+            document.querySelector('.panel:not(#countries-view):not(#section-view)').hidden = false;
+            document.getElementById('countries-view').hidden = true;
+            setActiveNav('dashboard-nav');
+        }
+
+        function showSourcesSection() {
+            hideMainPanels();
+            document.querySelector('.panel:not(#countries-view):not(#section-view)').hidden = false;
+            sectionView.hidden = true;
+            setActiveNav('sources-nav');
+        }
+
+        function showCountries() {
+            hideMainPanels();
             document.getElementById('countries-view').hidden = false;
-            document.getElementById('countries-nav').classList.add('active');
+            setActiveNav('countries-nav');
             renderCountries();
         }
 
         function showSources() {
-            document.querySelector('.stats').hidden = false;
-            document.querySelector('.panel:not(#countries-view)').hidden = false;
-            document.getElementById('countries-view').hidden = true;
-            document.getElementById('countries-nav').classList.remove('active');
+            showSourcesSection();
+        }
+
+        function showOperationalSection(id, title, description, rows, emptyMessage) {
+            const content = renderTable(['العنصر', 'الحالة', 'التفاصيل'], rows, emptyMessage);
+            showSection(id, title, description, content);
+        }
+
+        function showUsers() {
+            showOperationalSection('users-nav', 'المستخدمون', 'إدارة المستخدمين وصلاحياتهم', [], 'لا يوجد نظام مستخدمين مرتبط بقاعدة البيانات بعد. سيتم تفعيله عند إضافة تسجيل الدخول للمستخدمين.');
+        }
+
+        function showContributions() {
+            const rows = allCountrySources.map(source => [escapeHtml(source.name || 'مصدر مياه'), '<span class="badge">مساهمة مصدر</span>', `${escapeHtml(source.country || 'غير محددة')} — ${escapeHtml(source.province || 'غير محددة')}`]);
+            showOperationalSection('contributions-nav', 'المساهمات', 'كل مصدر مياه مضاف يُسجل كمساهمة مجتمعية', rows, 'لا توجد مساهمات بعد.');
+        }
+
+        function showReports() {
+            showOperationalSection('reports-nav', 'البلاغات', 'بلاغات المستخدمين عن مصادر غير صحيحة أو مغلقة', [], 'لا توجد بلاغات حتى الآن. نحتاج إضافة جدول البلاغات عند بناء نموذج البلاغ من التطبيق.');
+        }
+
+        function showPhotos() {
+            const rows = allCountrySources.filter(source => source.photo_url).map(source => [`<img src="${escapeHtml(source.photo_url)}" alt="" style="width:42px;height:32px;object-fit:cover;border-radius:5px">`, escapeHtml(source.name || 'مصدر مياه'), escapeHtml(source.status || 'غير محدد')]);
+            showOperationalSection('photos-nav', 'الصور', 'الصور المرتبطة بمصادر المياه', rows, 'لا توجد صور مرفوعة حاليًا.');
+        }
+
+        function showReviews() {
+            showOperationalSection('reviews-nav', 'التقييمات', 'تقييمات المستخدمين لمصادر المياه', [], 'لا توجد تقييمات بعد. سيتم تفعيلها عند إضافة نظام تقييم في التطبيق.');
+        }
+
+        function showSettings() {
+            showSection('settings-nav', 'الإعدادات', 'إعدادات لوحة الإدارة والتطبيق', `<div class="settings-grid"><div class="card"><strong>تحديث البيانات</strong><p class="muted">يتم تحديث الإحصائيات من قاعدة البيانات عند الضغط على زر التحديث.</p><button class="primary" onclick="loadSources();loadAnalytics()">تحديث الآن</button></div><div class="card"><strong>الأمان</strong><p class="muted">لوحة الإدارة محمية بمتغير ADMIN_TOKEN ولا يتم عرض قيمته داخل الصفحة.</p></div><div class="card"><strong>اللغة</strong><p class="muted">الواجهة الحالية باللغة العربية واتجاه RTL.</p></div></div>`);
         }
 
         function renderBars(elementId, rows, labelKey, valueKey, labelMap = {}) {
@@ -375,7 +460,17 @@
         document.getElementById('search-input').addEventListener('input', renderSources);
         document.getElementById('type-filter').addEventListener('change', renderSources);
         document.getElementById('countries-search').addEventListener('input', renderCountries);
+        document.getElementById('dashboard-nav').addEventListener('click', showDashboardSection);
+        document.getElementById('sources-nav').addEventListener('click', showSourcesSection);
         document.getElementById('countries-nav').addEventListener('click', showCountries);
+        document.getElementById('users-nav').addEventListener('click', showUsers);
+        document.getElementById('map-nav').addEventListener('click', () => { window.location.href = '/'; });
+        document.getElementById('contributions-nav').addEventListener('click', showContributions);
+        document.getElementById('reports-nav').addEventListener('click', showReports);
+        document.getElementById('photos-nav').addEventListener('click', showPhotos);
+        document.getElementById('reviews-nav').addEventListener('click', showReviews);
+        document.getElementById('settings-nav').addEventListener('click', showSettings);
+        document.getElementById('section-refresh').addEventListener('click', () => { const active = document.querySelector('.nav button.active')?.id; if (active === 'contributions-nav') showContributions(); else if (active === 'photos-nav') showPhotos(); else if (active === 'settings-nav') showSettings(); });
         document.getElementById('back-to-sources').addEventListener('click', showSources);
         document.getElementById('add-source-btn').addEventListener('click', () => { window.location.href = '/'; });
         grid.addEventListener('click', event => { const button = event.target.closest('button[data-id]'); if (button) updateStatus(Number(button.dataset.id), button.dataset.status); });
