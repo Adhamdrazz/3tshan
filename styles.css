@@ -808,7 +808,12 @@ h1, h2, h3, h4 {
         position: static;
         width: 100%;
         margin-top: 16px;
+        margin-bottom: 110px;
         box-shadow: none;
+    }
+
+    #view-add .account-container {
+        padding-bottom: 80px;
     }
 
     /* Account Page Mobile Fixes */
