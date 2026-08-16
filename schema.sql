@@ -12,6 +12,12 @@ CREATE TABLE IF NOT EXISTS water_sources (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS country VARCHAR(120);
+ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS province VARCHAR(120);
+
+CREATE INDEX IF NOT EXISTS water_sources_country_province_idx
+    ON water_sources (country, province);
+
 CREATE INDEX IF NOT EXISTS water_sources_status_created_at_idx
     ON water_sources (status, created_at DESC);
 
