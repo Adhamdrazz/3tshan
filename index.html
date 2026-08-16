@@ -915,6 +915,12 @@
 
                     <h2>حسابي</h2>
 
+                    <div class="account-auth-actions" id="account-auth-actions">
+                        <button type="button" id="google-login-btn" class="google-login-btn">G&nbsp;&nbsp; تسجيل الدخول بواسطة Google</button>
+                        <button type="button" id="google-logout-btn" class="google-logout-btn" hidden>تسجيل الخروج</button>
+                        <span id="account-auth-status" class="account-auth-status" role="status"></span>
+                    </div>
+
                     <button class="btn-icon">
 
                         <svg
@@ -940,11 +946,14 @@
 
                     <div class="welcome-text">
 
-                                <h3>أهلًا بك في مجتمع عطشان</h3>
+                                <h3 id="account-welcome-title">أهلًا بك في مجتمع عطشان</h3>
 
-                                <p>
+                                <p id="account-welcome-text">
                                     وجودك هنا يعني أن شخصًا آخر قد يجد الماء في الوقت الذي يحتاجه فيه.
                                 </p>
+                                <div id="account-user-meta" class="account-user-meta" hidden>
+                                    <span id="account-user-email"></span>
+                                </div>
 
                     </div>
 

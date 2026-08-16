@@ -1,0 +1,327 @@
+--- auth references ---
+./.git/hooks/commit-msg.sample:15:# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+./api/water-sources.js:64:    const authorization = req.headers?.authorization || '';
+./api/water-sources.js:65:    const bearerToken = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+./api/water-sources.js:82:    const playerId = typeof payload.player_id === 'string' ? payload.player_id.trim().slice(0, 80) : '';
+./api/water-sources.js:128:            player_id: playerId || null
+./api/water-sources.js:159:            if (req.query?.auth === '1') {
+./api/water-sources.js:179:                    sql`SELECT COUNT(*) FILTER (WHERE event_type = 'visit')::int AS visits, COUNT(DISTINCT session_id) FILTER (WHERE event_type = 'visit')::int AS unique_visitors, COUNT(*) FILTER (WHERE event_type <> 'visit')::int AS interactions, COUNT(*) FILTER (WHERE event_type = 'source_add')::int AS source_adds, COUNT(*) FILTER (WHERE event_type = 'source_view')::int AS source_views, COUNT(*) FILTER (WHERE event_type = 'nearest_click')::int AS nearest_clicks FROM site_events`
+./api/water-sources.js:186:                const playerId = typeof req.query?.player_id === 'string' ? req.query.player_id.trim().slice(0, 80) : '';
+./api/water-sources.js:189:                    sql`SELECT player_id, points, created_at, updated_at FROM player_profiles WHERE player_id = ${playerId}`,
+./api/water-sources.js:190:                    sql`SELECT id, name, type, status, points_awarded, created_at FROM water_sources WHERE player_id = ${playerId} ORDER BY created_at DESC LIMIT 20`,
+./api/water-sources.js:191:                    sql`SELECT COUNT(*)::int AS total_sources, COUNT(*) FILTER (WHERE status = 'approved')::int AS approved_sources, COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_sources, COUNT(*) FILTER (WHERE type = 'cooler' AND status = 'approved')::int AS approved_coolers, COUNT(*) FILTER (WHERE type = 'tap' AND status = 'approved')::int AS approved_taps FROM water_sources WHERE player_id = ${playerId}`
+./api/water-sources.js:197:                return json(res, 200, { success: true, data: { profile: profile[0] || { player_id: playerId, points: 0 }, points, level, next_level_at: nextLevelAt, points_to_next_level: Math.max(0, nextLevelAt - points), overview: userSummary, sources } });
+./api/water-sources.js:261:                    const contributor = await sql`SELECT player_id, points_awarded FROM water_sources WHERE id = ${id}`;
+./api/water-sources.js:262:                    const playerId = contributor[0]?.player_id;
+./api/water-sources.js:267:                            INSERT INTO player_profiles (player_id, points)
+./api/water-sources.js:269:                            ON CONFLICT (player_id) DO UPDATE SET points = player_profiles.points + 50, updated_at = NOW()
+./api/water-sources.js:284:            const sessionId = typeof body?.session_id === 'string' ? body.session_id.slice(0, 80) : null;
+./api/water-sources.js:289:            const result = await sql`INSERT INTO site_events (event_type, session_id, source_id) VALUES (${eventType}, ${sessionId}, ${sourceId}) RETURNING id`;
+./api/water-sources.js:296:        const { name, type, temp_status, price_type, latitude, longitude, photo_url, note, player_id } = validated.value;
+./api/water-sources.js:307:            INSERT INTO water_sources (name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, player_id, points_awarded, status) VALUES (${name}, ${type}, ${temp_status}, ${price_type}, ${latitude}, ${longitude}, ${country}, ${province}, ${photo_url}, ${note}, ${player_id}, ${player_id ? 10 : 0}, 'pending')
+./api/water-sources.js:310:        if (player_id) {
+./api/water-sources.js:312:                INSERT INTO player_profiles (player_id, points)
+./api/water-sources.js:313:                VALUES (${player_id}, 10)
+./api/water-sources.js:314:                ON CONFLICT (player_id) DO UPDATE SET points = player_profiles.points + 10, updated_at = NOW()
+./api/water-sources.js:317:        return json(res, 201, { success: true, data: result[0], points_awarded: player_id ? 10 : 0 });
+./script.js:160:    const engagementSessionKey = '3tshan_engagement_session';
+./script.js:161:    const engagementSessionId = localStorage.getItem(engagementSessionKey) || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `session-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+./script.js:162:    localStorage.setItem(engagementSessionKey, engagementSessionId);
+./script.js:164:    const playerIdKey = '3tshan_player_id';
+./script.js:172:            body: JSON.stringify({ event_type: eventType, session_id: engagementSessionId, source_id: sourceId })
+./script.js:176:    if (!sessionStorage.getItem('3tshan_visit_recorded')) {
+./script.js:177:        sessionStorage.setItem('3tshan_visit_recorded', '1');
+./script.js:1465:            const response = await fetch(`/api/water-sources?profile=1&player_id=${encodeURIComponent(playerId)}`);
+./script.js:2129:                    player_id:
+./schema.sql:32:    session_id VARCHAR(80),
+./schema.sql:40:CREATE INDEX IF NOT EXISTS site_events_session_created_at_idx
+./schema.sql:41:    ON site_events (session_id, created_at DESC);
+./schema.sql:45:    player_id VARCHAR(80) PRIMARY KEY,
+./schema.sql:51:ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS player_id VARCHAR(80);
+./schema.sql:54:CREATE INDEX IF NOT EXISTS water_sources_player_id_idx
+./schema.sql:55:    ON water_sources (player_id, created_at DESC);
+./admin.html:49:        .logout { width:100%; margin-top:7px; background:#fff7f8; border:0; border-radius:7px; color:var(--red); text-align:center; padding:8px; font-size:11px; }
+./admin.html:129:        .login-wrap { max-width:430px; margin:12vh auto; padding:20px; }
+./admin.html:130:        .login-card { background:#fff; border:1px solid var(--line); border-radius:17px; padding:28px; box-shadow:var(--shadow); }
+./admin.html:131:        .login-card h1 { margin:0 0 8px; }
+./admin.html:132:        .login-card p { color:var(--muted); font-size:13px; margin:0 0 22px; }
+./admin.html:133:        .login-card label { display:block; font-weight:700; font-size:13px; margin-bottom:7px; }
+./admin.html:134:        .login-card input { width:100%; border:1px solid var(--line); border-radius:9px; padding:12px; outline:none; margin-bottom:12px; }
+./admin.html:135:        .login-card button { width:100%; border:0; border-radius:9px; padding:12px; background:var(--primary); color:#fff; font-weight:700; }
+./admin.html:138:        @media (max-width:760px) { .app { display:block; } .sidebar { width:100%; height:auto; border-left:0; border-bottom:1px solid var(--line); padding:15px; } .brand { flex-direction:row; justify-content:flex-start; padding:0 5px 13px; } .brand img { width:38px; height:38px; } .nav-title,.sidebar-spacer,.sidebar-footer-tools,.logout { display:none; } .nav { display:flex; overflow:auto; } .nav button { white-space:nowrap; padding:9px 12px; } .main { padding:22px 15px 30px; } .topbar,.toolbar { align-items:stretch; flex-direction:column; } .top-actions,.tools { width:100%; } .search,.search input { width:100%; } .add-btn { flex:1; } }
+./admin.html:152:    <section id="login-view" class="login-wrap">
+./admin.html:153:        <div class="login-card">
+./admin.html:159:            <button id="login-btn">دخول إلى لوحة الإدارة</button>
+./admin.html:160:            <div id="login-status" class="status" role="status"></div>
+./admin.html:177:            <button id="logout-btn" class="logout">↪ تسجيل الخروج</button>
+./admin.html:232:        const loginView = document.getElementById('login-view');
+./admin.html:235:        const loginStatus = document.getElementById('login-status');
+./admin.html:251:        const getToken = () => sessionStorage.getItem(tokenKey) || '';
+./admin.html:268:                const response = await fetch('/api/water-sources?auth=1', { headers: { 'X-Admin-Token': token } });
+./admin.html:278:                sessionStorage.removeItem(tokenKey);
+./admin.html:279:                loginView.hidden = false;
+./admin.html:281:                loginStatus.textContent = 'رمز المشرف غير صحيح أو تعذر الاتصال بالخادم.';
+./admin.html:284:            loginView.hidden = true;
+./admin.html:290:        const showLogin = () => { loginView.hidden = false; dashboardView.hidden = true; };
+./admin.html:519:                const response = await fetch('/api/water-sources', { method:'PATCH', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` }, body:JSON.stringify({ id: Number(id), status }) });
+./admin.html:541:                const response = await fetch(`/api/water-sources?id=${encodeURIComponent(Number(id))}`, { method:'DELETE', headers:{ 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` } });
+./admin.html:554:        document.getElementById('login-btn').addEventListener('click', async () => {
+./admin.html:556:            if (!token) { loginStatus.textContent = 'اكتب رمز المشرف أولًا.'; return; }
+./admin.html:557:            loginStatus.textContent = 'جاري التحقق...';
+./admin.html:558:            document.getElementById('login-btn').disabled = true;
+./admin.html:560:            document.getElementById('login-btn').disabled = false;
+./admin.html:561:            if (!valid) { loginStatus.textContent = 'رمز المشرف غير صحيح.'; return; }
+./admin.html:562:            sessionStorage.setItem(tokenKey, token);
+./admin.html:563:            loginStatus.textContent = '';
+./admin.html:566:        tokenInput.addEventListener('keydown', event => { if (event.key === 'Enter') document.getElementById('login-btn').click(); });
+./admin.html:580:        document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem(tokenKey); showLogin(); });
+./player_progress_migration.sql:2:    player_id VARCHAR(80) PRIMARY KEY,
+./player_progress_migration.sql:8:ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS player_id VARCHAR(80);
+./player_progress_migration.sql:11:CREATE INDEX IF NOT EXISTS water_sources_player_id_idx
+./player_progress_migration.sql:12:    ON water_sources (player_id, created_at DESC);
+./PROJECT_AUDIT_AR_2026.md:74:الحماية الحالية تعتمد على `ADMIN_TOKEN` المشترك في header أو Bearer token، وهذا أفضل من ترك الإدارة عامة، لكنه يعني أن كل من يعرف التوكن يملك صلاحيات الاعتماد والحذف والإحصائيات. التوكن محفوظ في `sessionStorage` داخل المتصفح، ولا توجد أدوار أو سجل تدقيق لمن نفذ عملية الحذف أو الاعتماد.
+./auth_audit_output.txt:1:--- auth references ---
+./auth_audit_output.txt:2:./.git/hooks/commit-msg.sample:15:# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+./auth_audit_output.txt:3:./api/water-sources.js:64:    const authorization = req.headers?.authorization || '';
+./auth_audit_output.txt:4:./api/water-sources.js:65:    const bearerToken = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+./auth_audit_output.txt:5:./api/water-sources.js:82:    const playerId = typeof payload.player_id === 'string' ? payload.player_id.trim().slice(0, 80) : '';
+./auth_audit_output.txt:6:./api/water-sources.js:128:            player_id: playerId || null
+./auth_audit_output.txt:7:./api/water-sources.js:159:            if (req.query?.auth === '1') {
+./auth_audit_output.txt:8:./api/water-sources.js:179:                    sql`SELECT COUNT(*) FILTER (WHERE event_type = 'visit')::int AS visits, COUNT(DISTINCT session_id) FILTER (WHERE event_type = 'visit')::int AS unique_visitors, COUNT(*) FILTER (WHERE event_type <> 'visit')::int AS interactions, COUNT(*) FILTER (WHERE event_type = 'source_add')::int AS source_adds, COUNT(*) FILTER (WHERE event_type = 'source_view')::int AS source_views, COUNT(*) FILTER (WHERE event_type = 'nearest_click')::int AS nearest_clicks FROM site_events`
+./auth_audit_output.txt:9:./api/water-sources.js:186:                const playerId = typeof req.query?.player_id === 'string' ? req.query.player_id.trim().slice(0, 80) : '';
+./auth_audit_output.txt:10:./api/water-sources.js:189:                    sql`SELECT player_id, points, created_at, updated_at FROM player_profiles WHERE player_id = ${playerId}`,
+./auth_audit_output.txt:11:./api/water-sources.js:190:                    sql`SELECT id, name, type, status, points_awarded, created_at FROM water_sources WHERE player_id = ${playerId} ORDER BY created_at DESC LIMIT 20`,
+./auth_audit_output.txt:12:./api/water-sources.js:191:                    sql`SELECT COUNT(*)::int AS total_sources, COUNT(*) FILTER (WHERE status = 'approved')::int AS approved_sources, COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_sources, COUNT(*) FILTER (WHERE type = 'cooler' AND status = 'approved')::int AS approved_coolers, COUNT(*) FILTER (WHERE type = 'tap' AND status = 'approved')::int AS approved_taps FROM water_sources WHERE player_id = ${playerId}`
+./auth_audit_output.txt:13:./api/water-sources.js:197:                return json(res, 200, { success: true, data: { profile: profile[0] || { player_id: playerId, points: 0 }, points, level, next_level_at: nextLevelAt, points_to_next_level: Math.max(0, nextLevelAt - points), overview: userSummary, sources } });
+./auth_audit_output.txt:14:./api/water-sources.js:261:                    const contributor = await sql`SELECT player_id, points_awarded FROM water_sources WHERE id = ${id}`;
+./auth_audit_output.txt:15:./api/water-sources.js:262:                    const playerId = contributor[0]?.player_id;
+./auth_audit_output.txt:16:./api/water-sources.js:267:                            INSERT INTO player_profiles (player_id, points)
+./auth_audit_output.txt:17:./api/water-sources.js:269:                            ON CONFLICT (player_id) DO UPDATE SET points = player_profiles.points + 50, updated_at = NOW()
+./auth_audit_output.txt:18:./api/water-sources.js:284:            const sessionId = typeof body?.session_id === 'string' ? body.session_id.slice(0, 80) : null;
+./auth_audit_output.txt:19:./api/water-sources.js:289:            const result = await sql`INSERT INTO site_events (event_type, session_id, source_id) VALUES (${eventType}, ${sessionId}, ${sourceId}) RETURNING id`;
+./auth_audit_output.txt:20:./api/water-sources.js:296:        const { name, type, temp_status, price_type, latitude, longitude, photo_url, note, player_id } = validated.value;
+./auth_audit_output.txt:21:./api/water-sources.js:307:            INSERT INTO water_sources (name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, player_id, points_awarded, status) VALUES (${name}, ${type}, ${temp_status}, ${price_type}, ${latitude}, ${longitude}, ${country}, ${province}, ${photo_url}, ${note}, ${player_id}, ${player_id ? 10 : 0}, 'pending')
+./auth_audit_output.txt:22:./api/water-sources.js:310:        if (player_id) {
+./auth_audit_output.txt:23:./api/water-sources.js:312:                INSERT INTO player_profiles (player_id, points)
+./auth_audit_output.txt:24:./api/water-sources.js:313:                VALUES (${player_id}, 10)
+./auth_audit_output.txt:25:./api/water-sources.js:314:                ON CONFLICT (player_id) DO UPDATE SET points = player_profiles.points + 10, updated_at = NOW()
+./auth_audit_output.txt:26:./api/water-sources.js:317:        return json(res, 201, { success: true, data: result[0], points_awarded: player_id ? 10 : 0 });
+./auth_audit_output.txt:27:./script.js:160:    const engagementSessionKey = '3tshan_engagement_session';
+./auth_audit_output.txt:28:./script.js:161:    const engagementSessionId = localStorage.getItem(engagementSessionKey) || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `session-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+./auth_audit_output.txt:29:./script.js:162:    localStorage.setItem(engagementSessionKey, engagementSessionId);
+./auth_audit_output.txt:30:./script.js:164:    const playerIdKey = '3tshan_player_id';
+./auth_audit_output.txt:31:./script.js:172:            body: JSON.stringify({ event_type: eventType, session_id: engagementSessionId, source_id: sourceId })
+./auth_audit_output.txt:32:./script.js:176:    if (!sessionStorage.getItem('3tshan_visit_recorded')) {
+./auth_audit_output.txt:33:./script.js:177:        sessionStorage.setItem('3tshan_visit_recorded', '1');
+./auth_audit_output.txt:34:./script.js:1465:            const response = await fetch(`/api/water-sources?profile=1&player_id=${encodeURIComponent(playerId)}`);
+./auth_audit_output.txt:35:./script.js:2129:                    player_id:
+./auth_audit_output.txt:36:./schema.sql:32:    session_id VARCHAR(80),
+./auth_audit_output.txt:37:./schema.sql:40:CREATE INDEX IF NOT EXISTS site_events_session_created_at_idx
+./auth_audit_output.txt:38:./schema.sql:41:    ON site_events (session_id, created_at DESC);
+./auth_audit_output.txt:39:./schema.sql:45:    player_id VARCHAR(80) PRIMARY KEY,
+./auth_audit_output.txt:40:./schema.sql:51:ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS player_id VARCHAR(80);
+./auth_audit_output.txt:41:./schema.sql:54:CREATE INDEX IF NOT EXISTS water_sources_player_id_idx
+./auth_audit_output.txt:42:./schema.sql:55:    ON water_sources (player_id, created_at DESC);
+./auth_audit_output.txt:43:./admin.html:49:        .logout { width:100%; margin-top:7px; background:#fff7f8; border:0; border-radius:7px; color:var(--red); text-align:center; padding:8px; font-size:11px; }
+./auth_audit_output.txt:44:./admin.html:129:        .login-wrap { max-width:430px; margin:12vh auto; padding:20px; }
+./auth_audit_output.txt:45:./admin.html:130:        .login-card { background:#fff; border:1px solid var(--line); border-radius:17px; padding:28px; box-shadow:var(--shadow); }
+./auth_audit_output.txt:46:./admin.html:131:        .login-card h1 { margin:0 0 8px; }
+./auth_audit_output.txt:47:./admin.html:132:        .login-card p { color:var(--muted); font-size:13px; margin:0 0 22px; }
+./auth_audit_output.txt:48:./admin.html:133:        .login-card label { display:block; font-weight:700; font-size:13px; margin-bottom:7px; }
+./auth_audit_output.txt:49:./admin.html:134:        .login-card input { width:100%; border:1px solid var(--line); border-radius:9px; padding:12px; outline:none; margin-bottom:12px; }
+./auth_audit_output.txt:50:./admin.html:135:        .login-card button { width:100%; border:0; border-radius:9px; padding:12px; background:var(--primary); color:#fff; font-weight:700; }
+./auth_audit_output.txt:51:./admin.html:138:        @media (max-width:760px) { .app { display:block; } .sidebar { width:100%; height:auto; border-left:0; border-bottom:1px solid var(--line); padding:15px; } .brand { flex-direction:row; justify-content:flex-start; padding:0 5px 13px; } .brand img { width:38px; height:38px; } .nav-title,.sidebar-spacer,.sidebar-footer-tools,.logout { display:none; } .nav { display:flex; overflow:auto; } .nav button { white-space:nowrap; padding:9px 12px; } .main { padding:22px 15px 30px; } .topbar,.toolbar { align-items:stretch; flex-direction:column; } .top-actions,.tools { width:100%; } .search,.search input { width:100%; } .add-btn { flex:1; } }
+./auth_audit_output.txt:52:./admin.html:152:    <section id="login-view" class="login-wrap">
+./auth_audit_output.txt:53:./admin.html:153:        <div class="login-card">
+./auth_audit_output.txt:54:./admin.html:159:            <button id="login-btn">دخول إلى لوحة الإدارة</button>
+./auth_audit_output.txt:55:./admin.html:160:            <div id="login-status" class="status" role="status"></div>
+./auth_audit_output.txt:56:./admin.html:177:            <button id="logout-btn" class="logout">↪ تسجيل الخروج</button>
+./auth_audit_output.txt:57:./admin.html:232:        const loginView = document.getElementById('login-view');
+./auth_audit_output.txt:58:./admin.html:235:        const loginStatus = document.getElementById('login-status');
+./auth_audit_output.txt:59:./admin.html:251:        const getToken = () => sessionStorage.getItem(tokenKey) || '';
+./auth_audit_output.txt:60:./admin.html:268:                const response = await fetch('/api/water-sources?auth=1', { headers: { 'X-Admin-Token': token } });
+./auth_audit_output.txt:61:./admin.html:278:                sessionStorage.removeItem(tokenKey);
+./auth_audit_output.txt:62:./admin.html:279:                loginView.hidden = false;
+./auth_audit_output.txt:63:./admin.html:281:                loginStatus.textContent = 'رمز المشرف غير صحيح أو تعذر الاتصال بالخادم.';
+./auth_audit_output.txt:64:./admin.html:284:            loginView.hidden = true;
+./auth_audit_output.txt:65:./admin.html:290:        const showLogin = () => { loginView.hidden = false; dashboardView.hidden = true; };
+./auth_audit_output.txt:66:./admin.html:519:                const response = await fetch('/api/water-sources', { method:'PATCH', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` }, body:JSON.stringify({ id: Number(id), status }) });
+./auth_audit_output.txt:67:./admin.html:541:                const response = await fetch(`/api/water-sources?id=${encodeURIComponent(Number(id))}`, { method:'DELETE', headers:{ 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` } });
+./auth_audit_output.txt:68:./admin.html:554:        document.getElementById('login-btn').addEventListener('click', async () => {
+./auth_audit_output.txt:69:./admin.html:556:            if (!token) { loginStatus.textContent = 'اكتب رمز المشرف أولًا.'; return; }
+./auth_audit_output.txt:70:./admin.html:557:            loginStatus.textContent = 'جاري التحقق...';
+./auth_audit_output.txt:71:./admin.html:558:            document.getElementById('login-btn').disabled = true;
+./auth_audit_output.txt:72:./admin.html:560:            document.getElementById('login-btn').disabled = false;
+./auth_audit_output.txt:73:./admin.html:561:            if (!valid) { loginStatus.textContent = 'رمز المشرف غير صحيح.'; return; }
+./auth_audit_output.txt:74:./admin.html:562:            sessionStorage.setItem(tokenKey, token);
+./auth_audit_output.txt:75:./admin.html:563:            loginStatus.textContent = '';
+./auth_audit_output.txt:76:./admin.html:566:        tokenInput.addEventListener('keydown', event => { if (event.key === 'Enter') document.getElementById('login-btn').click(); });
+./auth_audit_output.txt:77:./admin.html:580:        document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem(tokenKey); showLogin(); });
+./auth_audit_output.txt:78:./player_progress_migration.sql:2:    player_id VARCHAR(80) PRIMARY KEY,
+./auth_audit_output.txt:79:./player_progress_migration.sql:8:ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS player_id VARCHAR(80);
+./auth_audit_output.txt:80:./player_progress_migration.sql:11:CREATE INDEX IF NOT EXISTS water_sources_player_id_idx
+./auth_audit_output.txt:81:./player_progress_migration.sql:12:    ON water_sources (player_id, created_at DESC);
+./auth_audit_output.txt:82:./PROJECT_AUDIT_AR_2026.md:74:الحماية الحالية تعتمد على `ADMIN_TOKEN` المشترك في header أو Bearer token، وهذا أفضل من ترك الإدارة عامة، لكنه يعني أن كل من يعرف التوكن يملك صلاحيات الاعتماد والحذف والإحصائيات. التوكن محفوظ في `sessionStorage` داخل المتصفح، ولا توجد أدوار أو سجل تدقيق لمن نفذ عملية الحذف أو الاعتماد.
+./auth_audit_output.txt:83:./auth_audit_output.txt:1:--- auth references ---
+./auth_audit_output.txt:84:./auth_audit_output.txt:2:./.git/hooks/commit-msg.sample:15:# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+./auth_audit_output.txt:85:./auth_audit_output.txt:3:./api/water-sources.js:64:    const authorization = req.headers?.authorization || '';
+./auth_audit_output.txt:86:./auth_audit_output.txt:4:./api/water-sources.js:65:    const bearerToken = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : '';
+./auth_audit_output.txt:87:./auth_audit_output.txt:5:./api/water-sources.js:82:    const playerId = typeof payload.player_id === 'string' ? payload.player_id.trim().slice(0, 80) : '';
+./auth_audit_output.txt:88:./auth_audit_output.txt:6:./api/water-sources.js:128:            player_id: playerId || null
+./auth_audit_output.txt:89:./auth_audit_output.txt:7:./api/water-sources.js:159:            if (req.query?.auth === '1') {
+./auth_audit_output.txt:90:./auth_audit_output.txt:8:./api/water-sources.js:179:                    sql`SELECT COUNT(*) FILTER (WHERE event_type = 'visit')::int AS visits, COUNT(DISTINCT session_id) FILTER (WHERE event_type = 'visit')::int AS unique_visitors, COUNT(*) FILTER (WHERE event_type <> 'visit')::int AS interactions, COUNT(*) FILTER (WHERE event_type = 'source_add')::int AS source_adds, COUNT(*) FILTER (WHERE event_type = 'source_view')::int AS source_views, COUNT(*) FILTER (WHERE event_type = 'nearest_click')::int AS nearest_clicks FROM site_events`
+./auth_audit_output.txt:91:./auth_audit_output.txt:9:./api/water-sources.js:186:                const playerId = typeof req.query?.player_id === 'string' ? req.query.player_id.trim().slice(0, 80) : '';
+./auth_audit_output.txt:92:./auth_audit_output.txt:10:./api/water-sources.js:189:                    sql`SELECT player_id, points, created_at, updated_at FROM player_profiles WHERE player_id = ${playerId}`,
+./auth_audit_output.txt:93:./auth_audit_output.txt:11:./api/water-sources.js:190:                    sql`SELECT id, name, type, status, points_awarded, created_at FROM water_sources WHERE player_id = ${playerId} ORDER BY created_at DESC LIMIT 20`,
+./auth_audit_output.txt:94:./auth_audit_output.txt:12:./api/water-sources.js:191:                    sql`SELECT COUNT(*)::int AS total_sources, COUNT(*) FILTER (WHERE status = 'approved')::int AS approved_sources, COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_sources, COUNT(*) FILTER (WHERE type = 'cooler' AND status = 'approved')::int AS approved_coolers, COUNT(*) FILTER (WHERE type = 'tap' AND status = 'approved')::int AS approved_taps FROM water_sources WHERE player_id = ${playerId}`
+./auth_audit_output.txt:95:./auth_audit_output.txt:13:./api/water-sources.js:197:                return json(res, 200, { success: true, data: { profile: profile[0] || { player_id: playerId, points: 0 }, points, level, next_level_at: nextLevelAt, points_to_next_level: Math.max(0, nextLevelAt - points), overview: userSummary, sources } });
+./auth_audit_output.txt:96:./auth_audit_output.txt:14:./api/water-sources.js:261:                    const contributor = await sql`SELECT player_id, points_awarded FROM water_sources WHERE id = ${id}`;
+./auth_audit_output.txt:97:./auth_audit_output.txt:15:./api/water-sources.js:262:                    const playerId = contributor[0]?.player_id;
+./auth_audit_output.txt:98:./auth_audit_output.txt:16:./api/water-sources.js:267:                            INSERT INTO player_profiles (player_id, points)
+./auth_audit_output.txt:99:./auth_audit_output.txt:17:./api/water-sources.js:269:                            ON CONFLICT (player_id) DO UPDATE SET points = player_profiles.points + 50, updated_at = NOW()
+./auth_audit_output.txt:100:./auth_audit_output.txt:18:./api/water-sources.js:284:            const sessionId = typeof body?.session_id === 'string' ? body.session_id.slice(0, 80) : null;
+./auth_audit_output.txt:101:./auth_audit_output.txt:19:./api/water-sources.js:289:            const result = await sql`INSERT INTO site_events (event_type, session_id, source_id) VALUES (${eventType}, ${sessionId}, ${sourceId}) RETURNING id`;
+./auth_audit_output.txt:102:./auth_audit_output.txt:20:./api/water-sources.js:296:        const { name, type, temp_status, price_type, latitude, longitude, photo_url, note, player_id } = validated.value;
+./auth_audit_output.txt:103:./auth_audit_output.txt:21:./api/water-sources.js:307:            INSERT INTO water_sources (name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, player_id, points_awarded, status) VALUES (${name}, ${type}, ${temp_status}, ${price_type}, ${latitude}, ${longitude}, ${country}, ${province}, ${photo_url}, ${note}, ${player_id}, ${player_id ? 10 : 0}, 'pending')
+./auth_audit_output.txt:104:./auth_audit_output.txt:22:./api/water-sources.js:310:        if (player_id) {
+./auth_audit_output.txt:105:./auth_audit_output.txt:23:./api/water-sources.js:312:                INSERT INTO player_profiles (player_id, points)
+./auth_audit_output.txt:106:./auth_audit_output.txt:24:./api/water-sources.js:313:                VALUES (${player_id}, 10)
+./auth_audit_output.txt:107:./auth_audit_output.txt:25:./api/water-sources.js:314:                ON CONFLICT (player_id) DO UPDATE SET points = player_profiles.points + 10, updated_at = NOW()
+./auth_audit_output.txt:108:./auth_audit_output.txt:26:./api/water-sources.js:317:        return json(res, 201, { success: true, data: result[0], points_awarded: player_id ? 10 : 0 });
+./auth_audit_output.txt:109:./auth_audit_output.txt:27:./script.js:160:    const engagementSessionKey = '3tshan_engagement_session';
+./auth_audit_output.txt:110:./auth_audit_output.txt:28:./script.js:161:    const engagementSessionId = localStorage.getItem(engagementSessionKey) || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `session-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+./auth_audit_output.txt:111:./auth_audit_output.txt:29:./script.js:162:    localStorage.setItem(engagementSessionKey, engagementSessionId);
+./auth_audit_output.txt:112:./auth_audit_output.txt:30:./script.js:164:    const playerIdKey = '3tshan_player_id';
+./auth_audit_output.txt:113:./auth_audit_output.txt:31:./script.js:172:            body: JSON.stringify({ event_type: eventType, session_id: engagementSessionId, source_id: sourceId })
+./auth_audit_output.txt:114:./auth_audit_output.txt:32:./script.js:176:    if (!sessionStorage.getItem('3tshan_visit_recorded')) {
+./auth_audit_output.txt:115:./auth_audit_output.txt:33:./script.js:177:        sessionStorage.setItem('3tshan_visit_recorded', '1');
+./auth_audit_output.txt:116:./auth_audit_output.txt:34:./script.js:1465:            const response = await fetch(`/api/water-sources?profile=1&player_id=${encodeURIComponent(playerId)}`);
+./auth_audit_output.txt:117:./auth_audit_output.txt:35:./script.js:2129:                    player_id:
+./auth_audit_output.txt:118:./auth_audit_output.txt:36:./schema.sql:32:    session_id VARCHAR(80),
+./auth_audit_output.txt:119:./auth_audit_output.txt:37:./schema.sql:40:CREATE INDEX IF NOT EXISTS site_events_session_created_at_idx
+./auth_audit_output.txt:120:./auth_audit_output.txt:38:./schema.sql:41:    ON site_events (session_id, created_at DESC);
+./auth_audit_output.txt:121:./auth_audit_output.txt:39:./schema.sql:45:    player_id VARCHAR(80) PRIMARY KEY,
+./auth_audit_output.txt:122:./auth_audit_output.txt:40:./schema.sql:51:ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS player_id VARCHAR(80);
+./auth_audit_output.txt:123:./auth_audit_output.txt:41:./schema.sql:54:CREATE INDEX IF NOT EXISTS water_sources_player_id_idx
+./auth_audit_output.txt:124:./auth_audit_output.txt:42:./schema.sql:55:    ON water_sources (player_id, created_at DESC);
+./auth_audit_output.txt:125:./auth_audit_output.txt:43:./admin.html:49:        .logout { width:100%; margin-top:7px; background:#fff7f8; border:0; border-radius:7px; color:var(--red); text-align:center; padding:8px; font-size:11px; }
+./auth_audit_output.txt:126:./auth_audit_output.txt:44:./admin.html:129:        .login-wrap { max-width:430px; margin:12vh auto; padding:20px; }
+./auth_audit_output.txt:127:./auth_audit_output.txt:45:./admin.html:130:        .login-card { background:#fff; border:1px solid var(--line); border-radius:17px; padding:28px; box-shadow:var(--shadow); }
+./auth_audit_output.txt:128:./auth_audit_output.txt:46:./admin.html:131:        .login-card h1 { margin:0 0 8px; }
+./auth_audit_output.txt:129:./auth_audit_output.txt:47:./admin.html:132:        .login-card p { color:var(--muted); font-size:13px; margin:0 0 22px; }
+./auth_audit_output.txt:130:./auth_audit_output.txt:48:./admin.html:133:        .login-card label { display:block; font-weight:700; font-size:13px; margin-bottom:7px; }
+./auth_audit_output.txt:131:./auth_audit_output.txt:49:./admin.html:134:        .login-card input { width:100%; border:1px solid var(--line); border-radius:9px; padding:12px; outline:none; margin-bottom:12px; }
+./auth_audit_output.txt:132:./auth_audit_output.txt:50:./admin.html:135:        .login-card button { width:100%; border:0; border-radius:9px; padding:12px; background:var(--primary); color:#fff; font-weight:700; }
+./auth_audit_output.txt:133:./auth_audit_output.txt:51:./admin.html:138:        @media (max-width:760px) { .app { display:block; } .sidebar { width:100%; height:auto; border-left:0; border-bottom:1px solid var(--line); padding:15px; } .brand { flex-direction:row; justify-content:flex-start; padding:0 5px 13px; } .brand img { width:38px; height:38px; } .nav-title,.sidebar-spacer,.sidebar-footer-tools,.logout { display:none; } .nav { display:flex; overflow:auto; } .nav button { white-space:nowrap; padding:9px 12px; } .main { padding:22px 15px 30px; } .topbar,.toolbar { align-items:stretch; flex-direction:column; } .top-actions,.tools { width:100%; } .search,.search input { width:100%; } .add-btn { flex:1; } }
+./auth_audit_output.txt:134:./auth_audit_output.txt:52:./admin.html:152:    <section id="login-view" class="login-wrap">
+./auth_audit_output.txt:135:./auth_audit_output.txt:53:./admin.html:153:        <div class="login-card">
+./auth_audit_output.txt:136:./auth_audit_output.txt:54:./admin.html:159:            <button id="login-btn">دخول إلى لوحة الإدارة</button>
+./auth_audit_output.txt:137:./auth_audit_output.txt:55:./admin.html:160:            <div id="login-status" class="status" role="status"></div>
+./auth_audit_output.txt:138:./auth_audit_output.txt:56:./admin.html:177:            <button id="logout-btn" class="logout">↪ تسجيل الخروج</button>
+./auth_audit_output.txt:139:./auth_audit_output.txt:57:./admin.html:232:        const loginView = document.getElementById('login-view');
+./auth_audit_output.txt:140:./auth_audit_output.txt:58:./admin.html:235:        const loginStatus = document.getElementById('login-status');
+./auth_audit_output.txt:141:./auth_audit_output.txt:59:./admin.html:251:        const getToken = () => sessionStorage.getItem(tokenKey) || '';
+./auth_audit_output.txt:142:./auth_audit_output.txt:60:./admin.html:268:                const response = await fetch('/api/water-sources?auth=1', { headers: { 'X-Admin-Token': token } });
+./auth_audit_output.txt:143:./auth_audit_output.txt:61:./admin.html:278:                sessionStorage.removeItem(tokenKey);
+./auth_audit_output.txt:144:./auth_audit_output.txt:62:./admin.html:279:                loginView.hidden = false;
+./auth_audit_output.txt:145:./auth_audit_output.txt:63:./admin.html:281:                loginStatus.textContent = 'رمز المشرف غير صحيح أو تعذر الاتصال بالخادم.';
+./auth_audit_output.txt:146:./auth_audit_output.txt:64:./admin.html:284:            loginView.hidden = true;
+./auth_audit_output.txt:147:./auth_audit_output.txt:65:./admin.html:290:        const showLogin = () => { loginView.hidden = false; dashboardView.hidden = true; };
+./auth_audit_output.txt:148:./auth_audit_output.txt:66:./admin.html:519:                const response = await fetch('/api/water-sources', { method:'PATCH', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` }, body:JSON.stringify({ id: Number(id), status }) });
+./auth_audit_output.txt:149:./auth_audit_output.txt:67:./admin.html:541:                const response = await fetch(`/api/water-sources?id=${encodeURIComponent(Number(id))}`, { method:'DELETE', headers:{ 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` } });
+./auth_audit_output.txt:150:./auth_audit_output.txt:68:./admin.html:554:        document.getElementById('login-btn').addEventListener('click', async () => {
+./auth_audit_output.txt:151:./auth_audit_output.txt:69:./admin.html:556:            if (!token) { loginStatus.textContent = 'اكتب رمز المشرف أولًا.'; return; }
+./auth_audit_output.txt:152:./auth_audit_output.txt:70:./admin.html:557:            loginStatus.textContent = 'جاري التحقق...';
+./auth_audit_output.txt:153:./auth_audit_output.txt:71:./admin.html:558:            document.getElementById('login-btn').disabled = true;
+./auth_audit_output.txt:154:./auth_audit_output.txt:72:./admin.html:560:            document.getElementById('login-btn').disabled = false;
+./auth_audit_output.txt:155:./auth_audit_output.txt:73:./admin.html:561:            if (!valid) { loginStatus.textContent = 'رمز المشرف غير صحيح.'; return; }
+./auth_audit_output.txt:156:./auth_audit_output.txt:74:./admin.html:562:            sessionStorage.setItem(tokenKey, token);
+./auth_audit_output.txt:157:./auth_audit_output.txt:75:./admin.html:563:            loginStatus.textContent = '';
+./auth_audit_output.txt:158:./auth_audit_output.txt:76:./admin.html:566:        tokenInput.addEventListener('keydown', event => { if (event.key === 'Enter') document.getElementById('login-btn').click(); });
+./auth_audit_output.txt:159:./auth_audit_output.txt:77:./admin.html:580:        document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem(tokenKey); showLogin(); });
+--- schema ---
+-- Run this once in Neon before deploying the API.
+CREATE TABLE IF NOT EXISTS water_sources (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(120),
+    type VARCHAR(120) NOT NULL,
+    temp_status VARCHAR(20) NOT NULL CHECK (temp_status IN ('cold', 'normal', 'not_cold')),
+    price_type VARCHAR(20) NOT NULL CHECK (price_type IN ('free', 'paid')),
+    latitude DOUBLE PRECISION NOT NULL CHECK (latitude BETWEEN -90 AND 90),
+    longitude DOUBLE PRECISION NOT NULL CHECK (longitude BETWEEN -180 AND 180),
+    photo_url TEXT,
+    note TEXT,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS country VARCHAR(120);
+ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS province VARCHAR(120);
+ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS note TEXT;
+
+CREATE INDEX IF NOT EXISTS water_sources_country_province_idx
+    ON water_sources (country, province);
+
+CREATE INDEX IF NOT EXISTS water_sources_status_created_at_idx
+    ON water_sources (status, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS water_sources_coordinates_idx
+    ON water_sources (latitude, longitude);
+
+CREATE TABLE IF NOT EXISTS site_events (
+    id BIGSERIAL PRIMARY KEY,
+    event_type VARCHAR(40) NOT NULL CHECK (event_type IN ('visit', 'source_view', 'source_add', 'map_interaction', 'nearest_click')),
+    session_id VARCHAR(80),
+    source_id BIGINT REFERENCES water_sources(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS site_events_type_created_at_idx
+    ON site_events (event_type, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS site_events_session_created_at_idx
+    ON site_events (session_id, created_at DESC);
+
+
+CREATE TABLE IF NOT EXISTS player_profiles (
+    player_id VARCHAR(80) PRIMARY KEY,
+    points INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS player_id VARCHAR(80);
+ALTER TABLE water_sources ADD COLUMN IF NOT EXISTS points_awarded INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS water_sources_player_id_idx
+    ON water_sources (player_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS player_profiles_points_idx
+    ON player_profiles (points DESC);
+--- package ---
+{
+  "name": "3tshan",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check script.js && node --check api/water-sources.js",
+    "serve": "npx --yes vercel dev"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "latest"
+  }
+}
+--- account hooks ---
+index.html:67:                <a href="#" data-target="view-account" class="nav-link">
+index.html:68:                    حسابي
+index.html:84:                    data-target="view-account"
+index.html:908:            id="view-account"
+index.html:916:                    <h2>حسابي</h2>
+index.html:1347:            data-target="view-account"
+script.js:164:    const playerIdKey = '3tshan_player_id';
+script.js:165:    const playerId = localStorage.getItem(playerIdKey) || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `player-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+script.js:166:    localStorage.setItem(playerIdKey, playerId);
+script.js:1465:            const response = await fetch(`/api/water-sources?profile=1&player_id=${encodeURIComponent(playerId)}`);
+script.js:1563:                            view.id === 'view-account'
+script.js:2130:                        playerId

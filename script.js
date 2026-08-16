@@ -164,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerIdKey = '3tshan_player_id';
     const playerId = localStorage.getItem(playerIdKey) || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `player-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     localStorage.setItem(playerIdKey, playerId);
+    let authenticatedUser = null;
 
     function trackEngagement(eventType, sourceId = null) {
         fetch('/api/water-sources?event=1', {
@@ -1449,6 +1450,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // =========================
+    // Optional Google Account
+    // =========================
+
+    function setAuthButtons(user) {
+        const loginButton = document.getElementById('google-login-btn');
+        const logoutButton = document.getElementById('google-logout-btn');
+        const welcomeTitle = document.getElementById('account-welcome-title');
+        const welcomeText = document.getElementById('account-welcome-text');
+        const userMeta = document.getElementById('account-user-meta');
+        const userEmail = document.getElementById('account-user-email');
+        if (loginButton) loginButton.hidden = Boolean(user);
+        if (logoutButton) logoutButton.hidden = !user;
+        if (welcomeTitle) welcomeTitle.textContent = user ? `أهلًا بك، ${user.name || 'مساهم عطشان'}` : 'أهلًا بك في مجتمع عطشان';
+        if (welcomeText) welcomeText.textContent = user ? 'حسابك يحفظ مساهماتك ونقاطك أينما دخلت إلى عطشان.' : 'وجودك هنا يعني أن شخصًا آخر قد يجد الماء في الوقت الذي يحتاجه فيه.';
+        if (userMeta) userMeta.hidden = !user;
+        if (userEmail) userEmail.textContent = user?.email || '';
+    }
+
+    async function loadAuthState() {
+        try {
+            const response = await fetch('/api/water-sources?auth=me', { credentials: 'same-origin' });
+            const result = await response.json();
+            authenticatedUser = result.authenticated ? result.user : null;
+            setAuthButtons(authenticatedUser);
+            if (document.getElementById('view-account')?.style.display !== 'none') loadProfileStats();
+            return authenticatedUser;
+        } catch (error) {
+            authenticatedUser = null;
+            setAuthButtons(null);
+            return null;
+        }
+    }
+
+    function startGoogleLogin() {
+        const returnUrl = `/api/water-sources?auth=google&player_id=${encodeURIComponent(playerId)}`;
+        window.location.href = returnUrl;
+    }
+
+    async function logoutGoogle() {
+        try {
+            await fetch('/api/water-sources?auth=logout', { method: 'POST', credentials: 'same-origin' });
+        } finally {
+            authenticatedUser = null;
+            setAuthButtons(null);
+            loadProfileStats();
+        }
+    }
+
+    document.getElementById('google-login-btn')?.addEventListener('click', startGoogleLogin);
+    document.getElementById('google-logout-btn')?.addEventListener('click', logoutGoogle);
+    const loginState = new URLSearchParams(window.location.search).get('login');
+    const authStatus = document.getElementById('account-auth-status');
+    if (authStatus && loginState) {
+        authStatus.textContent = loginState === 'success' ? 'تم تسجيل الدخول بنجاح.' : 'تعذر تسجيل الدخول بواسطة Google. حاول مرة أخرى.';
+        authStatus.classList.toggle('error', loginState !== 'success');
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+    }
+
+    loadAuthState();
+
+    // =========================
     // Start
 
     getUserLocation();
@@ -1462,7 +1524,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadProfileStats() {
         try {
-            const response = await fetch(`/api/water-sources?profile=1&player_id=${encodeURIComponent(playerId)}`);
+            const profileUrl = authenticatedUser ? '/api/water-sources?auth=profile' : `/api/water-sources?profile=1&player_id=${encodeURIComponent(playerId)}`;
+            const response = await fetch(profileUrl, { credentials: 'same-origin' });
             const result = await response.json();
             if (!response.ok || !result.success) throw new Error('تعذر تحميل بيانات الحساب');
             const overview = result.data?.overview || {};
