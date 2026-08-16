@@ -1109,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <img
                         src="${escapeHtml(source.photo_url)}"
                         alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}"
-                        style="width:100%;height:130px;object-fit:cover;border-radius:14px;margin-bottom:12px;display:block;"
+                        style="width:100%;height:130px;object-fit:contain;background:#eef4f8;border-radius:14px;margin-bottom:12px;display:block;"
                         onerror="this.outerHTML='<div style=\"width:100%;height:130px;border-radius:14px;background:linear-gradient(135deg,#eaf7ff,#d8f5f5);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:48px;\">💧</div>'"
                     >
                 ` : `
