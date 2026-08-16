@@ -1427,7 +1427,7 @@ document.addEventListener('DOMContentLoaded', () => {
             () => {
 
                 const file = photoInput.files && photoInput.files[0];
-                if (photoFileName) photoFileName.textContent = file ? `تم اختيار: ${file.name}` : 'الصورة اختيارية';
+                if (photoFileName) photoFileName.textContent = file ? `تم اختيار: ${file.name}` : 'اضغط لإضافة صورة';
                 if (photoPreview) {
                     if (file) {
                         photoPreview.src = URL.createObjectURL(file);
