@@ -77,7 +77,8 @@ function validatePayload(body) {
     const priceType = typeof payload.price_type === 'string' ? payload.price_type : '';
     const latitude = Number(payload.latitude);
     const longitude = Number(payload.longitude);
-    const photoUrl = payload.photo_url == null ? null : String(payload.photo_url).trim();
+    const photoUrl = payload.photo_url == null ? '' : String(payload.photo_url).trim();
+    const note = typeof payload.note === 'string' ? payload.note.trim() : '';
 
     if (!allowedTypes.has(type) && type.length === 0) {
         return { error: 'نوع مصدر المياه غير صحيح.' };
@@ -94,14 +95,23 @@ function validatePayload(body) {
     if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
         return { error: 'إحداثيات الموقع غير صحيحة.' };
     }
+    if (!name) {
+        return { error: 'اسم المصدر مطلوب.' };
+    }
     if (name.length > maxNameLength) {
         return { error: 'اسم المصدر طويل جدًا.' };
     }
-    if (photoUrl && photoUrl.length > maxPhotoUrlLength) {
+    if (!photoUrl) {
+        return { error: 'صورة المصدر مطلوبة.' };
+    }
+    if (photoUrl.length > maxPhotoUrlLength) {
         return { error: 'حجم الصورة أو رابطها كبير جدًا.' };
     }
-    if (photoUrl && !/^https?:\/\//i.test(photoUrl) && !/^data:image\/(jpeg|png|webp);base64,/i.test(photoUrl)) {
+    if (!/^https?:\/\//i.test(photoUrl) && !/^data:image\/(jpeg|png|webp);base64,/i.test(photoUrl)) {
         return { error: 'رابط الصورة غير صحيح.' };
+    }
+    if (note.length > 500) {
+        return { error: 'الملاحظة طويلة جدًا.' };
     }
 
     return {
@@ -112,7 +122,8 @@ function validatePayload(body) {
             price_type: priceType,
             latitude,
             longitude,
-            photo_url: photoUrl || null
+            photo_url: photoUrl,
+            note
         }
     };
 }
@@ -175,10 +186,10 @@ export default async function handler(req, res) {
                 return json(res, 401, { success: false, message: 'غير مصرح بالوصول إلى هذه المصادر.' });
             }
             const result = requestedStatus === 'pending'
-                    ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources WHERE status = 'pending' ORDER BY created_at DESC`
+                    ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at FROM water_sources WHERE status = 'pending' ORDER BY created_at DESC`
                     : requestedStatus === 'all' && adminRequest
-                        ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources ORDER BY created_at DESC`
-                        : await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources WHERE status = 'approved' ORDER BY created_at DESC`;
+                        ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at FROM water_sources ORDER BY created_at DESC`
+                        : await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at FROM water_sources WHERE status = 'approved' ORDER BY created_at DESC`;
             return json(res, 200, { success: true, data: result });
         }
 
@@ -221,7 +232,7 @@ export default async function handler(req, res) {
                 UPDATE water_sources
                 SET status = ${status}
                 WHERE id = ${id}
-                    RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at
+                    RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at
             `;
 
             if (!result[0]) {
@@ -247,7 +258,7 @@ export default async function handler(req, res) {
         const validated = validatePayload(req.body);
         if (validated.error) return json(res, 400, { success: false, message: validated.error });
 
-        const { name, type, temp_status, price_type, latitude, longitude, photo_url } = validated.value;
+        const { name, type, temp_status, price_type, latitude, longitude, photo_url, note } = validated.value;
         let country = null;
         let province = null;
 
@@ -258,9 +269,8 @@ export default async function handler(req, res) {
         }
 
         const result = await sql`
-            INSERT INTO water_sources (name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status)
-            VALUES (${name}, ${type}, ${temp_status}, ${price_type}, ${latitude}, ${longitude}, ${country}, ${province}, ${photo_url}, 'pending')
-            RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at
+            INSERT INTO water_sources (name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status) VALUES (${name}, ${type}, ${temp_status}, ${price_type}, ${latitude}, ${longitude}, ${country}, ${province}, ${photo_url}, ${note}, 'pending')
+            RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at
         `;
         return json(res, 201, { success: true, data: result[0] });
     } catch (error) {
