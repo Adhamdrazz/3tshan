@@ -122,6 +122,7 @@
         @media (max-width:1100px) { .country-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
         @media (max-width:500px) { .country-grid { grid-template-columns:1fr; } }
         .status { min-height:23px; color:var(--red); font-size:12px; margin-top:13px; }
+        .status.success { color:var(--green); }
         .login-wrap { max-width:430px; margin:12vh auto; padding:20px; }
         .login-card { background:#fff; border:1px solid var(--line); border-radius:17px; padding:28px; box-shadow:var(--shadow); }
         .login-card h1 { margin:0 0 8px; }
@@ -470,13 +471,24 @@
 
         async function updateStatus(id, status) {
             const buttons = [...document.querySelectorAll(`[data-id="${id}"]`)];
+            const card = buttons[0]?.closest('.source-card');
             buttons.forEach(button => button.disabled = true);
+            dashboardStatus.className = 'status';
+            dashboardStatus.textContent = status === 'approved' ? 'جاري قبول المصدر...' : 'جاري رفض المصدر...';
             try {
-                const response = await fetch('/api/water-sources', { method:'PATCH', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':getToken() }, body:JSON.stringify({ id, status }) });
+                const token = getToken();
+                const response = await fetch('/api/water-sources', { method:'PATCH', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':token, 'Authorization':`Bearer ${token}` }, body:JSON.stringify({ id: Number(id), status }) });
                 const result = await response.json();
-                if (!response.ok || !result.success) throw new Error(result.message || 'تعذر تحديث الحالة.');
+                if (!response.ok || !result.success) throw new Error(result.message || `تعذر ${status === 'approved' ? 'قبول' : 'رفض'} المصدر.`);
+                if (card) card.remove();
                 await loadSources();
-            } catch (error) { dashboardStatus.textContent = error.message; buttons.forEach(button => button.disabled = false); }
+                dashboardStatus.className = 'status success';
+                dashboardStatus.textContent = status === 'approved' ? 'تم قبول المصدر وسيظهر للمستخدمين.' : 'تم رفض المصدر ولن يظهر للمستخدمين.';
+            } catch (error) {
+                dashboardStatus.className = 'status';
+                dashboardStatus.textContent = error.message;
+                buttons.forEach(button => button.disabled = false);
+            }
         }
 
         document.getElementById('login-btn').addEventListener('click', async () => {
