@@ -1139,7 +1139,7 @@ document.addEventListener('DOMContentLoaded', () => {
             >
 
                 ${source.photo_url ? `
-                    <a href="${escapeHtml(source.photo_url)}" target="_blank" rel="noopener" title="فتح الصورة بالحجم الكامل" style="display:block;">
+                    <a href="${escapeHtml(source.photo_url)}" data-watermark-image="${escapeHtml(source.photo_url)}" data-watermark-title="صورة ${escapeHtml(source.name || 'مصدر مياه')}" title="فتح الصورة بالحجم الكامل" style="display:block;">
                         <img
                             src="${escapeHtml(source.photo_url)}"
                             alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}"
