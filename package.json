@@ -1,7 +1,12 @@
 {
   "name": "3tshan",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "private": true,
   "type": "module",
+  "scripts": {
+    "check": "node --check script.js && node --check api/water-sources.js",
+    "serve": "npx --yes vercel dev"
+  },
   "dependencies": {
     "@neondatabase/serverless": "latest"
   }

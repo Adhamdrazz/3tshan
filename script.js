@@ -795,6 +795,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 error
             );
 
+            const distanceElement = document.getElementById('nearest-distance');
+            const typeElement = document.getElementById('nearest-source-type');
+
+            if (distanceElement) {
+                distanceElement.textContent = 'تعذر تحميل مصادر المياه';
+            }
+
+            if (typeElement) {
+                typeElement.textContent = 'تحقق من اتصال الإنترنت أو إعدادات الخدمة';
+            }
+
         }
 
     }
@@ -1354,6 +1365,29 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(
             'photo-file-name'
         );
+
+
+    function readImageAsDataUrl(file) {
+
+        if (!file) {
+            return Promise.resolve(null);
+        }
+
+        if (!file.type.startsWith('image/')) {
+            return Promise.reject(new Error('من فضلك اختر ملف صورة صالحًا.'));
+        }
+
+        if (file.size > 750 * 1024) {
+            return Promise.reject(new Error('حجم الصورة يجب ألا يتجاوز 750 كيلوبايت.'));
+        }
+
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result));
+            reader.onerror = () => reject(new Error('تعذر قراءة الصورة.'));
+            reader.readAsDataURL(file);
+        });
+    }
 
 
     if (photoInput) {
@@ -1947,6 +1981,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         );
 
 
+                let photoUrl = null;
+
+                try {
+                    photoUrl = await readImageAsDataUrl(
+                        photoInput && photoInput.files ? photoInput.files[0] : null
+                    );
+                } catch (photoError) {
+                    showStatus(photoError.message, true);
+                    return;
+                }
+
                 const payload = {
 
                     name: name,
@@ -1970,7 +2015,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         longitude,
 
                     photo_url:
-                        null
+                        photoUrl
 
                 };
 

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة مصادر المياه - عطشان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary:#1769e0;
+            --primary-dark:#0d55c3;
+            --navy:#15233d;
+            --muted:#78859a;
+            --bg:#f6f8fc;
+            --card:#ffffff;
+            --line:#e8edf5;
+            --green:#20b783;
+            --green-bg:#eafaf4;
+            --red:#e75d67;
+            --red-bg:#fff0f2;
+            --purple:#7c69e8;
+            --shadow:0 8px 24px rgba(34,52,84,.05);
+        }
+        * { box-sizing:border-box; }
+        body { margin:0; background:var(--bg); color:var(--navy); font-family:Tajawal,Arial,sans-serif; }
+        button,input { font:inherit; }
+        button { cursor:pointer; }
+        .app { min-height:100vh; display:flex; flex-direction:row; }
+        .sidebar { width:252px; background:#fff; border-left:1px solid var(--line); padding:25px 15px 18px; display:flex; flex-direction:column; flex-shrink:0; }
+        .brand { display:flex; align-items:center; gap:10px; padding:0 15px 28px; color:var(--primary); font-size:20px; font-weight:800; }
+        .brand-mark { width:35px; height:35px; display:grid; place-items:center; border-radius:11px; color:#fff; background:linear-gradient(145deg,#1b8bf5,#0e58cd); box-shadow:0 5px 12px #1769e033; }
+        .nav-title { color:#a3adbc; font-size:12px; padding:0 16px 9px; }
+        .nav { display:grid; gap:5px; }
+        .nav button { border:0; background:transparent; color:#758196; border-radius:10px; padding:12px 15px; display:flex; align-items:center; gap:12px; text-align:right; transition:.18s; }
+        .nav button:hover { background:#f2f6ff; color:var(--primary); }
+        .nav button.active { background:var(--primary); color:#fff; box-shadow:0 5px 12px #1769e033; }
+        .nav-icon { width:20px; text-align:center; font-size:17px; }
+        .sidebar-spacer { flex:1; }
+        .profile { border-top:1px solid var(--line); padding:18px 8px 0; display:flex; align-items:center; gap:10px; }
+        .avatar { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:#e9f1ff; color:var(--primary); font-weight:800; }
+        .profile strong { display:block; font-size:13px; }
+        .profile small { color:var(--muted); font-size:11px; }
+        .logout { width:100%; margin-top:12px; background:transparent; border:0; color:var(--red); text-align:right; padding:8px; }
+        .main { flex:1; min-width:0; padding:28px 34px 40px; }
+        .topbar { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:25px; }
+        .heading h1 { margin:0; font-size:28px; letter-spacing:-.3px; }
+        .heading p { color:var(--muted); margin:7px 0 0; font-size:13px; }
+        .top-actions { display:flex; align-items:center; gap:10px; }
+        .add-btn { border:0; color:#fff; background:var(--primary); border-radius:9px; padding:12px 18px; font-weight:700; box-shadow:0 5px 12px #1769e033; }
+        .icon-btn { border:1px solid var(--line); background:#fff; border-radius:9px; width:42px; height:42px; color:var(--muted); }
+        .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; margin-bottom:23px; }
+        .stat { background:var(--card); border:1px solid var(--line); border-radius:13px; padding:17px 19px; box-shadow:var(--shadow); display:flex; justify-content:space-between; align-items:center; }
+        .stat-label { color:var(--muted); font-size:12px; margin-bottom:7px; }
+        .stat-value { font-size:25px; font-weight:800; }
+        .stat-icon { width:40px; height:40px; display:grid; place-items:center; border-radius:11px; color:var(--primary); background:#edf4ff; font-size:19px; }
+        .stat:nth-child(2) .stat-icon { color:var(--green); background:var(--green-bg); }
+        .stat:nth-child(3) .stat-icon { color:var(--purple); background:#f0edff; }
+        .stat:nth-child(4) .stat-icon { color:#eb9b2e; background:#fff6e6; }
+        .panel { background:var(--card); border:1px solid var(--line); border-radius:15px; box-shadow:var(--shadow); padding:18px; }
+        .toolbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+        .toolbar-title { font-size:17px; font-weight:800; }
+        .toolbar-meta { color:var(--muted); font-size:12px; font-weight:400; margin-right:8px; }
+        .tools { display:flex; align-items:center; gap:9px; }
+        .search { position:relative; }
+        .search input { width:220px; border:1px solid var(--line); border-radius:8px; background:#fbfcfe; padding:10px 36px 10px 11px; outline:none; color:var(--navy); }
+        .search input:focus { border-color:#a7c7ff; box-shadow:0 0 0 3px #1769e014; }
+        .search span { position:absolute; right:12px; top:9px; color:#9ba7b8; }
+        .filter { border:1px solid var(--line); background:#fff; color:var(--muted); border-radius:8px; padding:9px 13px; }
+        .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+        .source-card { border:1px solid var(--line); border-radius:12px; padding:15px; background:#fff; transition:.18s; }
+        .source-card:hover { border-color:#c9dafa; box-shadow:0 7px 18px #2e5e9e10; transform:translateY(-1px); }
+        .source-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+        .source-title { display:flex; align-items:center; gap:10px; min-width:0; }
+        .source-icon { width:37px; height:37px; border-radius:10px; display:grid; place-items:center; background:#edf5ff; color:var(--primary); font-size:17px; flex-shrink:0; }
+        .source-title h2 { margin:0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .source-title small { color:var(--muted); font-size:11px; display:block; margin-top:4px; }
+        .badge { border-radius:20px; padding:5px 8px; font-size:10px; font-weight:700; white-space:nowrap; background:#fff6e6; color:#c78316; }
+        .source-photo { display:block; width:100%; height:100px; object-fit:cover; border-radius:8px; margin:13px 0 10px; background:#edf5ff; }
+        .source-details { display:flex; flex-wrap:wrap; gap:6px; margin:13px 0; }
+        .detail { color:#67758b; background:#f7f9fc; border-radius:6px; padding:6px 8px; font-size:10px; }
+        .detail strong { color:#33435e; }
+        .location { border-top:1px solid var(--line); padding-top:11px; color:var(--muted); font-size:11px; }
+        .card-actions { display:flex; gap:7px; margin-top:13px; }
+        .card-actions button { flex:1; border:0; border-radius:7px; padding:9px 7px; font-weight:700; font-size:12px; }
+        .approve { color:var(--green); background:var(--green-bg); }
+        .reject { color:var(--red); background:var(--red-bg); }
+        .empty { text-align:center; padding:50px 20px; color:var(--muted); }
+        .status { min-height:23px; color:var(--red); font-size:12px; margin-top:13px; }
+        .login-wrap { max-width:430px; margin:12vh auto; padding:20px; }
+        .login-card { background:#fff; border:1px solid var(--line); border-radius:17px; padding:28px; box-shadow:var(--shadow); }
+        .login-card h1 { margin:0 0 8px; }
+        .login-card p { color:var(--muted); font-size:13px; margin:0 0 22px; }
+        .login-card label { display:block; font-weight:700; font-size:13px; margin-bottom:7px; }
+        .login-card input { width:100%; border:1px solid var(--line); border-radius:9px; padding:12px; outline:none; margin-bottom:12px; }
+        .login-card button { width:100%; border:0; border-radius:9px; padding:12px; background:var(--primary); color:#fff; font-weight:700; }
+        [hidden] { display:none !important; }
+        @media (max-width:1100px) { .grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .stats { grid-template-columns:repeat(2,1fr); } }
+        @media (max-width:760px) { .app { display:block; } .sidebar { width:100%; height:auto; border-left:0; border-bottom:1px solid var(--line); padding:15px; } .brand { padding:0 5px 13px; } .nav-title,.sidebar-spacer,.profile { display:none; } .nav { display:flex; overflow:auto; } .nav button { white-space:nowrap; padding:9px 12px; } .main { padding:22px 15px 30px; } .topbar,.toolbar { align-items:stretch; flex-direction:column; } .top-actions,.tools { width:100%; } .search,.search input { width:100%; } .add-btn { flex:1; } }
+        @media (max-width:500px) { .grid,.stats { grid-template-columns:1fr; } .heading h1 { font-size:24px; } }
+    </style>
+</head>
+<body>
+    <section id="login-view" class="login-wrap">
+        <div class="login-card">
+            <div class="brand" style="padding:0 0 20px"><span class="brand-mark">💧</span><span>عطشان</span></div>
+            <h1>تسجيل دخول المشرف</h1>
+            <p>أدخل رمز الإدارة للوصول إلى لوحة مراجعة مصادر المياه.</p>
+            <label for="admin-token">رمز المشرف</label>
+            <input id="admin-token" type="password" autocomplete="current-password" placeholder="ADMIN_TOKEN">
+            <button id="login-btn">دخول إلى لوحة الإدارة</button>
+            <div id="login-status" class="status" role="status"></div>
+        </div>
+    </section>
+
+    <div id="dashboard-view" class="app" hidden>
+        <aside class="sidebar">
+            <div class="brand"><span class="brand-mark">💧</span><span>عطشان</span></div>
+            <div class="nav-title">القائمة الرئيسية</div>
+            <nav class="nav">
+                <button class="active"><span class="nav-icon">▦</span> لوحة التحكم</button>
+                <button><span class="nav-icon">◉</span> مصادر المياه</button>
+                <button><span class="nav-icon">♧</span> المساهمات</button>
+                <button><span class="nav-icon">⚑</span> البلاغات</button>
+                <button><span class="nav-icon">⚙</span> الإعدادات</button>
+            </nav>
+            <div class="sidebar-spacer"></div>
+            <div class="profile"><div class="avatar">م</div><div><strong>المشرف</strong><small>إدارة عطشان</small></div></div>
+            <button id="logout-btn" class="logout">↪ تسجيل الخروج</button>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <div class="heading"><h1>مصادر المياه</h1><p>مراجعة وإدارة مصادر المياه المضافة من المجتمع</p></div>
+                <div class="top-actions"><button id="refresh-btn" class="icon-btn" title="تحديث">↻</button><button class="add-btn" id="add-source-btn">＋ إضافة مصدر</button></div>
+            </header>
+
+            <section class="stats">
+                <div class="stat"><div><div class="stat-label">إجمالي المصادر</div><div id="total-stat" class="stat-value">—</div></div><div class="stat-icon">◉</div></div>
+                <div class="stat"><div><div class="stat-label">قيد المراجعة</div><div id="pending-stat" class="stat-value">—</div></div><div class="stat-icon">◷</div></div>
+                <div class="stat"><div><div class="stat-label">المصادر المعتمدة</div><div id="approved-stat" class="stat-value">—</div></div><div class="stat-icon">✓</div></div>
+                <div class="stat"><div><div class="stat-label">مصادر مجانية</div><div id="free-stat" class="stat-value">—</div></div><div class="stat-icon">♧</div></div>
+            </section>
+
+            <section class="panel">
+                <div class="toolbar"><div class="toolbar-title">المصادر قيد المراجعة <span id="count-label" class="toolbar-meta"></span></div><div class="tools"><div class="search"><span>⌕</span><input id="search-input" type="search" placeholder="ابحث عن مصدر..."></div><select id="type-filter" class="filter"><option value="all">كل الأنواع</option><option value="cooler">كولدير</option><option value="tap">حنفية</option><option value="other">أخرى</option></select></div></div>
+                <div id="sources-grid" class="grid"></div>
+                <div id="empty-state" class="empty" hidden>لا توجد مصادر قيد المراجعة.</div>
+                <div id="dashboard-status" class="status" role="status"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const tokenKey = '3tshan_admin_token';
+        const loginView = document.getElementById('login-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const tokenInput = document.getElementById('admin-token');
+        const loginStatus = document.getElementById('login-status');
+        const dashboardStatus = document.getElementById('dashboard-status');
+        const grid = document.getElementById('sources-grid');
+        const emptyState = document.getElementById('empty-state');
+        const countLabel = document.getElementById('count-label');
+        let allSources = [];
+
+        const getToken = () => sessionStorage.getItem(tokenKey) || '';
+        const escapeHtml = value => String(value ?? '').replace(/[&<>\'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
+        const typeText = value => value === 'cooler' ? 'كولدير' : value === 'tap' ? 'حنفية' : escapeHtml(value || 'مصدر مياه');
+        const tempText = value => ({ cold:'باردة', normal:'عادية', not_cold:'غير باردة' }[value] || 'غير محددة');
+        const priceText = value => value === 'free' ? 'مجانية' : value === 'paid' ? 'مدفوعة' : 'غير محدد';
+        const showDashboard = () => { loginView.hidden = true; dashboardView.hidden = false; loadSources(); };
+        const showLogin = () => { loginView.hidden = false; dashboardView.hidden = true; };
+
+        function updateStats(sources) {
+            document.getElementById('total-stat').textContent = sources.length;
+            document.getElementById('pending-stat').textContent = sources.filter(s => s.status === 'pending').length;
+            document.getElementById('approved-stat').textContent = sources.filter(s => s.status === 'approved').length;
+            document.getElementById('free-stat').textContent = sources.filter(s => s.price_type === 'free').length;
+        }
+
+        function renderSources() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            const type = document.getElementById('type-filter').value;
+            const visible = allSources.filter(source => {
+                const matchesType = type === 'all' || source.type === type;
+                const haystack = `${source.name || ''} ${source.type || ''}`.toLowerCase();
+                return matchesType && (!query || haystack.includes(query));
+            });
+            countLabel.textContent = `${visible.length} مصدر`;
+            emptyState.hidden = visible.length !== 0;
+            grid.innerHTML = visible.map(source => `
+                <article class="source-card">
+                    <div class="source-head"><div class="source-title"><div class="source-icon">💧</div><div><h2>${escapeHtml(source.name || 'مصدر مياه')}</h2><small>${typeText(source.type)}</small></div></div><span class="badge">قيد المراجعة</span></div>
+                    ${source.photo_url ? `<img class="source-photo" src="${escapeHtml(source.photo_url)}" alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}">` : ''}
+                    <div class="source-details"><span class="detail"><strong>المياه:</strong> ${tempText(source.temp_status)}</span><span class="detail"><strong>السعر:</strong> ${priceText(source.price_type)}</span></div>
+                    <div class="location">⌖ ${Number(source.latitude).toFixed(5)}, ${Number(source.longitude).toFixed(5)}</div>
+                    <div class="card-actions"><button class="approve" data-id="${Number(source.id)}" data-status="approved">✓ قبول المصدر</button><button class="reject" data-id="${Number(source.id)}" data-status="rejected">× رفض</button></div>
+                </article>
+            `).join('');
+        }
+
+        async function loadSources() {
+            dashboardStatus.textContent = 'جاري تحميل البيانات...';
+            try {
+                const [pendingResponse, allResponse] = await Promise.all([
+                    fetch('/api/water-sources?status=pending', { headers: { 'X-Admin-Token': getToken() } }),
+                    fetch('/api/water-sources', { headers: { 'X-Admin-Token': getToken() } })
+                ]);
+                const pendingResult = await pendingResponse.json();
+                const allResult = await allResponse.json();
+                if (!pendingResponse.ok || !pendingResult.success) throw new Error(pendingResult.message || 'تعذر تحميل المصادر.');
+                allSources = pendingResult.data;
+                updateStats(allResult.success ? allResult.data : allSources);
+                renderSources();
+                dashboardStatus.textContent = '';
+            } catch (error) { dashboardStatus.textContent = error.message; }
+        }
+
+        async function updateStatus(id, status) {
+            const buttons = [...document.querySelectorAll(`[data-id="${id}"]`)];
+            buttons.forEach(button => button.disabled = true);
+            try {
+                const response = await fetch('/api/water-sources', { method:'PATCH', headers:{ 'Content-Type':'application/json', 'X-Admin-Token':getToken() }, body:JSON.stringify({ id, status }) });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.message || 'تعذر تحديث الحالة.');
+                await loadSources();
+            } catch (error) { dashboardStatus.textContent = error.message; buttons.forEach(button => button.disabled = false); }
+        }
+
+        document.getElementById('login-btn').addEventListener('click', () => { const token = tokenInput.value.trim(); if (!token) { loginStatus.textContent = 'اكتب رمز المشرف أولًا.'; return; } sessionStorage.setItem(tokenKey, token); loginStatus.textContent = ''; showDashboard(); });
+        tokenInput.addEventListener('keydown', event => { if (event.key === 'Enter') document.getElementById('login-btn').click(); });
+        document.getElementById('refresh-btn').addEventListener('click', loadSources);
+        document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem(tokenKey); showLogin(); });
+        document.getElementById('search-input').addEventListener('input', renderSources);
+        document.getElementById('type-filter').addEventListener('change', renderSources);
+        document.getElementById('add-source-btn').addEventListener('click', () => { window.location.href = '/'; });
+        grid.addEventListener('click', event => { const button = event.target.closest('button[data-id]'); if (button) updateStatus(Number(button.dataset.id), button.dataset.status); });
+        if (getToken()) showDashboard();
+    </script>
+</body>
+</html>
