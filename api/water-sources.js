@@ -79,6 +79,7 @@ function validatePayload(body) {
     const longitude = Number(payload.longitude);
     const photoUrl = payload.photo_url == null ? '' : String(payload.photo_url).trim();
     const note = typeof payload.note === 'string' ? payload.note.trim() : '';
+    const playerId = typeof payload.player_id === 'string' ? payload.player_id.trim().slice(0, 80) : '';
 
     if (!allowedTypes.has(type) && type.length === 0) {
         return { error: 'نوع مصدر المياه غير صحيح.' };
@@ -123,7 +124,8 @@ function validatePayload(body) {
             latitude,
             longitude,
             photo_url: photoUrl,
-            note
+            note,
+            player_id: playerId || null
         }
     };
 }
@@ -180,6 +182,21 @@ export default async function handler(req, res) {
                 return json(res, 200, { success: true, data: { overview: overview[0] || {}, byCountry, byProvince, byType, byStatus, byTemperature, byPrice, engagement: engagement[0] || {} } });
             }
 
+            if (req.query?.profile === '1') {
+                const playerId = typeof req.query?.player_id === 'string' ? req.query.player_id.trim().slice(0, 80) : '';
+                if (!playerId) return json(res, 400, { success: false, message: 'معرف اللاعب مطلوب.' });
+                const [profile, sources, summary] = await Promise.all([
+                    sql`SELECT player_id, points, created_at, updated_at FROM player_profiles WHERE player_id = ${playerId}`,
+                    sql`SELECT id, name, type, status, points_awarded, created_at FROM water_sources WHERE player_id = ${playerId} ORDER BY created_at DESC LIMIT 20`,
+                    sql`SELECT COUNT(*)::int AS total_sources, COUNT(*) FILTER (WHERE status = 'approved')::int AS approved_sources, COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_sources, COUNT(*) FILTER (WHERE type = 'cooler' AND status = 'approved')::int AS approved_coolers, COUNT(*) FILTER (WHERE type = 'tap' AND status = 'approved')::int AS approved_taps FROM water_sources WHERE player_id = ${playerId}`
+                ]);
+                const points = Number(profile[0]?.points || 0);
+                const level = Math.floor(points / 100) + 1;
+                const nextLevelAt = level * 100;
+                const userSummary = summary[0] || {};
+                return json(res, 200, { success: true, data: { profile: profile[0] || { player_id: playerId, points: 0 }, points, level, next_level_at: nextLevelAt, points_to_next_level: Math.max(0, nextLevelAt - points), overview: userSummary, sources } });
+            }
+
             const requestedStatus = req.query?.status;
             const adminRequest = isAdminRequest(req);
             if ((requestedStatus === 'pending' || requestedStatus === 'all') && !adminRequest) {
@@ -228,12 +245,25 @@ export default async function handler(req, res) {
                 return json(res, 400, { success: false, message: 'بيانات المراجعة غير صحيحة.' });
             }
 
+            const current = await sql`SELECT status, player_id, points_awarded FROM water_sources WHERE id = ${id}`;
+            if (!current[0]) return json(res, 404, { success: false, message: 'المصدر غير موجود.' });
+
+            const shouldAwardApproval = status === 'approved' && current[0].status === 'pending' && current[0].points_awarded < 60 && current[0].player_id;
+            const approvalPoints = shouldAwardApproval ? 50 : 0;
             const result = await sql`
                 UPDATE water_sources
-                SET status = ${status}
+                SET status = ${status}, points_awarded = points_awarded + ${approvalPoints}
                 WHERE id = ${id}
-                    RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at
+                    RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, points_awarded, created_at
             `;
+
+            if (shouldAwardApproval) {
+                await sql`
+                    INSERT INTO player_profiles (player_id, points)
+                    VALUES (${current[0].player_id}, ${approvalPoints})
+                    ON CONFLICT (player_id) DO UPDATE SET points = player_profiles.points + ${approvalPoints}, updated_at = NOW()
+                `;
+            }
 
             if (!result[0]) {
                 return json(res, 404, { success: false, message: 'المصدر غير موجود.' });
@@ -258,7 +288,7 @@ export default async function handler(req, res) {
         const validated = validatePayload(req.body);
         if (validated.error) return json(res, 400, { success: false, message: validated.error });
 
-        const { name, type, temp_status, price_type, latitude, longitude, photo_url, note } = validated.value;
+        const { name, type, temp_status, price_type, latitude, longitude, photo_url, note, player_id } = validated.value;
         let country = null;
         let province = null;
 
@@ -269,10 +299,17 @@ export default async function handler(req, res) {
         }
 
         const result = await sql`
-            INSERT INTO water_sources (name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status) VALUES (${name}, ${type}, ${temp_status}, ${price_type}, ${latitude}, ${longitude}, ${country}, ${province}, ${photo_url}, ${note}, 'pending')
-            RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at
+            INSERT INTO water_sources (name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, player_id, points_awarded, status) VALUES (${name}, ${type}, ${temp_status}, ${price_type}, ${latitude}, ${longitude}, ${country}, ${province}, ${photo_url}, ${note}, ${player_id}, ${player_id ? 10 : 0}, 'pending')
+            RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, points_awarded, created_at
         `;
-        return json(res, 201, { success: true, data: result[0] });
+        if (player_id) {
+            await sql`
+                INSERT INTO player_profiles (player_id, points)
+                VALUES (${player_id}, 10)
+                ON CONFLICT (player_id) DO UPDATE SET points = player_profiles.points + 10, updated_at = NOW()
+            `;
+        }
+        return json(res, 201, { success: true, data: result[0], points_awarded: player_id ? 10 : 0 });
     } catch (error) {
         console.error(`${req.method} water sources error:`, error);
         return json(res, 500, { success: false, message: 'حدث خطأ أثناء معالجة مصادر المياه.' });
