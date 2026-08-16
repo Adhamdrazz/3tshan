@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     longitude
                 );
 
-
+                renderSourceMarkers();
                 findNearestWaterSource();
 
             },
@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     31.2357
                 );
 
-
+                renderSourceMarkers();
                 findNearestWaterSource();
 
             },
@@ -1105,26 +1105,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 "
             >
 
-                <div
-                    style="
-                        width:100%;
-                        height:130px;
-                        border-radius:14px;
-                        background:
-                            linear-gradient(
-                                135deg,
-                                #eaf7ff,
-                                #d8f5f5
-                            );
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        margin-bottom:12px;
-                        font-size:48px;
-                    "
-                >
-                    💧
-                </div>
+                ${source.photo_url ? `
+                    <img
+                        src="${escapeHtml(source.photo_url)}"
+                        alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}"
+                        style="width:100%;height:130px;object-fit:cover;border-radius:14px;margin-bottom:12px;display:block;"
+                        onerror="this.outerHTML='<div style=\"width:100%;height:130px;border-radius:14px;background:linear-gradient(135deg,#eaf7ff,#d8f5f5);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:48px;\">💧</div>'"
+                    >
+                ` : `
+                    <div style="width:100%;height:130px;border-radius:14px;background:linear-gradient(135deg,#eaf7ff,#d8f5f5);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:48px;">💧</div>
+                `}
 
 
                 <strong
@@ -1366,6 +1356,9 @@ document.addEventListener('DOMContentLoaded', () => {
             'photo-file-name'
         );
 
+    const photoPreview = document.getElementById('photo-preview');
+    const removePhotoButton = document.getElementById('remove-photo-btn');
+
 
     function readImageAsDataUrl(file) {
 
@@ -1396,27 +1389,34 @@ document.addEventListener('DOMContentLoaded', () => {
             'change',
             () => {
 
-                if (photoFileName) {
-
-                    photoFileName.textContent =
-                        photoInput.files &&
-                        photoInput.files[0]
-
-                            ? `تم اختيار: ${photoInput.files[0].name}`
-
-                            : 'الصورة اختيارية';
-
+                const file = photoInput.files && photoInput.files[0];
+                if (photoFileName) photoFileName.textContent = file ? `تم اختيار: ${file.name}` : 'الصورة اختيارية';
+                if (photoPreview) {
+                    if (file) {
+                        photoPreview.src = URL.createObjectURL(file);
+                        photoPreview.hidden = false;
+                    } else {
+                        photoPreview.removeAttribute('src');
+                        photoPreview.hidden = true;
+                    }
                 }
+                if (removePhotoButton) removePhotoButton.hidden = !file;
 
             }
         );
 
     }
 
+    if (removePhotoButton) {
+        removePhotoButton.addEventListener('click', () => {
+            photoInput.value = '';
+            photoInput.dispatchEvent(new Event('change'));
+        });
+    }
+
 
     // =========================
     // Start
-    // =========================
 
     getUserLocation();
 
@@ -2105,7 +2105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                     addSourceForm.reset();
-
+                    if (photoInput) photoInput.dispatchEvent(new Event('change'));
 
                     await loadWaterSources();
 
