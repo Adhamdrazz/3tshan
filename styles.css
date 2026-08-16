@@ -800,7 +800,11 @@ h1, h2, h3, h4 {
         max-width: 100%;
     }
 
-    .mobile-add-source {
+    .filters-chips {
+        display: none;
+    }
+
+    .filters-chips.show {
         display: flex;
     }
 
