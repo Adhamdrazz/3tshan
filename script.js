@@ -793,7 +793,7 @@ document.addEventListener('DOMContentLoaded', () => {
             waterSources =
                 result.data;
 
-
+            updateSearchSuggestions();
             renderSourceMarkers();
 
 
@@ -838,21 +838,38 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
 
+    function normalizeSearchText(value) {
+        return String(value ?? '')
+            .toLocaleLowerCase('ar')
+            .normalize('NFKD')
+            .replace(/[\u064B-\u065F\u0670]/g, '')
+            .trim();
+    }
+
+    function getSourceSearchKeywords(source) {
+        const typeText = source.type === 'cooler' ? 'كولدير' : source.type === 'tap' ? 'صنبور' : 'أخرى';
+        const tempText = source.temp_status === 'cold' ? 'باردة' : source.temp_status === 'normal' ? 'عادية' : 'غير باردة';
+        const priceText = source.price_type === 'free' ? 'مجاني' : source.price_type === 'paid' ? 'بمقابل مادي' : '';
+        return [source.name, typeText, source.type, tempText, source.temp_status, priceText, source.price_type, source.country, source.province, source.note]
+            .filter(Boolean)
+            .map(normalizeSearchText);
+    }
+
+    function updateSearchSuggestions() {
+        const suggestions = document.getElementById('water-search-suggestions');
+        if (!suggestions) return;
+        const values = new Set();
+        waterSources.forEach(source => getSourceSearchKeywords(source).forEach(keyword => {
+            if (keyword.length >= 2) values.add(keyword);
+        }));
+        suggestions.innerHTML = [...values].slice(0, 80).map(keyword => `<option value="${escapeHtml(keyword)}"></option>`).join('');
+    }
+
     if (searchInput) {
-
-        searchInput.addEventListener(
-            'input',
-            (e) => {
-
-                searchQuery =
-                    e.target.value || '';
-
-
-                renderSourceMarkers();
-
-            }
-        );
-
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value || '';
+            renderSourceMarkers();
+        });
     }
 
 
@@ -979,35 +996,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
-                if (q) {
-
-                    const name =
-                        String(
-                            source.name || ''
-                        ).toLowerCase();
-
-
-                    const type =
-                        source.type === 'cooler'
-
-                            ? 'كولدير'
-
-                            : source.type === 'tap'
-
-                                ? 'حنفية'
-
-                                : 'مصدر مياه';
-
-
-                    if (
-                        !name.includes(q) &&
-                        !type.includes(q)
-                    ) {
-
-                        return false;
-
-                    }
-
+                                if (q) {
+                    const matchesSearch = getSourceSearchKeywords(source)
+                        .some(keyword => keyword.includes(normalizeSearchText(q)));
+                    if (!matchesSearch) return false;
                 }
 
 
