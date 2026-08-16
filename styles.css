@@ -395,6 +395,12 @@ h1, h2, h3, h4 {
     box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.14) !important;
 }
 
+.submit-add-source-btn {
+    min-height: 52px;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
 .field-error-message {
     display: block;
     color: #dc3545;
@@ -796,6 +802,13 @@ h1, h2, h3, h4 {
 
     .mobile-add-source {
         display: flex;
+    }
+
+    .submit-add-source-btn {
+        position: sticky;
+        bottom: 84px;
+        z-index: 25;
+        box-shadow: 0 8px 22px rgba(0, 119, 217, 0.24);
     }
 
     /* Account Page Mobile Fixes */
