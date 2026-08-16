@@ -873,6 +873,29 @@ h1, h2, h3, h4 {
     position: relative;
 }
 
+/* ترتيب بطاقة أقرب مصدر مياه: النص يمينًا والإغلاق يسارًا */
+.nearest-source .card-header {
+    direction: rtl;
+    justify-content: space-between;
+}
+
+.nearest-source .card-header .source-info {
+    order: 1;
+    text-align: right;
+}
+
+.nearest-source .card-header .icon-circle {
+    order: 2;
+    flex-shrink: 0;
+}
+
+.nearest-source #close-nearest-source {
+    order: 3;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    flex-shrink: 0;
+}
+
 .close-nearest-source {
     position: absolute;
     top: 10px;
