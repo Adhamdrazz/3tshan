@@ -818,8 +818,10 @@ h1, h2, h3, h4 {
 
     /* Account Page Mobile Fixes */
     .account-layout {
-        height: 100vh;
-        padding: 24px 16px 96px 16px; /* Add extra bottom padding for nav */
+        height: calc(100vh - 72px);
+        min-height: 0;
+        overflow-y: auto;
+        padding: 24px 16px 96px 16px;
     }
 
     .account-header {
