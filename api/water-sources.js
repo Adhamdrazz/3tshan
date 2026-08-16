@@ -123,13 +123,13 @@ export default async function handler(req, res) {
         res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
         res.setHeader('Vary', 'Origin');
     }
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, X-Admin-Token');
     res.setHeader('Cache-Control', 'no-store');
 
     if (req.method === 'OPTIONS') return json(res, 204, null);
-    if (!['GET', 'POST', 'PATCH'].includes(req.method)) {
-        res.setHeader('Allow', 'GET, POST, PATCH, OPTIONS');
+    if (!['GET', 'POST', 'PATCH', 'DELETE'].includes(req.method)) {
+        res.setHeader('Allow', 'GET, POST, PATCH, DELETE, OPTIONS');
         return json(res, 405, { success: false, message: 'Method not allowed' });
     }
 
@@ -150,22 +150,23 @@ export default async function handler(req, res) {
                 return json(res, 200, { success: true, message: 'تم التحقق من صلاحية المشرف.' });
             }
 
-            if (req.query?.stats === '1') {
+                if (req.query?.stats === '1') {
                 if (!isAdminRequest(req)) {
                     return json(res, 401, { success: false, message: 'غير مصرح بالوصول إلى الإحصائيات.' });
                 }
 
-                const [overview, byCountry, byProvince, byType, byStatus, byTemperature, byPrice] = await Promise.all([
+                const [overview, byCountry, byProvince, byType, byStatus, byTemperature, byPrice, engagement] = await Promise.all([
                     sql`SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE type = 'cooler')::int AS coolers, COUNT(*) FILTER (WHERE type = 'tap')::int AS taps, COUNT(*) FILTER (WHERE status = 'pending')::int AS pending, COUNT(*) FILTER (WHERE status = 'approved')::int AS approved, COUNT(*) FILTER (WHERE price_type = 'free')::int AS free, COUNT(*) FILTER (WHERE price_type = 'paid')::int AS paid FROM water_sources`,
                     sql`SELECT COALESCE(country, 'غير محددة') AS country, COUNT(*) FILTER (WHERE type = 'cooler')::int AS coolers, COUNT(*)::int AS total FROM water_sources GROUP BY 1 ORDER BY coolers DESC, total DESC`,
                     sql`SELECT COALESCE(country, 'غير محددة') AS country, COALESCE(province, 'غير محددة') AS province, COUNT(*) FILTER (WHERE type = 'cooler')::int AS coolers, COUNT(*)::int AS total FROM water_sources GROUP BY 1, 2 ORDER BY coolers DESC, total DESC`,
                     sql`SELECT type, COUNT(*)::int AS total FROM water_sources GROUP BY type ORDER BY total DESC`,
                     sql`SELECT status, COUNT(*)::int AS total FROM water_sources GROUP BY status ORDER BY total DESC`,
                     sql`SELECT temp_status, COUNT(*)::int AS total FROM water_sources GROUP BY temp_status ORDER BY total DESC`,
-                    sql`SELECT price_type, COUNT(*)::int AS total FROM water_sources GROUP BY price_type ORDER BY total DESC`
+                    sql`SELECT price_type, COUNT(*)::int AS total FROM water_sources GROUP BY price_type ORDER BY total DESC`,
+                    sql`SELECT COUNT(*) FILTER (WHERE event_type = 'visit')::int AS visits, COUNT(DISTINCT session_id) FILTER (WHERE event_type = 'visit')::int AS unique_visitors, COUNT(*) FILTER (WHERE event_type <> 'visit')::int AS interactions, COUNT(*) FILTER (WHERE event_type = 'source_add')::int AS source_adds, COUNT(*) FILTER (WHERE event_type = 'source_view')::int AS source_views, COUNT(*) FILTER (WHERE event_type = 'nearest_click')::int AS nearest_clicks FROM site_events`
                 ]);
 
-                return json(res, 200, { success: true, data: { overview: overview[0] || {}, byCountry, byProvince, byType, byStatus, byTemperature, byPrice } });
+                return json(res, 200, { success: true, data: { overview: overview[0] || {}, byCountry, byProvince, byType, byStatus, byTemperature, byPrice, engagement: engagement[0] || {} } });
             }
 
             const requestedStatus = req.query?.status;
@@ -179,6 +180,28 @@ export default async function handler(req, res) {
                         ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources ORDER BY created_at DESC`
                         : await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources WHERE status = 'approved' ORDER BY created_at DESC`;
             return json(res, 200, { success: true, data: result });
+        }
+
+        if (req.method === 'DELETE') {
+            if (!isAdminRequest(req)) {
+                return json(res, 401, { success: false, message: 'غير مصرح بهذا الإجراء.' });
+            }
+
+            const body = parseBody(req.body);
+            const id = Number(req.query?.id || body?.id);
+            if (!Number.isInteger(id) || id < 1) {
+                return json(res, 400, { success: false, message: 'رقم المصدر غير صحيح.' });
+            }
+
+            const result = await sql`
+                DELETE FROM water_sources
+                WHERE id = ${id}
+                RETURNING id, name, status
+            `;
+            if (!result[0]) {
+                return json(res, 404, { success: false, message: 'المصدر غير موجود.' });
+            }
+            return json(res, 200, { success: true, data: result[0], message: 'تم حذف المصدر.' });
         }
 
         if (req.method === 'PATCH') {
@@ -206,6 +229,19 @@ export default async function handler(req, res) {
             }
 
             return json(res, 200, { success: true, data: result[0] });
+        }
+
+        if (req.method === 'POST' && req.query?.event === '1') {
+            const body = parseBody(req.body);
+            const allowedEvents = new Set(['visit', 'source_view', 'source_add', 'map_interaction', 'nearest_click']);
+            const eventType = typeof body?.event_type === 'string' ? body.event_type : '';
+            const sessionId = typeof body?.session_id === 'string' ? body.session_id.slice(0, 80) : null;
+            const sourceId = body?.source_id == null ? null : Number(body.source_id);
+            if (!allowedEvents.has(eventType) || (sourceId !== null && (!Number.isInteger(sourceId) || sourceId < 1))) {
+                return json(res, 400, { success: false, message: 'بيانات التفاعل غير صحيحة.' });
+            }
+            const result = await sql`INSERT INTO site_events (event_type, session_id, source_id) VALUES (${eventType}, ${sessionId}, ${sourceId}) RETURNING id`;
+            return json(res, 201, { success: true, data: result[0] });
         }
 
         const validated = validatePayload(req.body);
