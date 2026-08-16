@@ -30,6 +30,34 @@ function parseBody(body) {
     }
 }
 
+async function reverseGeocode(latitude, longitude) {
+    const url = new URL('https://nominatim.openstreetmap.org/reverse');
+    url.searchParams.set('lat', String(latitude));
+    url.searchParams.set('lon', String(longitude));
+    url.searchParams.set('format', 'jsonv2');
+    url.searchParams.set('addressdetails', '1');
+    url.searchParams.set('zoom', '10');
+
+    const response = await fetch(url, {
+        headers: {
+            'User-Agent': '3tshan-water-sources/1.0 (contact project owner)',
+            'Accept-Language': 'ar,en'
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Reverse geocoding failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
+    const address = result.address || {};
+    return {
+        country: address.country || null,
+        province: address.state || address.province || address.region || address.county || null
+    };
+}
+
+
 function isAdminRequest(req) {
     const configuredToken = process.env.ADMIN_TOKEN;
     const receivedToken = req.headers?.['x-admin-token'];
@@ -113,15 +141,33 @@ export default async function handler(req, res) {
 
     try {
         if (req.method === 'GET') {
+            if (req.query?.stats === '1') {
+                if (!isAdminRequest(req)) {
+                    return json(res, 401, { success: false, message: 'غير مصرح بالوصول إلى الإحصائيات.' });
+                }
+
+                const [overview, byCountry, byProvince, byType, byStatus, byTemperature, byPrice] = await Promise.all([
+                    sql`SELECT COUNT(*)::int AS total, COUNT(*) FILTER (WHERE type = 'cooler')::int AS coolers, COUNT(*) FILTER (WHERE type = 'tap')::int AS taps, COUNT(*) FILTER (WHERE status = 'pending')::int AS pending, COUNT(*) FILTER (WHERE status = 'approved')::int AS approved, COUNT(*) FILTER (WHERE price_type = 'free')::int AS free, COUNT(*) FILTER (WHERE price_type = 'paid')::int AS paid FROM water_sources`,
+                    sql`SELECT COALESCE(country, 'غير محددة') AS country, COUNT(*) FILTER (WHERE type = 'cooler')::int AS coolers, COUNT(*)::int AS total FROM water_sources GROUP BY 1 ORDER BY coolers DESC, total DESC`,
+                    sql`SELECT COALESCE(country, 'غير محددة') AS country, COALESCE(province, 'غير محددة') AS province, COUNT(*) FILTER (WHERE type = 'cooler')::int AS coolers, COUNT(*)::int AS total FROM water_sources GROUP BY 1, 2 ORDER BY coolers DESC, total DESC`,
+                    sql`SELECT type, COUNT(*)::int AS total FROM water_sources GROUP BY type ORDER BY total DESC`,
+                    sql`SELECT status, COUNT(*)::int AS total FROM water_sources GROUP BY status ORDER BY total DESC`,
+                    sql`SELECT temp_status, COUNT(*)::int AS total FROM water_sources GROUP BY temp_status ORDER BY total DESC`,
+                    sql`SELECT price_type, COUNT(*)::int AS total FROM water_sources GROUP BY price_type ORDER BY total DESC`
+                ]);
+
+                return json(res, 200, { success: true, data: { overview: overview[0] || {}, byCountry, byProvince, byType, byStatus, byTemperature, byPrice } });
+            }
+
             const requestedStatus = req.query?.status;
             if (requestedStatus === 'pending' && !isAdminRequest(req)) {
                 return json(res, 401, { success: false, message: 'غير مصرح بالوصول إلى المصادر قيد المراجعة.' });
             }
             const result = requestedStatus === 'approved'
-                ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, photo_url, status, created_at FROM water_sources WHERE status = 'approved' ORDER BY created_at DESC`
+                    ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources WHERE status = 'approved' ORDER BY created_at DESC`
                 : requestedStatus === 'pending'
-                    ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, photo_url, status, created_at FROM water_sources WHERE status = 'pending' ORDER BY created_at DESC`
-                    : await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, photo_url, status, created_at FROM water_sources ORDER BY created_at DESC`;
+                    ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources WHERE status = 'pending' ORDER BY created_at DESC`
+                    : await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources ORDER BY created_at DESC`;
             return json(res, 200, { success: true, data: result });
         }
 
@@ -142,7 +188,7 @@ export default async function handler(req, res) {
                 UPDATE water_sources
                 SET status = ${status}
                 WHERE id = ${id}
-                RETURNING id, name, type, temp_status, price_type, latitude, longitude, photo_url, status, created_at
+                    RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at
             `;
 
             if (!result[0]) {
@@ -156,10 +202,19 @@ export default async function handler(req, res) {
         if (validated.error) return json(res, 400, { success: false, message: validated.error });
 
         const { name, type, temp_status, price_type, latitude, longitude, photo_url } = validated.value;
+        let country = null;
+        let province = null;
+
+        try {
+            ({ country, province } = await reverseGeocode(latitude, longitude));
+        } catch (geocodingError) {
+            console.error('Reverse geocoding error:', geocodingError.message);
+        }
+
         const result = await sql`
-            INSERT INTO water_sources (name, type, temp_status, price_type, latitude, longitude, photo_url, status)
-            VALUES (${name}, ${type}, ${temp_status}, ${price_type}, ${latitude}, ${longitude}, ${photo_url}, 'pending')
-            RETURNING id, name, type, temp_status, price_type, latitude, longitude, photo_url, status, created_at
+            INSERT INTO water_sources (name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status)
+            VALUES (${name}, ${type}, ${temp_status}, ${price_type}, ${latitude}, ${longitude}, ${country}, ${province}, ${photo_url}, 'pending')
+            RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at
         `;
         return json(res, 201, { success: true, data: result[0] });
     } catch (error) {
