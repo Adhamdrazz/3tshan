@@ -85,6 +85,7 @@
         .search input:focus { border-color:#a7c7ff; box-shadow:0 0 0 3px #1769e014; }
         .search span { position:absolute; right:12px; top:9px; color:#9ba7b8; }
         .filter { border:1px solid var(--line); background:#fff; color:var(--muted); border-radius:8px; padding:9px 13px; }
+        .filter.active-tab { background:var(--primary); color:#fff; border-color:var(--primary); }
         .grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
         .source-card { border:1px solid var(--line); border-radius:12px; padding:15px; background:#fff; transition:.18s; }
         .source-card:hover { border-color:#c9dafa; box-shadow:0 7px 18px #2e5e9e10; transform:translateY(-1px); }
@@ -177,6 +178,8 @@
                 <div class="stat"><div><div class="stat-label">قيد المراجعة</div><div id="pending-stat" class="stat-value">—</div></div><div class="stat-icon">◷</div></div>
                 <div class="stat"><div><div class="stat-label">المصادر المعتمدة</div><div id="approved-stat" class="stat-value">—</div></div><div class="stat-icon">✓</div></div>
                 <div class="stat"><div><div class="stat-label">مصادر مجانية</div><div id="free-stat" class="stat-value">—</div></div><div class="stat-icon">♧</div></div>
+                <div class="stat"><div><div class="stat-label">زيارات الموقع</div><div id="visits-stat" class="stat-value">—</div></div><div class="stat-icon">◉</div></div>
+                <div class="stat"><div><div class="stat-label">التفاعلات</div><div id="interactions-stat" class="stat-value">—</div></div><div class="stat-icon">↗</div></div>
             </section>
 
             <section class="analytics-panel">
@@ -186,11 +189,12 @@
                     <article class="analytics-card"><div class="analytics-card-title">الكولديرات حسب المحافظة</div><div id="province-bars" class="bars"></div></article>
                     <article class="analytics-card"><div class="analytics-card-title">توزيع أنواع المصادر</div><div id="type-bars" class="bars"></div></article>
                     <article class="analytics-card"><div class="analytics-card-title">حالة المصادر</div><div id="status-bars" class="bars"></div></article>
+                    <article class="analytics-card"><div class="analytics-card-title">تفاعل الزوار</div><div id="engagement-bars" class="bars"></div></article>
                 </div>
             </section>
 
             <section class="panel">
-                <div class="toolbar"><div class="toolbar-title">المصادر قيد المراجعة <span id="count-label" class="toolbar-meta"></span></div><div class="tools"><div class="search"><span>⌕</span><input id="search-input" type="search" placeholder="ابحث عن مصدر..."></div><select id="type-filter" class="filter"><option value="all">كل الأنواع</option><option value="cooler">كولدير</option><option value="tap">حنفية</option><option value="other">أخرى</option></select></div></div>
+                <div class="toolbar"><div class="toolbar-title" id="sources-heading">المصادر قيد المراجعة <span id="count-label" class="toolbar-meta"></span></div><div class="tools"><button id="pending-sources-tab" class="filter active-tab">قيد المراجعة</button><button id="approved-sources-tab" class="filter">المصادر المعتمدة</button><div class="search"><span>⌕</span><input id="search-input" type="search" placeholder="ابحث عن مصدر..."></div><select id="type-filter" class="filter"><option value="all">كل الأنواع</option><option value="cooler">كولدير</option><option value="tap">حنفية</option><option value="other">أخرى</option></select></div></div>
                 <div id="sources-grid" class="grid"></div>
                 <div id="empty-state" class="empty" hidden>لا توجد مصادر قيد المراجعة.</div>
                 <div id="dashboard-status" class="status" role="status"></div>
@@ -229,6 +233,10 @@
         const sectionContent = document.getElementById('section-content');
         let allSources = [];
         let allCountrySources = [];
+        let sourceView = 'pending';
+        const sourcesHeading = document.getElementById('sources-heading');
+        const pendingSourcesTab = document.getElementById('pending-sources-tab');
+        const approvedSourcesTab = document.getElementById('approved-sources-tab');
 
         const getToken = () => sessionStorage.getItem(tokenKey) || '';
         const themeToggle = document.getElementById('theme-toggle');
@@ -410,6 +418,15 @@
                 document.getElementById('pending-stat').textContent = overview.pending || 0;
                 document.getElementById('approved-stat').textContent = overview.approved || 0;
                 document.getElementById('free-stat').textContent = overview.free || 0;
+                const engagement = data.engagement || {};
+                document.getElementById('visits-stat').textContent = engagement.visits || 0;
+                document.getElementById('interactions-stat').textContent = engagement.interactions || 0;
+                renderBars('engagement-bars', [
+                    { label: 'زوار فريدون', total: engagement.unique_visitors || 0 },
+                    { label: 'مشاهدة مصادر', total: engagement.source_views || 0 },
+                    { label: 'إضافة مصادر', total: engagement.source_adds || 0 },
+                    { label: 'فتح الأقرب', total: engagement.nearest_clicks || 0 }
+                ], 'label', 'total');
                 renderBars('country-bars', data.byCountry, 'country', 'coolers');
                 renderBars('province-bars', data.byProvince.map(row => ({ ...row, province_label: `${row.province} - ${row.country}` })), 'province_label', 'coolers');
                 renderBars('type-bars', data.byType, 'type', 'total', { cooler:'كولدير', tap:'حنفية', other:'أخرى' });
@@ -429,11 +446,16 @@
             const query = document.getElementById('search-input').value.trim().toLowerCase();
             const type = document.getElementById('type-filter').value;
             const visible = allSources.filter(source => {
+                const matchesStatus = source.status === sourceView;
                 const matchesType = type === 'all' || source.type === type;
                 const haystack = `${source.name || ''} ${source.type || ''}`.toLowerCase();
-                return matchesType && (!query || haystack.includes(query));
+                return matchesStatus && matchesType && (!query || haystack.includes(query));
             });
             countLabel.textContent = `${visible.length} مصدر`;
+            emptyState.textContent = sourceView === 'approved' ? 'لا توجد مصادر معتمدة.' : 'لا توجد مصادر قيد المراجعة.';
+            sourcesHeading.firstChild.textContent = sourceView === 'approved' ? 'المصادر المعتمدة ' : 'المصادر قيد المراجعة ';
+            pendingSourcesTab.classList.toggle('active-tab', sourceView === 'pending');
+            approvedSourcesTab.classList.toggle('active-tab', sourceView === 'approved');
             emptyState.hidden = visible.length !== 0;
             grid.innerHTML = visible.map(source => {
                 const statusLabel = source.status === 'approved' ? 'معتمد' : source.status === 'rejected' ? 'مرفوض' : 'قيد المراجعة';
@@ -449,6 +471,11 @@
                     <div class="card-actions">${actionHtml}</div>
                 </article>`;
             }).join('');
+        }
+
+        function setSourceView(view) {
+            sourceView = view;
+            renderSources();
         }
 
         async function loadSources() {
@@ -549,6 +576,8 @@
         bindNav('countries-nav', showCountries);
         bindNav('map-nav', () => { window.location.href = '/'; });
         bindNav('settings-nav', showSettings);
+        pendingSourcesTab.addEventListener('click', () => setSourceView('pending'));
+        approvedSourcesTab.addEventListener('click', () => setSourceView('approved'));
         document.getElementById('section-refresh').addEventListener('click', () => { const active = document.querySelector('.nav button.active')?.id; if (active === 'contributions-nav') showContributions(); else if (active === 'photos-nav') showPhotos(); else if (active === 'settings-nav') showSettings(); });
         document.getElementById('back-to-sources').addEventListener('click', showSources);
         document.getElementById('add-source-btn').addEventListener('click', () => { window.location.href = '/'; });

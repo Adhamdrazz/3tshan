@@ -157,6 +157,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let nearestWaterSource = null;
 
+    const engagementSessionKey = '3tshan_engagement_session';
+    const engagementSessionId = localStorage.getItem(engagementSessionKey) || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `session-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    localStorage.setItem(engagementSessionKey, engagementSessionId);
+
+    function trackEngagement(eventType, sourceId = null) {
+        fetch('/api/water-sources?event=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event_type: eventType, session_id: engagementSessionId, source_id: sourceId })
+        }).catch(() => {});
+    }
+
+    if (!sessionStorage.getItem('3tshan_visit_recorded')) {
+        sessionStorage.setItem('3tshan_visit_recorded', '1');
+        trackEngagement('visit');
+    }
+
     let activeFilter = 'drinkable';
 
     let searchQuery = '';
@@ -1211,6 +1228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
 
         `);
+        marker.on('popupopen', () => trackEngagement('source_view', Number(source.id)));
 
     }
 
@@ -1249,6 +1267,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         map.invalidateSize();
 
+                        trackEngagement('nearest_click', nearestWaterSource?.id || null);
                         goToNearestSource();
 
                     },
@@ -2100,6 +2119,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
 
+                    trackEngagement('source_add', result.data?.id || null);
                     showStatus(
                         'تمت إضافة المصدر بنجاح، بانتظار المراجعة ✅',
                         false

@@ -23,3 +23,17 @@ CREATE INDEX IF NOT EXISTS water_sources_status_created_at_idx
 
 CREATE INDEX IF NOT EXISTS water_sources_coordinates_idx
     ON water_sources (latitude, longitude);
+
+CREATE TABLE IF NOT EXISTS site_events (
+    id BIGSERIAL PRIMARY KEY,
+    event_type VARCHAR(40) NOT NULL CHECK (event_type IN ('visit', 'source_view', 'source_add', 'map_interaction', 'nearest_click')),
+    session_id VARCHAR(80),
+    source_id BIGINT REFERENCES water_sources(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS site_events_type_created_at_idx
+    ON site_events (event_type, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS site_events_session_created_at_idx
+    ON site_events (session_id, created_at DESC);
