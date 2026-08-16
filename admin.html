@@ -21,8 +21,13 @@
             --purple:#7c69e8;
             --shadow:0 8px 24px rgba(34,52,84,.05);
         }
+        body.dark { --primary:#5b9aff; --primary-dark:#8bb8ff; --navy:#f3f4f6; --muted:#aab4c5; --bg:#111827; --card:#1f2937; --line:#374151; --green:#4ade80; --green-bg:#123b2d; --red:#fb7185; --red-bg:#3b1720; --purple:#a78bfa; --shadow:0 8px 24px rgba(0,0,0,.24); }
+        body.dark .sidebar, body.dark .settings-grid .card, body.dark .country-card, body.dark .analytics-card, body.dark .source-card, body.dark .stat, body.dark .panel { background:#1f2937; }
+        body.dark .sidebar-footer-tools button, body.dark .filter, body.dark .search { background:#273449; color:var(--muted); }
+        body.dark .bar-track { background:#374151; }
+        body.dark .nav button:hover { background:#273449; }
         * { box-sizing:border-box; }
-        body { margin:0; background:var(--bg); color:var(--navy); font-family:Tajawal,Arial,sans-serif; }
+        body { margin:0; background:var(--bg); color:var(--navy); font-family:Tajawal,Arial,sans-serif; transition:background .2s,color .2s; }
         button,input { font:inherit; }
         button { cursor:pointer; }
         .app { min-height:100vh; display:flex; flex-direction:row; }
@@ -160,7 +165,7 @@
                 <button id="settings-nav"><span class="nav-icon">⚙</span> الإعدادات</button>
             </nav>
             <div class="sidebar-spacer"></div>
-            <div class="sidebar-footer-tools"><button title="الوضع الليلي">☾</button><button title="اللغة">EN</button><span>Super Admin</span><div class="avatar">م</div></div>
+            <div class="sidebar-footer-tools"><button id="theme-toggle" title="الوضع الليلي">☾</button><button title="اللغة">EN</button><span>Super Admin</span><div class="avatar">م</div></div>
             <button id="logout-btn" class="logout">↪ تسجيل الخروج</button>
         </aside>
 
@@ -229,11 +234,44 @@
         let allCountrySources = [];
 
         const getToken = () => sessionStorage.getItem(tokenKey) || '';
+        const themeToggle = document.getElementById('theme-toggle');
+        function applyTheme(theme) {
+            const dark = theme === 'dark';
+            document.body.classList.toggle('dark', dark);
+            themeToggle.textContent = dark ? '☀' : '☾';
+            themeToggle.title = dark ? 'الوضع الفاتح' : 'الوضع الليلي';
+            localStorage.setItem('3tshan_admin_theme', dark ? 'dark' : 'light');
+        }
+        applyTheme(localStorage.getItem('3tshan_admin_theme') || 'light');
+        themeToggle.addEventListener('click', () => applyTheme(document.body.classList.contains('dark') ? 'light' : 'dark'));
         const escapeHtml = value => String(value ?? '').replace(/[&<>\'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
         const typeText = value => value === 'cooler' ? 'كولدير' : value === 'tap' ? 'حنفية' : escapeHtml(value || 'مصدر مياه');
         const tempText = value => ({ cold:'باردة', normal:'عادية', not_cold:'غير باردة' }[value] || 'غير محددة');
         const priceText = value => value === 'free' ? 'مجانية' : value === 'paid' ? 'مدفوعة' : 'غير محدد';
-        const showDashboard = () => { loginView.hidden = true; dashboardView.hidden = false; loadSources(); loadAnalytics(); };
+        async function verifyAdminToken(token) {
+            try {
+                const response = await fetch('/api/water-sources?auth=1', { headers: { 'X-Admin-Token': token } });
+                const result = await response.json();
+                return response.ok && result.success;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        async function showDashboard(token = getToken()) {
+            if (!token || !(await verifyAdminToken(token))) {
+                sessionStorage.removeItem(tokenKey);
+                loginView.hidden = false;
+                dashboardView.hidden = true;
+                loginStatus.textContent = 'رمز المشرف غير صحيح أو تعذر الاتصال بالخادم.';
+                return false;
+            }
+            loginView.hidden = true;
+            dashboardView.hidden = false;
+            loadSources();
+            loadAnalytics();
+            return true;
+        }
         const showLogin = () => { loginView.hidden = false; dashboardView.hidden = true; };
 
         function renderCountries() {
@@ -416,7 +454,7 @@
             try {
                 const [pendingResponse, allResponse] = await Promise.all([
                     fetch('/api/water-sources?status=pending', { headers: { 'X-Admin-Token': getToken() } }),
-                    fetch('/api/water-sources', { headers: { 'X-Admin-Token': getToken() } })
+                    fetch('/api/water-sources?status=all', { headers: { 'X-Admin-Token': getToken() } })
                 ]);
                 const pendingResult = await pendingResponse.json();
                 const allResult = await allResponse.json();
@@ -441,7 +479,18 @@
             } catch (error) { dashboardStatus.textContent = error.message; buttons.forEach(button => button.disabled = false); }
         }
 
-        document.getElementById('login-btn').addEventListener('click', () => { const token = tokenInput.value.trim(); if (!token) { loginStatus.textContent = 'اكتب رمز المشرف أولًا.'; return; } sessionStorage.setItem(tokenKey, token); loginStatus.textContent = ''; showDashboard(); });
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const token = tokenInput.value.trim();
+            if (!token) { loginStatus.textContent = 'اكتب رمز المشرف أولًا.'; return; }
+            loginStatus.textContent = 'جاري التحقق...';
+            document.getElementById('login-btn').disabled = true;
+            const valid = await verifyAdminToken(token);
+            document.getElementById('login-btn').disabled = false;
+            if (!valid) { loginStatus.textContent = 'رمز المشرف غير صحيح.'; return; }
+            sessionStorage.setItem(tokenKey, token);
+            loginStatus.textContent = '';
+            await showDashboard(token);
+        });
         tokenInput.addEventListener('keydown', event => { if (event.key === 'Enter') document.getElementById('login-btn').click(); });
         document.getElementById('refresh-btn').addEventListener('click', () => { loadSources(); loadAnalytics(); });
         document.getElementById('export-btn').addEventListener('click', async () => {
