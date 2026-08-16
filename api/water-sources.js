@@ -245,28 +245,33 @@ export default async function handler(req, res) {
                 return json(res, 400, { success: false, message: 'بيانات المراجعة غير صحيحة.' });
             }
 
-            const current = await sql`SELECT status, player_id, points_awarded FROM water_sources WHERE id = ${id}`;
+            const current = await sql`SELECT status FROM water_sources WHERE id = ${id}`;
             if (!current[0]) return json(res, 404, { success: false, message: 'المصدر غير موجود.' });
 
-            const shouldAwardApproval = status === 'approved' && current[0].status === 'pending' && current[0].points_awarded < 60 && current[0].player_id;
-            const approvalPoints = shouldAwardApproval ? 50 : 0;
             const result = await sql`
                 UPDATE water_sources
-                SET status = ${status}, points_awarded = points_awarded + ${approvalPoints}
+                SET status = ${status}
                 WHERE id = ${id}
-                    RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, points_awarded, created_at
+                    RETURNING id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, note, status, created_at
             `;
 
-            if (shouldAwardApproval) {
-                await sql`
-                    INSERT INTO player_profiles (player_id, points)
-                    VALUES (${current[0].player_id}, ${approvalPoints})
-                    ON CONFLICT (player_id) DO UPDATE SET points = player_profiles.points + ${approvalPoints}, updated_at = NOW()
-                `;
-            }
-
-            if (!result[0]) {
-                return json(res, 404, { success: false, message: 'المصدر غير موجود.' });
+            // نظام النقاط إضافة مستقلة؛ فشل migration أو جدول اللاعب لا يجب أن يمنع اعتماد/رفض المصدر.
+            if (status === 'approved' && current[0].status === 'pending') {
+                try {
+                    const contributor = await sql`SELECT player_id, points_awarded FROM water_sources WHERE id = ${id}`;
+                    const playerId = contributor[0]?.player_id;
+                    const pointsAwarded = Number(contributor[0]?.points_awarded || 0);
+                    if (playerId && pointsAwarded < 60) {
+                        await sql`UPDATE water_sources SET points_awarded = COALESCE(points_awarded, 0) + 50 WHERE id = ${id}`;
+                        await sql`
+                            INSERT INTO player_profiles (player_id, points)
+                            VALUES (${playerId}, 50)
+                            ON CONFLICT (player_id) DO UPDATE SET points = player_profiles.points + 50, updated_at = NOW()
+                        `;
+                    }
+                } catch (pointsError) {
+                    console.error('Approval points update skipped:', pointsError.message);
+                }
             }
 
             return json(res, 200, { success: true, data: result[0] });
