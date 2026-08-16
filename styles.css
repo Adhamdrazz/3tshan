@@ -497,6 +497,173 @@ h1, h2, h3, h4 {
     background-color: var(--light-bg);
 }
 
+.account-impact-card,
+.about-atshan-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    padding: 26px;
+    box-shadow: var(--shadow-lg);
+}
+
+.account-impact-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    color: #fff;
+    background: linear-gradient(135deg, #006bc2 0%, #0077d9 52%, #00aeb9 100%);
+}
+
+.account-impact-card::after {
+    content: '';
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    left: -95px;
+    bottom: -145px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 50%;
+}
+
+.impact-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 620px;
+}
+
+.impact-kicker {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #b9f8f5;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .02em;
+}
+
+.impact-copy h3,
+.about-atshan-card h3 {
+    margin-bottom: 9px;
+    font-size: 1.35rem;
+    line-height: 1.45;
+}
+
+.impact-copy p,
+.about-atshan-card p {
+    color: inherit;
+    opacity: .9;
+    line-height: 1.85;
+    font-size: .92rem;
+}
+
+.account-add-cta {
+    margin-top: 18px;
+    width: fit-content;
+    min-width: 178px;
+    background: #fff;
+    color: var(--primary-blue);
+}
+
+.account-add-cta:hover {
+    background: #f0ffff;
+    color: #0066b8;
+}
+
+.impact-visual {
+    position: relative;
+    flex: 0 0 130px;
+    width: 130px;
+    height: 130px;
+    display: grid;
+    place-items: center;
+}
+
+.impact-drop {
+    position: relative;
+    z-index: 2;
+    width: 74px;
+    height: 74px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,.18);
+    font-size: 2.2rem;
+}
+
+.impact-ripple {
+    position: absolute;
+    inset: 13px;
+    border: 1px solid rgba(255,255,255,.4);
+    border-radius: 50%;
+}
+
+.ripple-two { inset: 0; opacity: .45; }
+
+.about-atshan-card {
+    color: var(--dark-navy);
+    background: linear-gradient(145deg, #ffffff 0%, #effbff 100%);
+    border: 1px solid rgba(0,119,217,.1);
+}
+
+.about-atshan-head,
+.about-atshan-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.about-atshan-card .impact-kicker {
+    color: var(--primary-blue);
+    margin-bottom: 0;
+}
+
+.about-badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    color: #18794e;
+    background: #e7f8ef;
+    font-size: .75rem;
+    font-weight: 800;
+}
+
+.about-atshan-card h3 {
+    max-width: 650px;
+    margin-top: 18px;
+    color: var(--dark-navy);
+}
+
+.about-atshan-card p {
+    max-width: 760px;
+    color: #52627a;
+}
+
+.about-atshan-card blockquote {
+    margin: 18px 0;
+    padding: 12px 16px;
+    border-right: 3px solid var(--turquoise);
+    border-radius: 10px;
+    color: #006d77;
+    background: rgba(0,194,199,.08);
+    font-weight: 800;
+}
+
+.about-atshan-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.about-atshan-actions .btn-secondary {
+    color: var(--primary-blue);
+    border-color: rgba(0,119,217,.25);
+}
+
+.about-atshan-actions span {
+    color: #718096;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
 .account-layout {
     flex: 1;
     display: flex;
@@ -837,6 +1004,48 @@ h1, h2, h3, h4 {
 
     .account-header {
         margin-top: 16px;
+    }
+
+    .account-impact-card,
+    .about-atshan-card {
+        padding: 20px;
+        border-radius: 20px;
+    }
+
+    .account-impact-card {
+        align-items: flex-start;
+    }
+
+    .impact-copy h3,
+    .about-atshan-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .impact-copy p,
+    .about-atshan-card p {
+        font-size: .86rem;
+    }
+
+    .impact-visual {
+        flex-basis: 74px;
+        width: 74px;
+        height: 74px;
+    }
+
+    .impact-drop {
+        width: 58px;
+        height: 58px;
+        font-size: 1.65rem;
+    }
+
+    .account-add-cta {
+        width: 100%;
+    }
+
+    .about-atshan-head,
+    .about-atshan-actions {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     .stats-row {
