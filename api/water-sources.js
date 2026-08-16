@@ -141,6 +141,13 @@ export default async function handler(req, res) {
 
     try {
         if (req.method === 'GET') {
+            if (req.query?.auth === '1') {
+                if (!isAdminRequest(req)) {
+                    return json(res, 401, { success: false, message: 'رمز المشرف غير صحيح.' });
+                }
+                return json(res, 200, { success: true, message: 'تم التحقق من صلاحية المشرف.' });
+            }
+
             if (req.query?.stats === '1') {
                 if (!isAdminRequest(req)) {
                     return json(res, 401, { success: false, message: 'غير مصرح بالوصول إلى الإحصائيات.' });
@@ -160,14 +167,15 @@ export default async function handler(req, res) {
             }
 
             const requestedStatus = req.query?.status;
-            if (requestedStatus === 'pending' && !isAdminRequest(req)) {
-                return json(res, 401, { success: false, message: 'غير مصرح بالوصول إلى المصادر قيد المراجعة.' });
+            const adminRequest = isAdminRequest(req);
+            if ((requestedStatus === 'pending' || requestedStatus === 'all') && !adminRequest) {
+                return json(res, 401, { success: false, message: 'غير مصرح بالوصول إلى هذه المصادر.' });
             }
-            const result = requestedStatus === 'approved'
-                    ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources WHERE status = 'approved' ORDER BY created_at DESC`
-                : requestedStatus === 'pending'
+            const result = requestedStatus === 'pending'
                     ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources WHERE status = 'pending' ORDER BY created_at DESC`
-                    : await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources ORDER BY created_at DESC`;
+                    : requestedStatus === 'all' && adminRequest
+                        ? await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources ORDER BY created_at DESC`
+                        : await sql`SELECT id, name, type, temp_status, price_type, latitude, longitude, country, province, photo_url, status, created_at FROM water_sources WHERE status = 'approved' ORDER BY created_at DESC`;
             return json(res, 200, { success: true, data: result });
         }
 
