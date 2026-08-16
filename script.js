@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         trackEngagement('visit');
     }
 
-    let activeFilter = 'drinkable';
+    let activeFilter = 'cooler';
 
     let searchQuery = '';
 
@@ -856,6 +856,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    const mobileAddSourceButton = document.getElementById('mobile-add-source-btn');
+    if (mobileAddSourceButton) {
+        mobileAddSourceButton.addEventListener('click', () => {
+            document.querySelector('[data-target="view-add"]')?.click();
+        });
+    }
+
     const filterButton =
         document.getElementById(
             'filter-btn'
@@ -956,6 +963,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (
                     activeFilter === 'tap' &&
                     source.type !== 'tap'
+                ) {
+
+                    return false;
+
+                }
+
+                if (
+                    activeFilter === 'other' &&
+                    source.type !== 'other'
                 ) {
 
                     return false;

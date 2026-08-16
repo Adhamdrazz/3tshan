@@ -291,14 +291,6 @@
                         <button
                             type="button"
                             class="chip active"
-                            data-filter="drinkable"
-                        >
-                            مياه صالحة للشرب
-                        </button>
-
-                        <button
-                            type="button"
-                            class="chip"
                             data-filter="cooler"
                         >
                             كولدير
@@ -315,9 +307,9 @@
                         <button
                             type="button"
                             class="chip"
-                            data-filter="open"
+                            data-filter="other"
                         >
-                            مفتوح الآن
+                            أخرى
                         </button>
 
                     </div>
@@ -338,6 +330,11 @@
                         gap:8px;
                     "
                 >
+
+                    <button class="mobile-add-source" id="mobile-add-source-btn" type="button" aria-label="أضف مصدرًا">
+                        <span aria-hidden="true">＋</span>
+                        <span>أضف مصدرًا</span>
+                    </button>
 
                     <button
                         id="toggle-layer-btn"
