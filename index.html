@@ -464,13 +464,15 @@
                                     color:var(--dark-navy);
                                 "
                             >
-                                اسم المصدر (اختياري)
+                                اسم المصدر
                             </label>
 
                             <input
                                 type="text"
                                 id="input-name"
                                 placeholder="مثال: كولدير مسجد النور"
+                                required
+                                maxlength="120"
                                 style="
                                     padding:12px;
                                     border:1px solid var(--border-color);
@@ -791,7 +793,7 @@
                                     color:var(--dark-navy);
                                 "
                             >
-                                صورة المصدر (اختياري)
+                                صورة المصدر
                             </label>
 
                             <label
@@ -817,6 +819,7 @@
                                     type="file"
                                     id="input-photo"
                                     accept="image/*"
+                                    required
                                     style="display:none;"
                                 >
 
@@ -859,11 +862,16 @@
                                     margin:0;
                                 "
                             >
-                                الصورة اختيارية
+                                يجب إضافة صورة للمصدر
                             </p>
                             <img id="photo-preview" alt="معاينة الصورة" hidden style="width:100%;height:150px;object-fit:cover;border-radius:12px;border:1px solid var(--border-color);">
                             <button type="button" id="remove-photo-btn" hidden style="border:0;background:#fff0f2;color:#d94c67;border-radius:8px;padding:8px;font-weight:700;cursor:pointer;">إزالة الصورة</button>
 
+                        </div>
+
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <label for="input-note" style="font-weight:700;color:var(--dark-navy);">ملاحظة</label>
+                            <textarea id="input-note" maxlength="500" placeholder="اكتب أي ملاحظة مهمة عن المصدر..." style="min-height:100px;padding:12px;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-family:inherit;font-size:1rem;resize:vertical;outline:none;"></textarea>
                         </div>
 
                         <p

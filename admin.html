@@ -97,6 +97,7 @@
         .badge { border-radius:20px; padding:5px 8px; font-size:10px; font-weight:700; white-space:nowrap; background:#fff6e6; color:#c78316; }
         .source-photo { width:100%; height:150px; object-fit:contain; background:#eef4f8; border-radius:12px; margin:10px 0; }
         .source-details { display:flex; flex-wrap:wrap; gap:6px; margin:13px 0; }
+        .source-note { margin:10px 0; padding:10px 12px; border-radius:8px; background:var(--soft); color:var(--muted); font-size:11px; line-height:1.7; }
         .detail { color:#67758b; background:#f7f9fc; border-radius:6px; padding:6px 8px; font-size:10px; }
         .detail strong { color:#33435e; }
         .location { border-top:1px solid var(--line); padding-top:11px; color:var(--muted); font-size:11px; }
@@ -467,6 +468,7 @@
                     <div class="source-head"><div class="source-title"><div class="source-icon">💧</div><div><h2>${escapeHtml(source.name || 'مصدر مياه')}</h2><small>${typeText(source.type)}</small></div></div><span class="badge">${statusLabel}</span></div>
                     ${source.photo_url ? `<a href="${escapeHtml(source.photo_url)}" target="_blank" rel="noopener" title="فتح الصورة بالحجم الكامل" style="display:block;"><img class="source-photo" src="${escapeHtml(source.photo_url)}" alt="صورة ${escapeHtml(source.name || 'مصدر مياه')}" style="cursor:zoom-in;"></a>` : ''}
                     <div class="source-details"><span class="detail"><strong>المياه:</strong> ${tempText(source.temp_status)}</span><span class="detail"><strong>السعر:</strong> ${priceText(source.price_type)}</span><span class="detail"><strong>الدولة:</strong> ${escapeHtml(source.country || 'غير محددة')}</span><span class="detail"><strong>المحافظة:</strong> ${escapeHtml(source.province || 'غير محددة')}</span></div>
+                    <p class="source-note"><strong>الملاحظة:</strong> ${escapeHtml(source.note || 'لا توجد ملاحظة')}</p>
                     <div class="location">⌖ ${Number(source.latitude).toFixed(5)}, ${Number(source.longitude).toFixed(5)}</div>
                     <div class="card-actions">${actionHtml}</div>
                 </article>`;

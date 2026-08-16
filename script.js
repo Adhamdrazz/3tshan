@@ -1854,7 +1854,25 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(
             'add-source-form'
         );
+    const noteInput = document.getElementById('input-note');
 
+
+    function markFieldError(element, message) {
+        if (!element) return;
+        element.classList.add('field-error');
+        let messageEl = element.parentElement?.querySelector('.field-error-message');
+        if (!messageEl) {
+            messageEl = document.createElement('small');
+            messageEl.className = 'field-error-message';
+            element.parentElement?.appendChild(messageEl);
+        }
+        messageEl.textContent = message;
+    }
+
+    function clearFieldErrors() {
+        document.querySelectorAll('.field-error').forEach(element => element.classList.remove('field-error'));
+        document.querySelectorAll('.field-error-message').forEach(element => element.remove());
+    }
 
     if (addSourceForm) {
 
@@ -1863,7 +1881,7 @@ document.addEventListener('DOMContentLoaded', () => {
             async (e) => {
 
                 e.preventDefault();
-
+                clearFieldErrors();
 
                 const statusEl =
                     document.getElementById(
@@ -1975,10 +1993,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     longitude === null
                 ) {
 
-                    showStatus(
-                        'من فضلك اختر الموقع على الخريطة أولاً.',
-                        true
-                    );
+                    markFieldError(document.getElementById('add-location-map'), 'اختر موقع المصدر على الخريطة.');
+                    showStatus('من فضلك اختر الموقع على الخريطة أولاً.', true);
 
                     return;
 
@@ -2003,27 +2019,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
-                const name =
-                    nameInput &&
-                    nameInput.value.trim()
+                const name = nameInput ? nameInput.value.trim() : '';
+                const note = noteInput ? noteInput.value.trim() : '';
+                const selectedPhoto = photoInput && photoInput.files ? photoInput.files[0] : null;
 
-                        ? nameInput.value.trim()
-
-                        : (
-                            type === 'cooler'
-                                ? 'كولدير'
-                                : type === 'tap'
-                                    ? 'حنفية'
-                                    : 'مصدر مياه'
-                        );
+                if (!name) {
+                    markFieldError(nameInput, 'اكتب اسم المصدر.');
+                    showStatus('اسم المصدر مطلوب.', true);
+                    nameInput?.focus();
+                    return;
+                }
+                if (!tempInput?.value || !priceInput?.value || !typeInput?.value) {
+                    const missingGroup = !typeInput?.value ? typeInput : !tempInput?.value ? tempInput : priceInput;
+                    markFieldError(missingGroup?.closest('div'), 'اختر قيمة من الخيارات.');
+                    showStatus('اختر نوع المصدر وحالة المياه والتكلفة.', true);
+                    return;
+                }
+                if (type === 'other' && !otherTypeInput?.value.trim()) {
+                    markFieldError(otherTypeInput, 'اكتب نوع المصدر.');
+                    showStatus('اكتب نوع المصدر في خانة أخرى.', true);
+                    otherTypeInput?.focus();
+                    return;
+                }
+                if (!selectedPhoto) {
+                    markFieldError(document.getElementById('photo-upload-label'), 'أضف صورة المصدر.');
+                    showStatus('يجب إضافة صورة للمصدر.', true);
+                    return;
+                }
 
 
                 let photoUrl = null;
 
                 try {
-                    photoUrl = await readImageAsDataUrl(
-                        photoInput && photoInput.files ? photoInput.files[0] : null
-                    );
+                    photoUrl = await readImageAsDataUrl(selectedPhoto);
                 } catch (photoError) {
                     showStatus(photoError.message, true);
                     return;
@@ -2052,7 +2080,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         longitude,
 
                     photo_url:
-                        photoUrl
+                        photoUrl,
+
+                    note:
+                        note
 
                 };
 
