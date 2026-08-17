@@ -1173,6 +1173,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
 
 
+                ${source.note && String(source.note).trim() ? `
+                    <div
+                        style="
+                            background:#FFF9E8;
+                            border-right:4px solid #F5B400;
+                            border-radius:10px;
+                            padding:10px 12px;
+                            margin-bottom:12px;
+                            color:#172033;
+                            line-height:1.7;
+                        "
+                    >
+                        <small style="display:block;color:#9A6B00;font-weight:700;margin-bottom:3px;">ملاحظة</small>
+                        <div style="font-size:13px;white-space:pre-wrap;word-break:break-word;">${escapeHtml(String(source.note).trim())}</div>
+                    </div>
+                ` : ''}
+
                 <div
                     style="
                         display:grid;
