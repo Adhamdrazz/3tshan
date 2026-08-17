@@ -179,7 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
         trackEngagement('visit');
     }
 
-    let activeFilter = 'cooler';
+    // Show all approved source types by default; filtering is optional.
+    let activeFilter = 'all';
 
     let searchQuery = '';
 
